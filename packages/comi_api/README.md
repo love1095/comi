@@ -70,14 +70,20 @@ Class | Method | HTTP request | Description
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsList**](doc/AdminApi.md#adminrestaurantslist) | **GET** /api/v1/admin/restaurants | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsPause**](doc/AdminApi.md#adminrestaurantspause) | **POST** /api/v1/admin/restaurants/{id}/pause | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsReject**](doc/AdminApi.md#adminrestaurantsreject) | **POST** /api/v1/admin/restaurants/{id}/reject | 
+[*AdminReviewsApi*](doc/AdminReviewsApi.md) | [**adminReviewsDecide**](doc/AdminReviewsApi.md#adminreviewsdecide) | **POST** /api/v1/admin/reviews/{id}/decision | 
+[*AdminReviewsApi*](doc/AdminReviewsApi.md) | [**adminReviewsReported**](doc/AdminReviewsApi.md#adminreviewsreported) | **GET** /api/v1/admin/reviews/reported | 
 [*AdminStatementsApi*](doc/AdminStatementsApi.md) | [**adminStatementsGenerate**](doc/AdminStatementsApi.md#adminstatementsgenerate) | **POST** /api/v1/admin/statements/generate | 
 [*AdminStatementsApi*](doc/AdminStatementsApi.md) | [**adminStatementsList**](doc/AdminStatementsApi.md#adminstatementslist) | **GET** /api/v1/admin/statements | 
 [*AdminStatementsApi*](doc/AdminStatementsApi.md) | [**adminStatementsPaid**](doc/AdminStatementsApi.md#adminstatementspaid) | **POST** /api/v1/admin/statements/{id}/paid | 
+[*AdminVouchersApi*](doc/AdminVouchersApi.md) | [**adminVouchersActive**](doc/AdminVouchersApi.md#adminvouchersactive) | **PATCH** /api/v1/admin/vouchers/{id} | 
+[*AdminVouchersApi*](doc/AdminVouchersApi.md) | [**adminVouchersCreate**](doc/AdminVouchersApi.md#adminvoucherscreate) | **POST** /api/v1/admin/vouchers | 
+[*AdminVouchersApi*](doc/AdminVouchersApi.md) | [**adminVouchersList**](doc/AdminVouchersApi.md#adminvoucherslist) | **GET** /api/v1/admin/vouchers | 
 [*AuthApi*](doc/AuthApi.md) | [**authExchange**](doc/AuthApi.md#authexchange) | **POST** /api/v1/auth/customer/exchange | 
 [*AuthApi*](doc/AuthApi.md) | [**authLogin**](doc/AuthApi.md#authlogin) | **POST** /api/v1/auth/staff/login | 
 [*AuthApi*](doc/AuthApi.md) | [**authLogout**](doc/AuthApi.md#authlogout) | **POST** /api/v1/auth/logout | 
 [*AuthApi*](doc/AuthApi.md) | [**authRefresh**](doc/AuthApi.md#authrefresh) | **POST** /api/v1/auth/refresh | 
 [*AuthApi*](doc/AuthApi.md) | [**authRegister**](doc/AuthApi.md#authregister) | **POST** /api/v1/auth/staff/register | 
+[*AuthApi*](doc/AuthApi.md) | [**staffAccountRemove**](doc/AuthApi.md#staffaccountremove) | **DELETE** /api/v1/auth/staff/me | 
 [*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableBill**](doc/CustomerAtTheTableApi.md#customertablebill) | **GET** /api/v1/bookings/{id}/bill | 
 [*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableCheckIn**](doc/CustomerAtTheTableApi.md#customertablecheckin) | **POST** /api/v1/bookings/{id}/check-in | 
 [*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableDepart**](doc/CustomerAtTheTableApi.md#customertabledepart) | **POST** /api/v1/bookings/{id}/depart | 
@@ -102,11 +108,18 @@ Class | Method | HTTP request | Description
 [*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupSaveSplit**](doc/CustomerGroupOrderApi.md#customergroupsavesplit) | **POST** /api/v1/bookings/{id}/split | 
 [*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupSplit**](doc/CustomerGroupOrderApi.md#customergroupsplit) | **GET** /api/v1/bookings/{id}/split | 
 [*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupStart**](doc/CustomerGroupOrderApi.md#customergroupstart) | **POST** /api/v1/bookings/{id}/group | 
+[*CustomerNotificationsApi*](doc/CustomerNotificationsApi.md) | [**notificationsList**](doc/CustomerNotificationsApi.md#notificationslist) | **GET** /api/v1/notifications | 
+[*CustomerNotificationsApi*](doc/CustomerNotificationsApi.md) | [**notificationsReadAll**](doc/CustomerNotificationsApi.md#notificationsreadall) | **POST** /api/v1/notifications/read-all | 
+[*CustomerNotificationsApi*](doc/CustomerNotificationsApi.md) | [**notificationsReadOne**](doc/CustomerNotificationsApi.md#notificationsreadone) | **POST** /api/v1/notifications/{id}/read | 
 [*CustomerPaymentsApi*](doc/CustomerPaymentsApi.md) | [**customerPaymentsPay**](doc/CustomerPaymentsApi.md#customerpaymentspay) | **POST** /api/v1/bookings/{id}/pay | 
 [*CustomerPaymentsApi*](doc/CustomerPaymentsApi.md) | [**customerPaymentsRefundAccount**](doc/CustomerPaymentsApi.md#customerpaymentsrefundaccount) | **PUT** /api/v1/bookings/{id}/refund-account | 
+[*CustomerReviewsApi*](doc/CustomerReviewsApi.md) | [**reviewsCreate**](doc/CustomerReviewsApi.md#reviewscreate) | **POST** /api/v1/bookings/{id}/review | 
+[*CustomerReviewsApi*](doc/CustomerReviewsApi.md) | [**reviewsList**](doc/CustomerReviewsApi.md#reviewslist) | **GET** /api/v1/restaurants/{id}/reviews | 
+[*CustomerReviewsApi*](doc/CustomerReviewsApi.md) | [**reviewsMine**](doc/CustomerReviewsApi.md#reviewsmine) | **GET** /api/v1/bookings/{id}/review | 
 [*CustomerVATInvoiceApi*](doc/CustomerVATInvoiceApi.md) | [**customerInvoiceGet**](doc/CustomerVATInvoiceApi.md#customerinvoiceget) | **GET** /api/v1/bookings/{id}/invoice | 
 [*CustomerVATInvoiceApi*](doc/CustomerVATInvoiceApi.md) | [**customerInvoiceProfiles**](doc/CustomerVATInvoiceApi.md#customerinvoiceprofiles) | **GET** /api/v1/me/invoice-profiles | 
 [*CustomerVATInvoiceApi*](doc/CustomerVATInvoiceApi.md) | [**customerInvoiceRequest**](doc/CustomerVATInvoiceApi.md#customerinvoicerequest) | **POST** /api/v1/bookings/{id}/invoice | 
+[*CustomerVouchersApi*](doc/CustomerVouchersApi.md) | [**customerVouchersCheck**](doc/CustomerVouchersApi.md#customervoucherscheck) | **POST** /api/v1/vouchers/check | 
 [*HealthApi*](doc/HealthApi.md) | [**healthCheck**](doc/HealthApi.md#healthcheck) | **GET** /api/v1/health | 
 [*MeApi*](doc/MeApi.md) | [**meExtrasAddFavorite**](doc/MeApi.md#meextrasaddfavorite) | **POST** /api/v1/me/favorites | 
 [*MeApi*](doc/MeApi.md) | [**meExtrasDeleteSavedOrder**](doc/MeApi.md#meextrasdeletesavedorder) | **DELETE** /api/v1/me/saved-orders/{id} | 
@@ -117,15 +130,21 @@ Class | Method | HTTP request | Description
 [*MeApi*](doc/MeApi.md) | [**meExtrasSavedOrders**](doc/MeApi.md#meextrassavedorders) | **GET** /api/v1/me/saved-orders | 
 [*MeApi*](doc/MeApi.md) | [**meExtrasUpdatePreferences**](doc/MeApi.md#meextrasupdatepreferences) | **PATCH** /api/v1/me/preferences | 
 [*MeApi*](doc/MeApi.md) | [**usersAddDeviceToken**](doc/MeApi.md#usersadddevicetoken) | **POST** /api/v1/me/device-tokens | 
+[*MeApi*](doc/MeApi.md) | [**usersConsent**](doc/MeApi.md#usersconsent) | **POST** /api/v1/me/consent | 
+[*MeApi*](doc/MeApi.md) | [**usersExport**](doc/MeApi.md#usersexport) | **GET** /api/v1/me/export | 
 [*MeApi*](doc/MeApi.md) | [**usersMe**](doc/MeApi.md#usersme) | **GET** /api/v1/me | 
 [*MeApi*](doc/MeApi.md) | [**usersRemove**](doc/MeApi.md#usersremove) | **DELETE** /api/v1/me | 
 [*MeApi*](doc/MeApi.md) | [**usersUpdate**](doc/MeApi.md#usersupdate) | **PATCH** /api/v1/me | 
 [*MediaApi*](doc/MediaApi.md) | [**mediaSignature**](doc/MediaApi.md#mediasignature) | **GET** /api/v1/media/upload-signature | 
+[*PublicExchangeRatesApi*](doc/PublicExchangeRatesApi.md) | [**placesRates**](doc/PublicExchangeRatesApi.md#placesrates) | **GET** /api/v1/exchange-rates | 
+[*PublicExchangeRatesApi*](doc/PublicExchangeRatesApi.md) | [**placesSetRates**](doc/PublicExchangeRatesApi.md#placessetrates) | **PUT** /api/v1/admin/exchange-rates | 
 [*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**groupPaymentsPay**](doc/PublicGroupOrderApi.md#grouppaymentspay) | **POST** /api/v1/groups/{token}/pay | 
 [*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupAdd**](doc/PublicGroupOrderApi.md#publicgroupadd) | **POST** /api/v1/groups/{token}/items | 
 [*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupGet**](doc/PublicGroupOrderApi.md#publicgroupget) | **GET** /api/v1/groups/{token} | 
 [*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupJoin**](doc/PublicGroupOrderApi.md#publicgroupjoin) | **POST** /api/v1/groups/{token}/join | 
 [*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupRemove**](doc/PublicGroupOrderApi.md#publicgroupremove) | **POST** /api/v1/groups/{token}/items/{itemId}/remove | 
+[*PublicLegalApi*](doc/PublicLegalApi.md) | [**legalInfo**](doc/PublicLegalApi.md#legalinfo) | **GET** /api/v1/legal | 
+[*PublicLegalApi*](doc/PublicLegalApi.md) | [**legalPage**](doc/PublicLegalApi.md#legalpage) | **GET** /api/v1/legal/{doc} | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantChecklist**](doc/RestaurantApi.md#restaurantchecklist) | **GET** /api/v1/restaurant/checklist | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantClosures**](doc/RestaurantApi.md#restaurantclosures) | **GET** /api/v1/restaurant/closures | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantCreateClosure**](doc/RestaurantApi.md#restaurantcreateclosure) | **POST** /api/v1/restaurant/closures | 
@@ -177,11 +196,15 @@ Class | Method | HTTP request | Description
 [*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**menuTranslation**](doc/RestaurantMenuApi.md#menutranslation) | **PUT** /api/v1/restaurant/menu/items/{id}/translations/{locale} | 
 [*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**menuUpdateCategory**](doc/RestaurantMenuApi.md#menuupdatecategory) | **PATCH** /api/v1/restaurant/menu/categories/{id} | 
 [*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**menuUpdateItem**](doc/RestaurantMenuApi.md#menuupdateitem) | **PATCH** /api/v1/restaurant/menu/items/{id} | 
+[*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**translationsRows**](doc/RestaurantMenuApi.md#translationsrows) | **GET** /api/v1/restaurant/menu/translations | 
 [*RestaurantPaymentsApi*](doc/RestaurantPaymentsApi.md) | [**restaurantPaymentsAccount**](doc/RestaurantPaymentsApi.md#restaurantpaymentsaccount) | **GET** /api/v1/restaurant/payment-account | 
 [*RestaurantPaymentsApi*](doc/RestaurantPaymentsApi.md) | [**restaurantPaymentsConnect**](doc/RestaurantPaymentsApi.md#restaurantpaymentsconnect) | **PUT** /api/v1/restaurant/payment-account | 
 [*RestaurantPaymentsApi*](doc/RestaurantPaymentsApi.md) | [**restaurantPaymentsDisconnect**](doc/RestaurantPaymentsApi.md#restaurantpaymentsdisconnect) | **DELETE** /api/v1/restaurant/payment-account | 
 [*RestaurantPaymentsApi*](doc/RestaurantPaymentsApi.md) | [**restaurantPaymentsDone**](doc/RestaurantPaymentsApi.md#restaurantpaymentsdone) | **POST** /api/v1/restaurant/refunds/{id}/done | 
 [*RestaurantPaymentsApi*](doc/RestaurantPaymentsApi.md) | [**restaurantPaymentsRefunds**](doc/RestaurantPaymentsApi.md#restaurantpaymentsrefunds) | **GET** /api/v1/restaurant/refunds | 
+[*RestaurantReviewsApi*](doc/RestaurantReviewsApi.md) | [**restaurantReviewsList**](doc/RestaurantReviewsApi.md#restaurantreviewslist) | **GET** /api/v1/restaurant/reviews | 
+[*RestaurantReviewsApi*](doc/RestaurantReviewsApi.md) | [**restaurantReviewsReply**](doc/RestaurantReviewsApi.md#restaurantreviewsreply) | **POST** /api/v1/restaurant/reviews/{id}/reply | 
+[*RestaurantReviewsApi*](doc/RestaurantReviewsApi.md) | [**restaurantReviewsReport**](doc/RestaurantReviewsApi.md#restaurantreviewsreport) | **POST** /api/v1/restaurant/reviews/{id}/report | 
 [*RestaurantSettingsApi*](doc/RestaurantSettingsApi.md) | [**diningRulesCreate**](doc/RestaurantSettingsApi.md#diningrulescreate) | **POST** /api/v1/restaurant/dining-rules | 
 [*RestaurantSettingsApi*](doc/RestaurantSettingsApi.md) | [**diningRulesList**](doc/RestaurantSettingsApi.md#diningruleslist) | **GET** /api/v1/restaurant/dining-rules | 
 [*RestaurantSettingsApi*](doc/RestaurantSettingsApi.md) | [**diningRulesRemove**](doc/RestaurantSettingsApi.md#diningrulesremove) | **DELETE** /api/v1/restaurant/dining-rules/{id} | 
@@ -205,12 +228,16 @@ Class | Method | HTTP request | Description
 [*RestaurantVATInvoiceApi*](doc/RestaurantVATInvoiceApi.md) | [**restaurantInvoiceIssued**](doc/RestaurantVATInvoiceApi.md#restaurantinvoiceissued) | **POST** /api/v1/restaurant/invoice-requests/{id}/issued | 
 [*RestaurantVATInvoiceApi*](doc/RestaurantVATInvoiceApi.md) | [**restaurantInvoiceList**](doc/RestaurantVATInvoiceApi.md#restaurantinvoicelist) | **GET** /api/v1/restaurant/invoice-requests | 
 [*RestaurantVATInvoiceApi*](doc/RestaurantVATInvoiceApi.md) | [**restaurantInvoiceReject**](doc/RestaurantVATInvoiceApi.md#restaurantinvoicereject) | **POST** /api/v1/restaurant/invoice-requests/{id}/reject | 
+[*RestaurantVouchersApi*](doc/RestaurantVouchersApi.md) | [**restaurantVouchersActive**](doc/RestaurantVouchersApi.md#restaurantvouchersactive) | **PATCH** /api/v1/restaurant/vouchers/{id} | 
+[*RestaurantVouchersApi*](doc/RestaurantVouchersApi.md) | [**restaurantVouchersCreate**](doc/RestaurantVouchersApi.md#restaurantvoucherscreate) | **POST** /api/v1/restaurant/vouchers | 
+[*RestaurantVouchersApi*](doc/RestaurantVouchersApi.md) | [**restaurantVouchersList**](doc/RestaurantVouchersApi.md#restaurantvoucherslist) | **GET** /api/v1/restaurant/vouchers | 
 [*WebhooksApi*](doc/WebhooksApi.md) | [**webhooksPayos**](doc/WebhooksApi.md#webhookspayos) | **POST** /api/v1/webhooks/payos | 
 
 
 ## Documentation For Models
 
  - [AddPhotoDto](doc/AddPhotoDto.md)
+ - [AdminVoucherInputDto](doc/AdminVoucherInputDto.md)
  - [AreaBriefDto](doc/AreaBriefDto.md)
  - [AreaDto](doc/AreaDto.md)
  - [AreaLayoutDto](doc/AreaLayoutDto.md)
@@ -243,17 +270,21 @@ Class | Method | HTTP request | Description
  - [ClosureDto](doc/ClosureDto.md)
  - [ClosureInfoDto](doc/ClosureInfoDto.md)
  - [ConnectPayOsDto](doc/ConnectPayOsDto.md)
+ - [ConsentDto](doc/ConsentDto.md)
  - [Course](doc/Course.md)
  - [CreateBookingDto](doc/CreateBookingDto.md)
  - [CreateHoldDto](doc/CreateHoldDto.md)
+ - [CreateReviewDto](doc/CreateReviewDto.md)
  - [CreateTableDto](doc/CreateTableDto.md)
  - [CustomerBookingDto](doc/CustomerBookingDto.md)
  - [CustomerExchangeDto](doc/CustomerExchangeDto.md)
  - [CustomerOrderDto](doc/CustomerOrderDto.md)
+ - [DecisionDto](doc/DecisionDto.md)
  - [DepartDto](doc/DepartDto.md)
  - [DepartResultDto](doc/DepartResultDto.md)
  - [DeviceTokenDto](doc/DeviceTokenDto.md)
  - [DiningRuleDto](doc/DiningRuleDto.md)
+ - [ExchangeRateDto](doc/ExchangeRateDto.md)
  - [FavoriteDto](doc/FavoriteDto.md)
  - [FireDto](doc/FireDto.md)
  - [FireResultDto](doc/FireResultDto.md)
@@ -283,6 +314,7 @@ Class | Method | HTTP request | Description
  - [KitchenStatus](doc/KitchenStatus.md)
  - [KitchenStatusDto](doc/KitchenStatusDto.md)
  - [LayoutTableDto](doc/LayoutTableDto.md)
+ - [LegalInfoDto](doc/LegalInfoDto.md)
  - [MapAreaDto](doc/MapAreaDto.md)
  - [MapAreaWithElementsDto](doc/MapAreaWithElementsDto.md)
  - [MapElementDto](doc/MapElementDto.md)
@@ -302,6 +334,8 @@ Class | Method | HTTP request | Description
  - [MoveTableDto](doc/MoveTableDto.md)
  - [MyBookingsPageDto](doc/MyBookingsPageDto.md)
  - [MyHoldDto](doc/MyHoldDto.md)
+ - [NotificationDto](doc/NotificationDto.md)
+ - [NotificationPageDto](doc/NotificationPageDto.md)
  - [OpeningHoursDto](doc/OpeningHoursDto.md)
  - [OpeningHoursItemDto](doc/OpeningHoursItemDto.md)
  - [OptionDto](doc/OptionDto.md)
@@ -318,6 +352,7 @@ Class | Method | HTTP request | Description
  - [PublicOptionDto](doc/PublicOptionDto.md)
  - [PublicOptionGroupDto](doc/PublicOptionGroupDto.md)
  - [PublicPhotoDto](doc/PublicPhotoDto.md)
+ - [RatesDto](doc/RatesDto.md)
  - [RefreshDto](doc/RefreshDto.md)
  - [RefundAccountDto](doc/RefundAccountDto.md)
  - [RefundDoneDto](doc/RefundDoneDto.md)
@@ -328,9 +363,11 @@ Class | Method | HTTP request | Description
  - [ReorderDto](doc/ReorderDto.md)
  - [ReorderLineDto](doc/ReorderLineDto.md)
  - [ReplaceOpeningHoursDto](doc/ReplaceOpeningHoursDto.md)
+ - [ReplyDto](doc/ReplyDto.md)
  - [ReportDayDto](doc/ReportDayDto.md)
  - [ReportDishDto](doc/ReportDishDto.md)
  - [ReportDto](doc/ReportDto.md)
+ - [ReportReviewDto](doc/ReportReviewDto.md)
  - [RestaurantCancelDto](doc/RestaurantCancelDto.md)
  - [RestaurantCardDto](doc/RestaurantCardDto.md)
  - [RestaurantDetailDto](doc/RestaurantDetailDto.md)
@@ -338,6 +375,8 @@ Class | Method | HTTP request | Description
  - [RestaurantProfileDto](doc/RestaurantProfileDto.md)
  - [RestaurantStatus](doc/RestaurantStatus.md)
  - [RestaurantSummaryDto](doc/RestaurantSummaryDto.md)
+ - [ReviewDto](doc/ReviewDto.md)
+ - [ReviewPageDto](doc/ReviewPageDto.md)
  - [RoundResultDto](doc/RoundResultDto.md)
  - [SaveLayoutDto](doc/SaveLayoutDto.md)
  - [SaveSplitDto](doc/SaveSplitDto.md)
@@ -368,7 +407,9 @@ Class | Method | HTTP request | Description
  - [TableShape](doc/TableShape.md)
  - [TokenPairDto](doc/TokenPairDto.md)
  - [TranslationDto](doc/TranslationDto.md)
+ - [TranslationRowDto](doc/TranslationRowDto.md)
  - [UnavailableLineDto](doc/UnavailableLineDto.md)
+ - [UnreadDto](doc/UnreadDto.md)
  - [UpdateAreaDto](doc/UpdateAreaDto.md)
  - [UpdateCategoryDto](doc/UpdateCategoryDto.md)
  - [UpdateMeDto](doc/UpdateMeDto.md)
@@ -378,6 +419,13 @@ Class | Method | HTTP request | Description
  - [UpdateTableDto](doc/UpdateTableDto.md)
  - [UpdatedDto](doc/UpdatedDto.md)
  - [UploadSignatureDto](doc/UploadSignatureDto.md)
+ - [VoucherActiveDto](doc/VoucherActiveDto.md)
+ - [VoucherCheckDto](doc/VoucherCheckDto.md)
+ - [VoucherCheckResultDto](doc/VoucherCheckResultDto.md)
+ - [VoucherDto](doc/VoucherDto.md)
+ - [VoucherFunder](doc/VoucherFunder.md)
+ - [VoucherInputDto](doc/VoucherInputDto.md)
+ - [VoucherType](doc/VoucherType.md)
 
 
 ## Documentation For Authorization

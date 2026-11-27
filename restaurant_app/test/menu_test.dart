@@ -11,6 +11,7 @@ import 'package:restaurant_app/features/menu/import_screen.dart';
 import 'package:restaurant_app/features/menu/item_editor_screen.dart';
 import 'package:restaurant_app/features/menu/menu_repository.dart';
 import 'package:restaurant_app/features/menu/menu_screen.dart';
+import 'package:restaurant_app/features/menu/translations_screen.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 StaffMenuItemDto menuItem(
@@ -40,6 +41,26 @@ StaffMenuItemDto menuItem(
 );
 
 class FakeMenuRepository implements MenuRepository {
+  final translationRows = <String, TranslationRowDto>{};
+  final savedTranslations = <String>[];
+
+  @override
+  Future<List<TranslationRowDto>> translations(String locale) async => translationRows.values.toList();
+
+  @override
+  Future<void> putTranslation(String itemId, String locale, String name, String? description) async {
+    savedTranslations.add('$itemId $locale $name');
+    final r = translationRows[itemId]!;
+    translationRows[itemId] = TranslationRowDto(
+      itemId: itemId,
+      sourceName: r.sourceName,
+      sourceDescription: r.sourceDescription,
+      name: name,
+      description: description,
+      state: TranslationRowDtoStateEnum.human,
+    );
+  }
+
   FakeMenuRepository(this.cats);
   List<StaffMenuCategoryDto> cats;
   final calls = <String>[];
@@ -302,5 +323,24 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.calls, ['preview menu.xlsx', 'preview menu.xlsx', 'confirm menu.xlsx']);
     });
+  });
+
+  testWidgets('translation editor: machine label, fix a dish → saved as human', (tester) async {
+    final repo = FakeMenuRepository([]);
+    repo.translationRows['d1'] = TranslationRowDto(
+      itemId: 'd1',
+      sourceName: 'Ốc hương xào bơ',
+      name: 'Sweet snail stir-fried with butter',
+      state: TranslationRowDtoStateEnum.machine,
+    );
+    await pump(tester, repo, const TranslationsScreen());
+    expect(find.text('Dịch tự động'), findsOneWidget);
+    await tester.tap(find.text('Ốc hương xào bơ'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextField, 'Tên món (English)'), 'Butter garlic sea snails');
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+    expect(repo.savedTranslations, ['d1 en Butter garlic sea snails']);
+    expect(find.text('Đã sửa'), findsOneWidget);
   });
 }

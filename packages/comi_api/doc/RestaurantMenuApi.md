@@ -26,6 +26,7 @@ Method | HTTP request | Description
 [**menuTranslation**](RestaurantMenuApi.md#menutranslation) | **PUT** /api/v1/restaurant/menu/items/{id}/translations/{locale} | 
 [**menuUpdateCategory**](RestaurantMenuApi.md#menuupdatecategory) | **PATCH** /api/v1/restaurant/menu/categories/{id} | 
 [**menuUpdateItem**](RestaurantMenuApi.md#menuupdateitem) | **PATCH** /api/v1/restaurant/menu/items/{id} | 
+[**translationsRows**](RestaurantMenuApi.md#translationsrows) | **GET** /api/v1/restaurant/menu/translations | 
 
 
 # **menuAddPhoto**
@@ -757,6 +758,49 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **translationsRows**
+> List<TranslationRowDto> translationsRows(locale, xRestaurantId)
+
+
+
+### Example
+```dart
+import 'package:comi_api/api.dart';
+
+final api = ComiApi().getRestaurantMenuApi();
+final String locale = locale_example; // String | 
+final String xRestaurantId = xRestaurantId_example; // String | 
+
+try {
+    final response = api.translationsRows(locale, xRestaurantId);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling RestaurantMenuApi->translationsRows: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **locale** | **String**|  | 
+ **xRestaurantId** | **String**|  | 
+
+### Return type
+
+[**List&lt;TranslationRowDto&gt;**](TranslationRowDto.md)
+
+### Authorization
+
+[bearer](../README.md#bearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

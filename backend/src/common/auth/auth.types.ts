@@ -10,6 +10,8 @@ export interface AccessTokenPayload {
   sub: string;
   typ: 'user' | 'staff';
   adm?: boolean;
+  /** Issued at (seconds), set by jsonwebtoken. */
+  iat?: number;
 }
 
 export interface AuthedRequest extends Request {
@@ -26,3 +28,6 @@ export const Perm = {
   KITCHEN: ['OWNER', 'MANAGER', 'CASHIER', 'KITCHEN'],
   REVIEWS_INVOICES: ['OWNER', 'MANAGER', 'CASHIER'],
 } as const satisfies Record<string, readonly StaffRole[]>;
+
+/** Redis key holding the access-token cut-off (seconds) after revokeAllFor (§23). */
+export const revokedKey = (kind: 'user' | 'staff', id: string) => `revoked:${kind}:${id}`;

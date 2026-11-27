@@ -11,6 +11,7 @@ import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
 import 'bookings_repository.dart';
 import 'table_picker_screen.dart';
+import '../vouchers/vouchers.dart';
 import '../group/split_screen.dart' show openUrlProvider;
 
 typedef SlotQuery = ({String restaurantId, String date, int partySize});
@@ -66,6 +67,25 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
 
   /// null = the default (prepay at lunch when the restaurant takes it, §Phase 4).
   bool? _prepaidChoice;
+
+  /// Voucher checked at checkout (§12): code + previewed discount.
+  ({String code, int discount})? _voucher;
+
+  Future<void> _applyVoucher(String code, CartState cart) async {
+    final c = code.trim().toUpperCase();
+    if (c.isEmpty || cart.isEmpty) return;
+    try {
+      final r = await ref.read(vouchersRepositoryProvider).check(c, widget.restaurant.id, [for (final l in cart.lines) l.toDto()]);
+      if (!mounted) return;
+      if (r.valid) {
+        setState(() => _voucher = (code: c, discount: r.discount.toInt()));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(voucherProblemText(r.problem))));
+      }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ApiError.from(e).userMessage)));
+    }
+  }
 
   bool get _isLunch {
     final local = _slot?.local;
@@ -129,6 +149,7 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
               note: _note.text.trim().isEmpty ? null : _note.text.trim(),
               ageConfirmed: cart.hasAlcohol ? _ageConfirmed : null,
               items: cart.isEmpty ? null : [for (final l in cart.lines) l.toDto()],
+              voucherCode: cart.isEmpty ? null : _voucher?.code,
             ),
             idempotencyKey: _idempotencyKey,
           );
@@ -327,6 +348,14 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
                 ],
               ),
             ),
+            _VoucherField(applied: _voucher, onApply: (code) => _applyVoucher(code, cart), onClear: () => setState(() => _voucher = null)),
+            if (_voucher != null)
+              Row(
+                children: [
+                  Expanded(child: Text('Thanh toán', style: theme.textTheme.titleMedium)),
+                  Text(formatVnd(cart.total - _voucher!.discount), style: theme.textTheme.titleMedium),
+                ],
+              ),
           ],
           if (cart.hasAlcohol)
             CheckboxListTile(
@@ -469,4 +498,54 @@ class _PayOption extends StatelessWidget {
     ),
     subtitle: Text(subtitle),
   );
+}
+
+class _VoucherField extends StatefulWidget {
+  const _VoucherField({required this.applied, required this.onApply, required this.onClear});
+  final ({String code, int discount})? applied;
+  final ValueChanged<String> onApply;
+  final VoidCallback onClear;
+
+  @override
+  State<_VoucherField> createState() => _VoucherFieldState();
+}
+
+class _VoucherFieldState extends State<_VoucherField> {
+  final _code = TextEditingController();
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final a = widget.applied;
+    if (a != null) {
+      return ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.local_offer, color: ComiColors.available),
+        title: Text('Mã ${a.code}: giảm ${formatVnd(a.discount)}'),
+        trailing: IconButton(tooltip: 'Bỏ mã', onPressed: widget.onClear, icon: const Icon(Icons.close)),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _code,
+              textCapitalization: TextCapitalization.characters,
+              decoration: const InputDecoration(isDense: true, labelText: 'Mã giảm giá', border: OutlineInputBorder()),
+              onSubmitted: widget.onApply,
+            ),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton(onPressed: () => widget.onApply(_code.text), child: const Text('Áp dụng')),
+        ],
+      ),
+    );
+  }
 }

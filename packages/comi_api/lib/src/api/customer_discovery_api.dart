@@ -359,7 +359,10 @@ _responseData = rawData == null ? null : deserialize<List<PublicMenuCategoryDto>
   /// * [openLate] - Open until 23:00 or later today
   /// * [privateRoom] 
   /// * [mode] 
-  /// * [sort] 
+  /// * [sort] - score = rating weighted by review count and distance
+  /// * [dietary] - Tourists: comma separated vegetarian,halal,no_pork,gluten_free
+  /// * [availableAt] - Only restaurants with a free table at this time (ISO) — needs partySize
+  /// * [partySize] - With availableAt
   /// * [cursor] - Offset from the previous page
   /// * [limit] 
   /// * [acceptLanguage2] - vi | en | ko | zh | ja (fallback → en → vi)
@@ -388,6 +391,9 @@ _responseData = rawData == null ? null : deserialize<List<PublicMenuCategoryDto>
     bool? privateRoom,
     String? mode,
     String? sort,
+    String? dietary,
+    String? availableAt,
+    num? partySize,
     num? cursor,
     num? limit = 20,
     String? acceptLanguage2,
@@ -428,6 +434,9 @@ _responseData = rawData == null ? null : deserialize<List<PublicMenuCategoryDto>
       if (privateRoom != null) r'privateRoom': privateRoom,
       if (mode != null) r'mode': mode,
       if (sort != null) r'sort': sort,
+      if (dietary != null) r'dietary': dietary,
+      if (availableAt != null) r'availableAt': availableAt,
+      if (partySize != null) r'partySize': partySize,
       if (cursor != null) r'cursor': cursor,
       if (limit != null) r'limit': limit,
     };

@@ -3,10 +3,12 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 import 'app/router.dart';
+import 'data/language.dart';
 import 'data/session.dart';
+import 'l10n/app_localizations.dart';
 
 void main() {
-  runApp(const ProviderScope(child: CustomerApp()));
+  runApp(ProviderScope(overrides: [deviceLanguageProvider.overrideWithValue(platformLanguage())], child: const CustomerApp()));
 }
 
 class CustomerApp extends ConsumerWidget {
@@ -22,9 +24,9 @@ class CustomerApp extends ConsumerWidget {
       theme: ComiTheme.light(),
       darkTheme: ComiTheme.dark(),
       routerConfig: ref.watch(routerProvider),
-      locale: const Locale('vi'),
-      supportedLocales: const [Locale('vi'), Locale('en')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      locale: Locale(ref.watch(appLanguageProvider)),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [AppLocalizations.delegate, ...GlobalMaterialLocalizations.delegates],
     );
   }
 }

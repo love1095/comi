@@ -1,3 +1,4 @@
+import { NotificationsService } from '../notifications/notifications.module';
 import { Injectable } from '@nestjs/common';
 import { AuditService } from '../../common/audit.service';
 import { Clock } from '../../common/clock';
@@ -19,6 +20,7 @@ export class BookingTimeouts {
     private readonly clock: Clock,
     private readonly redis: RedisService,
     private readonly realtime: RealtimeService,
+    private readonly notifications: NotificationsService,
     private readonly fees: FeesService,
   ) {}
 
@@ -72,7 +74,7 @@ export class BookingTimeouts {
     await this.redis.client.incr(`availv:${done.restaurantId}`).catch(() => undefined);
     this.realtime.toRestaurant(done.restaurantId, 'booking.updated', { bookingId, status: 'NO_SHOW' });
     this.realtime.toKitchen(done.restaurantId, 'kitchen.item_updated', { bookingId });
-    this.realtime.toUser(done.userId, 'booking.status', { bookingId, status: 'NO_SHOW' });
+    void this.notifications.booking(done.userId, { bookingId, status: 'NO_SHOW' });
     // TODO(phase2/push): "Your booking was marked as no-show".
     await this.fees.finalize(bookingId);
     return true;
@@ -102,7 +104,7 @@ export class BookingTimeouts {
     if (!closed) return false;
     await this.fees.finalize(bookingId);
     this.realtime.toRestaurant(closed.restaurantId, 'booking.updated', { bookingId, status: 'COMPLETED' });
-    this.realtime.toUser(closed.userId, 'booking.status', { bookingId, status: 'COMPLETED' });
+    void this.notifications.booking(closed.userId, { bookingId, status: 'COMPLETED' });
     return true;
   }
 }

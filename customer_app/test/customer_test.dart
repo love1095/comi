@@ -12,6 +12,9 @@ import 'package:customer_app/features/discovery/discovery_repository.dart';
 import 'package:customer_app/features/home/home_screen.dart';
 import 'package:customer_app/features/restaurant/item_sheet.dart';
 import 'package:customer_app/features/restaurant/restaurant_screen.dart';
+import 'package:customer_app/features/reviews/reviews.dart';
+import 'package:customer_app/features/vouchers/vouchers.dart';
+import 'package:customer_app/features/notifications/notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -41,6 +44,9 @@ void main() {
         discoveryRepositoryProvider.overrideWithValue(discovery ?? FakeDiscovery()),
         bookingsRepositoryProvider.overrideWithValue(bookings ?? FakeBookings()),
         realtimeClientProvider.overrideWithValue(NoRealtimeClient()),
+        reviewsRepositoryProvider.overrideWithValue(FakeReviews()),
+        vouchersRepositoryProvider.overrideWithValue(FakeVouchers()),
+        notificationsRepositoryProvider.overrideWithValue(FakeNotifications()),
       ],
     );
     addTearDown(container.dispose);

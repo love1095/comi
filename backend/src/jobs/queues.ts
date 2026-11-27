@@ -9,6 +9,7 @@ export const QUEUES = {
   BOOKING: 'booking', // group-approval-timeout, no-show-check; payment-timeout, reminders later
   KITCHEN: 'kitchen', // kitchen-release at fire time, kitchen-sweep every minute (§7.2, §7.4)
   BILLING: 'billing', // statement-generate (02:00 on the 1st), statement-overdue (daily) §11.3
+  CONTENT: 'content', // translate-sweep every 10 min (§17.2)
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
@@ -25,6 +26,8 @@ export interface JobPayloads {
   'statement-overdue': Record<string, never>;
   'payment-timeout': { bookingId: string };
   'payment-reconcile': Record<string, never>;
+  'google-ratings': Record<string, never>;
+  'translate-sweep': Record<string, never>;
 }
 
 export function redisConnection(url: string) {

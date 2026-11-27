@@ -4,18 +4,20 @@ import 'package:material_ui/material_ui.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 import '../../data/api_error.dart';
+import '../../data/language.dart';
 import '../../data/location.dart';
 import '../../widgets/restaurant_card.dart';
 import '../discovery/discovery_repository.dart';
+import '../notifications/notifications.dart';
 
 /// Home: sections change with the time of day — lunch around noon, groups in the evening (§0.5).
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  static String greeting(String mode) => switch (mode) {
-    'lunch' => 'Trưa nay ăn gì?',
-    'tonight' => 'Tối nay đi đâu?',
-    _ => 'Tìm quán ngon gần bạn',
+  static String greeting(BuildContext context, String mode) => switch (mode) {
+    'lunch' => context.l10n.greetingLunch,
+    'tonight' => context.l10n.greetingTonight,
+    _ => context.l10n.greetingDefault,
   };
 
   @override
@@ -46,15 +48,16 @@ class HomeScreen extends ConsumerWidget {
                     const Spacer(),
                     Icon(Icons.place_outlined, size: 18, color: theme.colorScheme.outline),
                     Text(
-                      location == null ? 'Đang tìm vị trí…' : (location.approximate ? 'Quận 1 (gần đúng)' : 'Gần bạn'),
+                      location == null ? context.l10n.findingLocation : (location.approximate ? 'Quận 1 (gần đúng)' : context.l10n.nearYou),
                       style: theme.textTheme.bodySmall,
                     ),
+                    const NotificationBell(),
                   ],
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(greeting(home.value?.mode.value ?? ''), style: theme.textTheme.headlineSmall),
+                child: Text(greeting(context, home.value?.mode.value ?? ''), style: theme.textTheme.headlineSmall),
               ),
               Padding(
                 padding: const EdgeInsets.all(16),

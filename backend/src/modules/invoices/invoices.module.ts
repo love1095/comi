@@ -1,3 +1,4 @@
+import { NotificationsService } from '../notifications/notifications.module';
 import { Body, Controller, Get, HttpCode, Injectable, Module, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiProperty, ApiPropertyOptional, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
@@ -82,6 +83,7 @@ export class InvoicesService {
     private readonly clock: Clock,
     private readonly mail: MailService,
     private readonly realtime: RealtimeService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async request(userId: string, bookingId: string, p: InvoiceRequestCreateDto) {
@@ -182,7 +184,7 @@ export class InvoicesService {
         'Hoá đơn điện tử được gửi từ hệ thống của nhà hàng; liên hệ quán nếu chưa nhận được.',
       ].join('\n'),
     });
-    this.realtime.toUser(r.booking.userId, 'booking.status', { bookingId: r.bookingId, invoice: 'issued' });
+    void this.notifications.booking(r.booking.userId, { bookingId: r.bookingId, invoice: 'issued' });
     if (sent) await this.prisma.invoiceRequest.update({ where: { id }, data: { status: 'EMAILED' } });
     return dto({ ...updated, status: sent ? 'EMAILED' : 'ISSUED' });
   }
@@ -192,7 +194,7 @@ export class InvoicesService {
     if (r.status === 'ISSUED' || r.status === 'EMAILED') throw new AppError('INVALID_STATUS', 'Already issued');
     const updated = await this.prisma.invoiceRequest.update({ where: { id }, data: { status: 'REJECTED' }, include: INCLUDE });
     await this.audit.log({ actorType: 'STAFF', actorId: staffId, action: 'invoice.rejected', entity: 'InvoiceRequest', entityId: id });
-    this.realtime.toUser(r.booking.userId, 'booking.status', { bookingId: r.bookingId, invoice: 'rejected' });
+    void this.notifications.booking(r.booking.userId, { bookingId: r.bookingId, invoice: 'rejected' });
     return dto(updated);
   }
 }

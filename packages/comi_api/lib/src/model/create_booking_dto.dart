@@ -42,6 +42,8 @@ class CreateBookingDto {
 
      this.ageConfirmed,
 
+     this.voucherCode,
+
      this.items,
   });
 
@@ -168,6 +170,19 @@ class CreateBookingDto {
 
 
 
+      /// One voucher per booking (§12); never discounts alcohol
+  @JsonKey(
+    
+    name: r'voucherCode',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? voucherCode;
+
+
+
   @JsonKey(
     
     name: r'items',
@@ -197,6 +212,7 @@ class CreateBookingDto {
             note,
             occasion,
             ageConfirmed,
+            voucherCode,
             items,
         ],
         [
@@ -210,6 +226,7 @@ class CreateBookingDto {
             other.note,
             other.occasion,
             other.ageConfirmed,
+            other.voucherCode,
             other.items,
         ]
       );
@@ -228,6 +245,7 @@ class CreateBookingDto {
         note,
         occasion,
         ageConfirmed,
+        voucherCode,
         items,
     ],);
 

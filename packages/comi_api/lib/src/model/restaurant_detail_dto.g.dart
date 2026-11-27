@@ -13,6 +13,8 @@ abstract class _$RestaurantDetailDtoCWProxy {
 
   RestaurantDetailDto name(String name);
 
+  RestaurantDetailDto originalName(String originalName);
+
   RestaurantDetailDto description(String? description);
 
   RestaurantDetailDto translated(RestaurantDetailDtoTranslatedEnum translated);
@@ -49,6 +51,10 @@ abstract class _$RestaurantDetailDtoCWProxy {
 
   RestaurantDetailDto prepaidAvailable(bool prepaidAvailable);
 
+  RestaurantDetailDto googleRating(num? googleRating);
+
+  RestaurantDetailDto googleRatingCount(num? googleRatingCount);
+
   RestaurantDetailDto maxGroupSize(num maxGroupSize);
 
   RestaurantDetailDto confirmGroupsOver(num confirmGroupsOver);
@@ -75,6 +81,7 @@ abstract class _$RestaurantDetailDtoCWProxy {
     String id,
     String slug,
     String name,
+    String originalName,
     String? description,
     RestaurantDetailDtoTranslatedEnum translated,
     String phone,
@@ -93,6 +100,8 @@ abstract class _$RestaurantDetailDtoCWProxy {
     bool allowTableChoice,
     bool allowCod,
     bool prepaidAvailable,
+    num? googleRating,
+    num? googleRatingCount,
     num maxGroupSize,
     num confirmGroupsOver,
     num cancelCutoffMinutes,
@@ -118,6 +127,10 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
 
   @override
   RestaurantDetailDto name(String name) => call(name: name);
+
+  @override
+  RestaurantDetailDto originalName(String originalName) =>
+      call(originalName: originalName);
 
   @override
   RestaurantDetailDto description(String? description) =>
@@ -186,6 +199,14 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
       call(prepaidAvailable: prepaidAvailable);
 
   @override
+  RestaurantDetailDto googleRating(num? googleRating) =>
+      call(googleRating: googleRating);
+
+  @override
+  RestaurantDetailDto googleRatingCount(num? googleRatingCount) =>
+      call(googleRatingCount: googleRatingCount);
+
+  @override
   RestaurantDetailDto maxGroupSize(num maxGroupSize) =>
       call(maxGroupSize: maxGroupSize);
 
@@ -224,6 +245,7 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
     Object? id = const $CopyWithPlaceholder(),
     Object? slug = const $CopyWithPlaceholder(),
     Object? name = const $CopyWithPlaceholder(),
+    Object? originalName = const $CopyWithPlaceholder(),
     Object? description = const $CopyWithPlaceholder(),
     Object? translated = const $CopyWithPlaceholder(),
     Object? phone = const $CopyWithPlaceholder(),
@@ -242,6 +264,8 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
     Object? allowTableChoice = const $CopyWithPlaceholder(),
     Object? allowCod = const $CopyWithPlaceholder(),
     Object? prepaidAvailable = const $CopyWithPlaceholder(),
+    Object? googleRating = const $CopyWithPlaceholder(),
+    Object? googleRatingCount = const $CopyWithPlaceholder(),
     Object? maxGroupSize = const $CopyWithPlaceholder(),
     Object? confirmGroupsOver = const $CopyWithPlaceholder(),
     Object? cancelCutoffMinutes = const $CopyWithPlaceholder(),
@@ -263,6 +287,11 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
           : name as String,
+      originalName:
+          originalName == const $CopyWithPlaceholder() || originalName == null
+          ? _value.originalName
+          // ignore: cast_nullable_to_non_nullable
+          : originalName as String,
       description: description == const $CopyWithPlaceholder()
           ? _value.description
           // ignore: cast_nullable_to_non_nullable
@@ -346,6 +375,14 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
           ? _value.prepaidAvailable
           // ignore: cast_nullable_to_non_nullable
           : prepaidAvailable as bool,
+      googleRating: googleRating == const $CopyWithPlaceholder()
+          ? _value.googleRating
+          // ignore: cast_nullable_to_non_nullable
+          : googleRating as num?,
+      googleRatingCount: googleRatingCount == const $CopyWithPlaceholder()
+          ? _value.googleRatingCount
+          // ignore: cast_nullable_to_non_nullable
+          : googleRatingCount as num?,
       maxGroupSize:
           maxGroupSize == const $CopyWithPlaceholder() || maxGroupSize == null
           ? _value.maxGroupSize
@@ -396,99 +433,101 @@ extension $RestaurantDetailDtoCopyWith on RestaurantDetailDto {
 // JsonSerializableGenerator
 // **************************************************************************
 
-RestaurantDetailDto _$RestaurantDetailDtoFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('RestaurantDetailDto', json, ($checkedConvert) {
-      $checkKeys(
-        json,
-        requiredKeys: const [
-          'id',
-          'slug',
-          'name',
-          'translated',
-          'phone',
-          'address',
-          'timezone',
-          'cuisineTags',
-          'ambienceTags',
-          'priceLevel',
-          'ratingAvg',
-          'ratingCount',
-          'servesLunch',
-          'servesNhau',
-          'allowTableChoice',
-          'allowCod',
-          'prepaidAvailable',
-          'maxGroupSize',
-          'confirmGroupsOver',
-          'cancelCutoffMinutes',
-          'isOpenNow',
-          'openingHours',
-          'closures',
-          'areas',
-        ],
-      );
-      final val = RestaurantDetailDto(
-        id: $checkedConvert('id', (v) => v as String),
-        slug: $checkedConvert('slug', (v) => v as String),
-        name: $checkedConvert('name', (v) => v as String),
-        description: $checkedConvert('description', (v) => v as String?),
-        translated: $checkedConvert(
-          'translated',
-          (v) => $enumDecode(_$RestaurantDetailDtoTranslatedEnumEnumMap, v),
-        ),
-        phone: $checkedConvert('phone', (v) => v as String),
-        address: $checkedConvert('address', (v) => v as String),
-        lat: $checkedConvert('lat', (v) => v as num?),
-        lng: $checkedConvert('lng', (v) => v as num?),
-        timezone: $checkedConvert('timezone', (v) => v as String),
-        cuisineTags: $checkedConvert(
-          'cuisineTags',
-          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
-        ),
-        ambienceTags: $checkedConvert(
-          'ambienceTags',
-          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
-        ),
-        priceLevel: $checkedConvert('priceLevel', (v) => v as num),
-        coverPhotoUrl: $checkedConvert('coverPhotoUrl', (v) => v as String?),
-        ratingAvg: $checkedConvert('ratingAvg', (v) => v as num),
-        ratingCount: $checkedConvert('ratingCount', (v) => v as num),
-        servesLunch: $checkedConvert('servesLunch', (v) => v as bool),
-        servesNhau: $checkedConvert('servesNhau', (v) => v as bool),
-        allowTableChoice: $checkedConvert('allowTableChoice', (v) => v as bool),
-        allowCod: $checkedConvert('allowCod', (v) => v as bool),
-        prepaidAvailable: $checkedConvert('prepaidAvailable', (v) => v as bool),
-        maxGroupSize: $checkedConvert('maxGroupSize', (v) => v as num),
-        confirmGroupsOver: $checkedConvert(
-          'confirmGroupsOver',
-          (v) => v as num,
-        ),
-        cancelCutoffMinutes: $checkedConvert(
-          'cancelCutoffMinutes',
-          (v) => v as num,
-        ),
-        isOpenNow: $checkedConvert('isOpenNow', (v) => v as bool),
-        openingHours: $checkedConvert(
-          'openingHours',
-          (v) => (v as List<dynamic>)
-              .map((e) => OpeningHoursDto.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        closures: $checkedConvert(
-          'closures',
-          (v) => (v as List<dynamic>)
-              .map((e) => ClosureInfoDto.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-        areas: $checkedConvert(
-          'areas',
-          (v) => (v as List<dynamic>)
-              .map((e) => AreaBriefDto.fromJson(e as Map<String, dynamic>))
-              .toList(),
-        ),
-      );
-      return val;
-    });
+RestaurantDetailDto _$RestaurantDetailDtoFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('RestaurantDetailDto', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    requiredKeys: const [
+      'id',
+      'slug',
+      'name',
+      'originalName',
+      'translated',
+      'phone',
+      'address',
+      'timezone',
+      'cuisineTags',
+      'ambienceTags',
+      'priceLevel',
+      'ratingAvg',
+      'ratingCount',
+      'servesLunch',
+      'servesNhau',
+      'allowTableChoice',
+      'allowCod',
+      'prepaidAvailable',
+      'maxGroupSize',
+      'confirmGroupsOver',
+      'cancelCutoffMinutes',
+      'isOpenNow',
+      'openingHours',
+      'closures',
+      'areas',
+    ],
+  );
+  final val = RestaurantDetailDto(
+    id: $checkedConvert('id', (v) => v as String),
+    slug: $checkedConvert('slug', (v) => v as String),
+    name: $checkedConvert('name', (v) => v as String),
+    originalName: $checkedConvert('originalName', (v) => v as String),
+    description: $checkedConvert('description', (v) => v as String?),
+    translated: $checkedConvert(
+      'translated',
+      (v) => $enumDecode(_$RestaurantDetailDtoTranslatedEnumEnumMap, v),
+    ),
+    phone: $checkedConvert('phone', (v) => v as String),
+    address: $checkedConvert('address', (v) => v as String),
+    lat: $checkedConvert('lat', (v) => v as num?),
+    lng: $checkedConvert('lng', (v) => v as num?),
+    timezone: $checkedConvert('timezone', (v) => v as String),
+    cuisineTags: $checkedConvert(
+      'cuisineTags',
+      (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+    ),
+    ambienceTags: $checkedConvert(
+      'ambienceTags',
+      (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+    ),
+    priceLevel: $checkedConvert('priceLevel', (v) => v as num),
+    coverPhotoUrl: $checkedConvert('coverPhotoUrl', (v) => v as String?),
+    ratingAvg: $checkedConvert('ratingAvg', (v) => v as num),
+    ratingCount: $checkedConvert('ratingCount', (v) => v as num),
+    servesLunch: $checkedConvert('servesLunch', (v) => v as bool),
+    servesNhau: $checkedConvert('servesNhau', (v) => v as bool),
+    allowTableChoice: $checkedConvert('allowTableChoice', (v) => v as bool),
+    allowCod: $checkedConvert('allowCod', (v) => v as bool),
+    prepaidAvailable: $checkedConvert('prepaidAvailable', (v) => v as bool),
+    googleRating: $checkedConvert('googleRating', (v) => v as num?),
+    googleRatingCount: $checkedConvert('googleRatingCount', (v) => v as num?),
+    maxGroupSize: $checkedConvert('maxGroupSize', (v) => v as num),
+    confirmGroupsOver: $checkedConvert('confirmGroupsOver', (v) => v as num),
+    cancelCutoffMinutes: $checkedConvert(
+      'cancelCutoffMinutes',
+      (v) => v as num,
+    ),
+    isOpenNow: $checkedConvert('isOpenNow', (v) => v as bool),
+    openingHours: $checkedConvert(
+      'openingHours',
+      (v) => (v as List<dynamic>)
+          .map((e) => OpeningHoursDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    closures: $checkedConvert(
+      'closures',
+      (v) => (v as List<dynamic>)
+          .map((e) => ClosureInfoDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+    areas: $checkedConvert(
+      'areas',
+      (v) => (v as List<dynamic>)
+          .map((e) => AreaBriefDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$RestaurantDetailDtoToJson(
   RestaurantDetailDto instance,
@@ -496,6 +535,7 @@ Map<String, dynamic> _$RestaurantDetailDtoToJson(
   'id': instance.id,
   'slug': instance.slug,
   'name': instance.name,
+  'originalName': instance.originalName,
   'description': ?instance.description,
   'translated':
       _$RestaurantDetailDtoTranslatedEnumEnumMap[instance.translated]!,
@@ -515,6 +555,8 @@ Map<String, dynamic> _$RestaurantDetailDtoToJson(
   'allowTableChoice': instance.allowTableChoice,
   'allowCod': instance.allowCod,
   'prepaidAvailable': instance.prepaidAvailable,
+  'googleRating': ?instance.googleRating,
+  'googleRatingCount': ?instance.googleRatingCount,
   'maxGroupSize': instance.maxGroupSize,
   'confirmGroupsOver': instance.confirmGroupsOver,
   'cancelCutoffMinutes': instance.cancelCutoffMinutes,

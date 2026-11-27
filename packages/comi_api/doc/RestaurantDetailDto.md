@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **id** | **String** |  | 
 **slug** | **String** |  | 
 **name** | **String** |  | 
+**originalName** | **String** | Vietnamese name (for the taxi card) | 
 **description** | **String** |  | [optional] 
 **translated** | **String** | none = Vietnamese original shown | 
 **phone** | **String** |  | 
@@ -29,6 +30,8 @@ Name | Type | Description | Notes
 **allowTableChoice** | **bool** |  | 
 **allowCod** | **bool** |  | 
 **prepaidAvailable** | **bool** | Guests can prepay online (the restaurant connected PayOS) | 
+**googleRating** | **num** | Rating on Google Maps (refreshed weekly) | [optional] 
+**googleRatingCount** | **num** |  | [optional] 
 **maxGroupSize** | **num** |  | 
 **confirmGroupsOver** | **num** |  | 
 **cancelCutoffMinutes** | **num** |  | 

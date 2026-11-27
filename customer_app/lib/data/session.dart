@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app/config.dart';
+import 'language.dart';
 import 'token_store.dart';
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
@@ -10,7 +11,8 @@ final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 final apiBaseUrlProvider = Provider<String>((ref) => apiBaseUrl);
 
 /// Menu / restaurant text language sent as Accept-Language (§17). Vietnamese until the app has a language picker.
-final contentLocaleProvider = Provider<String>((ref) => 'vi');
+/// Language for restaurant content from the API (Accept-Language) — follows the app language.
+final contentLocaleProvider = Provider<String>((ref) => ref.watch(appLanguageProvider));
 
 class Session {
   const Session({this.accessToken, this.refreshToken});
@@ -25,9 +27,18 @@ class Session {
 /// Dev: the backend accepts `dev:<uid>:<phone>` when Firebase is not configured.
 abstract class PhoneAuth {
   Future<String> idTokenFor(String phone);
+
+  /// Tourists without a Vietnamese number (Firebase email link in production).
+  Future<String> idTokenForEmail(String email);
 }
 
 class DevPhoneAuth implements PhoneAuth {
+  @override
+  Future<String> idTokenForEmail(String email) async {
+    final e = email.trim().toLowerCase();
+    return 'dev:e${e.replaceAll(RegExp(r'[^a-z0-9]'), '')}:$e';
+  }
+
   @override
   Future<String> idTokenFor(String phone) async {
     final digits = phone.replaceAll(RegExp(r'\D'), '');
@@ -54,6 +65,12 @@ class SessionController extends AsyncNotifier<Session> {
     final idToken = await ref.read(phoneAuthProvider).idTokenFor(phone);
     final res = await ref.read(apiProvider).getAuthApi().authExchange(customerExchangeDto: CustomerExchangeDto(idToken: idToken));
     final t = res.data!;
+    await _set(Session(accessToken: t.accessToken, refreshToken: t.refreshToken));
+  }
+
+  Future<void> loginWithEmail(String email) async {
+    final idToken = await ref.read(phoneAuthProvider).idTokenForEmail(email);
+    final t = (await ref.read(apiProvider).getAuthApi().authExchange(customerExchangeDto: CustomerExchangeDto(idToken: idToken))).data!;
     await _set(Session(accessToken: t.accessToken, refreshToken: t.refreshToken));
   }
 

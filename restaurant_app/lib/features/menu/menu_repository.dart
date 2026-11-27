@@ -23,6 +23,8 @@ abstract class MenuRepository {
   Future<UploadSignatureDto> uploadSignature(String kind);
   Future<MenuPhotoDto> addPhoto(String itemId, String publicId, {int? width, int? height});
   Future<void> deletePhoto(String photoId);
+  Future<List<TranslationRowDto>> translations(String locale);
+  Future<void> putTranslation(String itemId, String locale, String name, String? description);
 }
 
 class ApiMenuRepository implements MenuRepository {
@@ -101,7 +103,23 @@ class ApiMenuRepository implements MenuRepository {
 
   @override
   Future<void> deletePhoto(String photoId) => _api.menuDeletePhoto(photoId: photoId, xRestaurantId: _rid);
+
+  @override
+  Future<List<TranslationRowDto>> translations(String locale) async =>
+      (await _api.translationsRows(locale: locale, xRestaurantId: _rid)).data ?? const [];
+
+  @override
+  Future<void> putTranslation(String itemId, String locale, String name, String? description) => _api.menuTranslation(
+    id: itemId,
+    locale: locale,
+    xRestaurantId: _rid,
+    translationDto: TranslationDto(name: name, description: description),
+  );
 }
+
+final translationRowsProvider = FutureProvider.autoDispose.family<List<TranslationRowDto>, String>(
+  (ref, locale) => ref.watch(menuRepositoryProvider).translations(locale),
+);
 
 final menuRepositoryProvider = Provider<MenuRepository>((ref) {
   final api = ref.watch(apiProvider);

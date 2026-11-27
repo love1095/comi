@@ -1,0 +1,68 @@
+# Production layout (§24.2): Caddy → 2 API instances (sticky for Socket.IO) + 1 worker, PostGIS, Redis with AOF.
+# Usage on the server:  cp .env.prod.example .env.prod  (fill it)  →  docker compose -f docker-compose.prod.yml up -d
+name: comi
+
+x-backend: &backend
+  image: ${COMI_IMAGE:-ghcr.io/love1095/comi-backend:latest}
+  env_file: .env.prod
+  restart: unless-stopped
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+  logging:
+    driver: json-file
+    options: { max-size: 20m, max-file: '5' }
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [api1, api2]
+
+  api1: *backend
+  api2: *backend
+
+  # Runs migrations once, then exits. `docker compose run --rm migrate` before starting a new version.
+  migrate:
+    <<: *backend
+    restart: 'no'
+    profiles: [tools]
+    command: ['npx', 'prisma', 'migrate', 'deploy']
+
+  worker:
+    <<: *backend
+    command: ['node', 'dist/worker.js']
+
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: comi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: comi
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U comi']
+      interval: 10s
+      retries: 10
+    shm_size: 256mb
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # AOF on: BullMQ delayed jobs (no-show checks, payment timeouts) must survive restarts.
+    command: ['redis-server', '--appendonly', 'yes', '--appendfsync', 'everysec', '--maxmemory-policy', 'noeviction']
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:

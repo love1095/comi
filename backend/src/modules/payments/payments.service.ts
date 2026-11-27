@@ -1,3 +1,4 @@
+import { NotificationsService } from '../notifications/notifications.module';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Payment, Prisma } from '@prisma/client';
 import { AuditService } from '../../common/audit.service';
@@ -12,6 +13,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AvailabilityService } from '../availability/availability.service';
 import { noShowDeadline } from '../bookings/booking.state';
 import { FeesService } from '../fees/fees.service';
+import { VouchersService } from '../vouchers/vouchers.module';
 import { KitchenService } from '../kitchen/kitchen.service';
 import { RealtimeService } from '../realtime/realtime.service';
 import { PayOsAdapter, PayOsCredentials } from './payos';
@@ -57,7 +59,9 @@ export class PaymentsService {
     private readonly kitchen: KitchenService,
     private readonly availability: AvailabilityService,
     private readonly realtime: RealtimeService,
+    private readonly notifications: NotificationsService,
     private readonly fees: FeesService,
+    private readonly vouchers: VouchersService,
     @Inject(ENV) private readonly env: Env,
     private readonly payos: PayOsAdapter,
   ) {}
@@ -247,7 +251,7 @@ export class PaymentsService {
     if (short) {
       await this.audit.log({ actorType: 'SYSTEM', action: 'payment.amount_mismatch', entity: 'Payment', entityId: paymentId, data: { expected: p.amount, got: r.amount } });
       await this.createRefund(p.id, b.id, r.amount, 'AMOUNT_MISMATCH');
-      this.realtime.toUser(b.userId, 'booking.status', { bookingId: b.id, payment: 'failed' });
+      void this.notifications.booking(b.userId, { bookingId: b.id, payment: 'failed' });
       return true;
     }
     await this.audit.log({ actorType: 'SYSTEM', action: 'payment.paid', entity: 'Payment', entityId: paymentId, data: { amount: r.amount, purpose: p.purpose } });
@@ -286,7 +290,7 @@ export class PaymentsService {
         await this.availability.invalidate(b.restaurantId);
       }
     }
-    this.realtime.toUser(b.userId, 'booking.status', { bookingId: b.id, status: confirm ? 'CONFIRMED' : b.status, payment: 'paid' });
+    void this.notifications.booking(b.userId, { bookingId: b.id, status: confirm ? 'CONFIRMED' : b.status, payment: 'paid' });
     this.realtime.toRestaurant(b.restaurantId, 'booking.updated', { bookingId: b.id, payment: 'paid' });
     return true;
   }
@@ -304,12 +308,13 @@ export class PaymentsService {
       await tx.orderItem.updateMany({ where: { order: { bookingId }, kitchenStatus: { in: ['HOLD', 'SCHEDULED'] } }, data: { kitchenStatus: 'CANCELLED' } });
       await tx.order.updateMany({ where: { bookingId }, data: { status: 'CANCELLED' } });
       await tx.payment.updateMany({ where: { bookingId, status: { in: [...OPEN_PAYMENT] } }, data: { status: 'EXPIRED' } });
+      await this.vouchers.release(bookingId, tx);
       await this.audit.log({ actorType: 'SYSTEM', action: 'booking.payment_timeout', entity: 'Booking', entityId: bookingId, data: { at: now } }, tx);
       return true;
     });
     if (!done) return false;
     await this.availability.invalidate(b.restaurantId);
-    this.realtime.toUser(b.userId, 'booking.status', { bookingId, status: 'EXPIRED' });
+    void this.notifications.booking(b.userId, { bookingId, status: 'EXPIRED' });
     this.realtime.toRestaurant(b.restaurantId, 'booking.updated', { bookingId, status: 'EXPIRED' });
     return true;
   }
@@ -359,7 +364,7 @@ export class PaymentsService {
     await this.audit.log({ actorType: 'SYSTEM', action: 'refund.created', entity: 'Refund', entityId: r.id, data: { amount, reason } });
     const b = await this.prisma.booking.findUniqueOrThrow({ where: { id: bookingId }, select: { restaurantId: true, userId: true } });
     this.realtime.toRestaurant(b.restaurantId, 'booking.updated', { bookingId, refund: 'pending' });
-    this.realtime.toUser(b.userId, 'booking.status', { bookingId, refund: 'pending' });
+    void this.notifications.booking(b.userId, { bookingId, refund: 'pending' });
     return r;
   }
 
@@ -427,7 +432,7 @@ export class PaymentsService {
         await this.audit.log({ actorType: 'STAFF', actorId: staffId, action: 'refund.done', entity: 'Refund', entityId: refundId, data: { amount: r.amount, note } }, tx);
       });
       await this.fees.finalize(r.bookingId);
-      this.realtime.toUser(r.booking.userId, 'booking.status', { bookingId: r.bookingId, refund: 'done' });
+      void this.notifications.booking(r.booking.userId, { bookingId: r.bookingId, refund: 'done' });
     }
     return (await this.refundsForRestaurant(restaurantId)).find((x) => x.id === refundId)!;
   }

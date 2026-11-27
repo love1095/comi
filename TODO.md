@@ -86,20 +86,20 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 
 ## Phase 5 — Growth + tourists (4–5 weeks)
 
-- [ ] Reviews (verified visits only), replies, reports §15
-- [ ] Google rating on detail page
-- [ ] Map filters: rating, open now, table available at time, ranking
-- [ ] Vouchers (platform + restaurant, exclude alcohol) §12
-- [ ] 5 languages: app text + menu translation + editor §17
-- [ ] Tourists: card payments, dietary filters, email login, "show to taxi driver", approx. foreign prices
-- [ ] Notification center
+- [x] Reviews (verified visits only), replies, reports §15 — after the visit / 14 days, one per booking, rating kept in step, first name only, one reply, report → admin hides; both apps — ⬜ review photos, push reminder 2 h after check-in
+- [x] Google rating on detail page — Places API (New) with field mask, daily job refreshes ratings older than 7 days (needs `GOOGLE_PLACES_API_KEY` + `googlePlaceId` per restaurant)
+- [x] Map filters: rating, open now, table available at time, ranking — 4★+, "Còn bàn ngay" (table for 2 in ~30 min, checked with the real availability engine), "Nổi bật" score = rating × log(reviews) ÷ distance
+- [x] Vouchers (platform + restaurant, exclude alcohol) §12 — rules tested first; row lock while applying; per-user/total limits, first-order-only; released on cancel / payment timeout; restaurant + admin create; checkout code field
+- [x] 5 languages: app text + menu translation + editor §17 — gen-l10n ARB vi/en/ko/zh/ja, saved language picker (also sets Accept-Language), Google Translate sweep every 10 min (human edits never overwritten, stale machine rows re-translated), restaurant translation editor, "Dịch tự động" label — ⬜ move the remaining hard-coded Vietnamese strings into the ARB files (core screens done), restaurant app stays Vietnamese
+- [x] Tourists: dietary filters (chay/halal/không heo/không gluten tags), email login (dev token; Firebase email link ⬜), "show to taxi driver" card, approx. USD/KRW/CNY/JPY prices (admin sets rates) — ⬜ card payments need VNPay/MoMo merchant accounts
+- [x] Notification center — stored per guest from booking/payment/refund/invoice events (guest’s own cancel stays quiet), bell + unread badge, mark read, realtime refresh — ⬜ FCM push once Firebase is set up
 
 ## Phase 6 — Launch (2–3 weeks)
 
-- [ ] Security pass + permission tests + rate limits §23
-- [ ] Load test (booking, availability, sockets)
-- [ ] Privacy policy, terms, consent, account deletion
-- [ ] Production server, backups, monitoring, alerts §24
+- [x] Security pass + permission tests + rate limits §23 — e2e walks every protected route in the OpenAPI spec (401), customer↔staff separation, cross-restaurant 403, guest↔guest 404, owner≠admin; tighter limits on voucher check / reviews / group join / deletion; Redis rate-limit storage in production; revoked sessions kill access tokens at once
+- [~] Load test (booking, availability, sockets) — k6 scripts in `loadtest/` (discovery, booking rush with double-booking check, 2 000 sockets) — ⬜ run against staging
+- [x] Privacy policy, terms, consent, account deletion — draft vi/en pages at `/legal/*` (⬜ lawyer review), consent stored with version on login/register, customer data export, deletion for guests (waits for active bookings) and staff (sole owner must hand over), both apps
+- [~] Production server, backups, monitoring, alerts §24 — `deploy/` compose (Caddy sticky sessions, 2 API + worker, Redis AOF), backup script, 503 health with Redis, failed-job email alerts, runbook `docs/PRODUCTION.md` — ⬜ rent the server, Sentry, uptime monitor
 - [ ] App Store + Google Play submission
 - [ ] Onboard first 20–30 restaurants + photo shoots
 

@@ -1,7 +1,9 @@
-import { Controller, Get, Module } from '@nestjs/common';
+import { Controller, Get, Module, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { Public } from '../../common/auth/decorators';
 import { Clock } from '../../common/clock';
+import { RedisService } from '../../common/redis';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @ApiTags('health')
@@ -9,20 +11,27 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class HealthController {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
     private readonly clock: Clock,
   ) {}
 
-  /** Liveness + DB check, used by uptime monitors (§24.4). */
+  /** Liveness + DB + Redis, used by uptime monitors and the load balancer (§24.4). 503 when degraded. */
   @Public()
   @Get()
-  async check() {
-    let db: 'up' | 'down' = 'up';
-    try {
-      await this.prisma.$queryRaw`SELECT 1`;
-    } catch {
-      db = 'down';
-    }
-    return { status: db === 'up' ? 'ok' : 'degraded', db, time: this.clock.now().toISOString() };
+  async check(@Res({ passthrough: true }) res: Response) {
+    const [db, redis] = await Promise.all([
+      this.prisma.$queryRaw`SELECT 1`.then(
+        () => 'up' as const,
+        () => 'down' as const,
+      ),
+      this.redis.client.ping().then(
+        () => 'up' as const,
+        () => 'down' as const,
+      ),
+    ]);
+    const ok = db === 'up' && redis === 'up';
+    if (!ok) res.status(503);
+    return { status: ok ? 'ok' : 'degraded', db, redis, time: this.clock.now().toISOString() };
   }
 }
 

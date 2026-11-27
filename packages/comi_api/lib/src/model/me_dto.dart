@@ -38,6 +38,10 @@ class MeDto {
     required  this.mustPrepay,
 
     required  this.createdAt,
+
+     this.termsVersion,
+
+    required  this.marketingOptIn,
   });
 
   @JsonKey(
@@ -149,6 +153,31 @@ class MeDto {
 
 
 
+      /// Accepted terms/privacy version; null = ask again
+  @JsonKey(
+    
+    name: r'termsVersion',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final String? termsVersion;
+
+
+
+  @JsonKey(
+    
+    name: r'marketingOptIn',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool marketingOptIn;
+
+
+
 
     bool operator ==(Object other) {
       return identical(this, other) ||
@@ -165,6 +194,8 @@ class MeDto {
             noShowCount,
             mustPrepay,
             createdAt,
+            termsVersion,
+            marketingOptIn,
         ],
         [
             other.id,
@@ -176,6 +207,8 @@ class MeDto {
             other.noShowCount,
             other.mustPrepay,
             other.createdAt,
+            other.termsVersion,
+            other.marketingOptIn,
         ]
       );
     }
@@ -192,6 +225,8 @@ class MeDto {
         noShowCount,
         mustPrepay,
         createdAt,
+        termsVersion,
+        marketingOptIn,
     ],);
 
   factory MeDto.fromJson(Map<String, dynamic> json) => _$MeDtoFromJson(json);

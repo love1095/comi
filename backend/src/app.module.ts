@@ -5,7 +5,8 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuditModule } from './common/audit.service';
 import { AuthGuard } from './common/auth/auth.guard';
 import { ClockModule } from './common/clock';
-import { RedisModule } from './common/redis';
+import { RedisModule, RedisService } from './common/redis';
+import { RedisThrottlerStorage } from './common/throttler-redis';
 import { JobsModule } from './jobs/queues';
 import { AvailabilityModule } from './modules/availability/availability.controller';
 import { BookingsModule } from './modules/bookings/bookings.controller';
@@ -14,6 +15,12 @@ import { GroupModule } from './modules/group/group.controller';
 import { FeesModule } from './modules/fees/fees.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { VouchersModule } from './modules/vouchers/vouchers.module';
+import { PlacesModule } from './modules/places/places.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { TranslationsModule } from './modules/translations/translations.module';
+import { LegalModule } from './modules/legal/legal.module';
 import { RealtimeGatewayModule } from './modules/realtime/realtime.gateway';
 import { RealtimeModule } from './modules/realtime/realtime.service';
 import { MailModule } from './common/mail';
@@ -41,10 +48,14 @@ const isDev = (process.env.NODE_ENV ?? 'development') === 'development';
         autoLogging: { ignore: (req) => req.url === '/api/v1/health' },
       },
     }),
-    // In-memory for now; switch to Redis storage when running several API instances (§3).
-    ThrottlerModule.forRoot({
-      throttlers: [{ name: 'default', ttl: 60_000, limit: 300 }],
-      skipIf: () => process.env.NODE_ENV === 'test',
+    // Production: counters in Redis so every API instance shares them (§3, §23); in-memory elsewhere.
+    ThrottlerModule.forRootAsync({
+      inject: [RedisService],
+      useFactory: (redis: RedisService) => ({
+        throttlers: [{ name: 'default', ttl: 60_000, limit: 300 }],
+        skipIf: () => process.env.NODE_ENV === 'test',
+        storage: process.env.NODE_ENV === 'production' ? new RedisThrottlerStorage(redis.client) : undefined,
+      }),
     }),
     PrismaModule,
     ClockModule,
@@ -69,6 +80,12 @@ const isDev = (process.env.NODE_ENV ?? 'development') === 'development';
     FeesModule,
     InvoicesModule,
     PaymentsModule,
+    ReviewsModule,
+    VouchersModule,
+    PlacesModule,
+    NotificationsModule,
+    TranslationsModule,
+    LegalModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

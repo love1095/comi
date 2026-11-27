@@ -8,6 +8,7 @@ import '../../data/api_error.dart';
 import 'import_screen.dart';
 import 'item_editor_screen.dart';
 import 'menu_repository.dart';
+import 'translations_screen.dart';
 
 /// Menu: categories (left / chips) and their dishes. Drag to reorder, switch to mark sold out.
 class MenuScreen extends ConsumerStatefulWidget {
@@ -111,6 +112,11 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         title: const Text('Thực đơn'),
         actions: [
           IconButton(tooltip: 'Nhập từ Excel', onPressed: _openImport, icon: const Icon(Icons.upload_file)),
+          IconButton(
+            tooltip: 'Bản dịch',
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const TranslationsScreen())),
+            icon: const Icon(Icons.translate),
+          ),
           const AccountMenu(),
         ],
       ),

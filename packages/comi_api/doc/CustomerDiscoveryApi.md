@@ -196,7 +196,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **discoveryNearby**
-> RestaurantPageDto discoveryNearby(lat, lng, acceptLanguage, radius, q, cuisine, priceMax, minRating, openNow, maxMainPrice, groupSize, openLate, privateRoom, mode, sort, cursor, limit, acceptLanguage2)
+> RestaurantPageDto discoveryNearby(lat, lng, acceptLanguage, radius, q, cuisine, priceMax, minRating, openNow, maxMainPrice, groupSize, openLate, privateRoom, mode, sort, dietary, availableAt, partySize, cursor, limit, acceptLanguage2)
 
 
 
@@ -219,13 +219,16 @@ final num groupSize = 8.14; // num | \"Groups 10+\"
 final bool openLate = true; // bool | Open until 23:00 or later today
 final bool privateRoom = true; // bool | 
 final String mode = mode_example; // String | 
-final String sort = sort_example; // String | 
+final String sort = sort_example; // String | score = rating weighted by review count and distance
+final String dietary = dietary_example; // String | Tourists: comma separated vegetarian,halal,no_pork,gluten_free
+final String availableAt = availableAt_example; // String | Only restaurants with a free table at this time (ISO) — needs partySize
+final num partySize = 8.14; // num | With availableAt
 final num cursor = 8.14; // num | Offset from the previous page
 final num limit = 8.14; // num | 
 final String acceptLanguage2 = acceptLanguage_example; // String | vi | en | ko | zh | ja (fallback → en → vi)
 
 try {
-    final response = api.discoveryNearby(lat, lng, acceptLanguage, radius, q, cuisine, priceMax, minRating, openNow, maxMainPrice, groupSize, openLate, privateRoom, mode, sort, cursor, limit, acceptLanguage2);
+    final response = api.discoveryNearby(lat, lng, acceptLanguage, radius, q, cuisine, priceMax, minRating, openNow, maxMainPrice, groupSize, openLate, privateRoom, mode, sort, dietary, availableAt, partySize, cursor, limit, acceptLanguage2);
     print(response);
 } on DioException catch (e) {
     print('Exception when calling CustomerDiscoveryApi->discoveryNearby: $e\n');
@@ -250,7 +253,10 @@ Name | Type | Description  | Notes
  **openLate** | **bool**| Open until 23:00 or later today | [optional] 
  **privateRoom** | **bool**|  | [optional] 
  **mode** | **String**|  | [optional] 
- **sort** | **String**|  | [optional] 
+ **sort** | **String**| score = rating weighted by review count and distance | [optional] 
+ **dietary** | **String**| Tourists: comma separated vegetarian,halal,no_pork,gluten_free | [optional] 
+ **availableAt** | **String**| Only restaurants with a free table at this time (ISO) — needs partySize | [optional] 
+ **partySize** | **num**| With availableAt | [optional] 
  **cursor** | **num**| Offset from the previous page | [optional] 
  **limit** | **num**|  | [optional] [default to 20]
  **acceptLanguage2** | **String**| vi | en | ko | zh | ja (fallback → en → vi) | [optional] 

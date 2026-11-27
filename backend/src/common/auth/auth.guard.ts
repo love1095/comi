@@ -3,8 +3,10 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { StaffRole } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+
+import { RedisService } from '../redis';
 import { AppError } from '../errors/app-error';
-import { AccessTokenPayload, AuthedRequest } from './auth.types';
+import { AccessTokenPayload, AuthedRequest, revokedKey } from './auth.types';
 import { ACTOR, ActorKind, IS_PUBLIC, RESTAURANT_ROLES } from './decorators';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -20,6 +22,7 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly jwt: JwtService,
     @Inject(PrismaService) private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -39,6 +42,13 @@ export class AuthGuard implements CanActivate {
       payload = await this.jwt.verifyAsync<AccessTokenPayload>(token);
     } catch {
       if (isPublic) return true; // public routes ignore a stale token
+      throw new AppError('INVALID_TOKEN');
+    }
+
+    // Account deleted / blocked / logged out everywhere: tokens issued before that are dead.
+    const cutoff = await this.redis.client.get(revokedKey(payload.typ === 'user' ? 'user' : 'staff', payload.sub)).catch(() => null);
+    if (cutoff && (payload.iat ?? 0) <= Number(cutoff)) {
+      if (isPublic) return true;
       throw new AppError('INVALID_TOKEN');
     }
 

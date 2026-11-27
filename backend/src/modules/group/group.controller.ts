@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, Get, HttpCode, Module, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
 import { ApiOkResponse, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
 import { SplitMode } from '@prisma/client';
@@ -110,6 +111,7 @@ export class PublicGroupController {
   }
 
   /** Logged-in users (token sent) are linked to their account; others join by name. */
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post(':token/join')
   @HttpCode(200)
   @ApiOkResponse({ type: GroupMemberDto })

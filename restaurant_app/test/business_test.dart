@@ -7,6 +7,7 @@ import 'package:restaurant_app/data/token_store.dart';
 import 'package:restaurant_app/features/business/business_repository.dart';
 import 'package:restaurant_app/features/business/business_screens.dart';
 import 'package:restaurant_app/features/business/payment_screens.dart';
+import 'package:restaurant_app/features/business/marketing_screens.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 class FakeBusiness implements BusinessRepository {
@@ -179,6 +180,69 @@ class FakeBusiness implements BusinessRepository {
       createdAt: '2026-12-02T06:00:00Z',
     );
   }
+
+  ReviewDto review = ReviewDto(
+    id: 'rv1',
+    bookingId: 'b1',
+    restaurantId: 'r1',
+    authorName: 'Lan',
+    rating: 2,
+    text: 'Chờ lâu',
+    verifiedVisit: true,
+    visitedAt: '2026-12-02T05:00:00Z',
+    partySize: 2,
+    status: ReviewDtoStatusEnum.PUBLISHED,
+    createdAt: '2026-12-02T08:00:00Z',
+  );
+
+  @override
+  Future<ReviewPageDto> reviews() async => ReviewPageDto(ratingAvg: 2, ratingCount: 1, histogram: const [0, 1, 0, 0, 0], items: [review]);
+
+  @override
+  Future<ReviewDto> replyReview(String id, String reply) async {
+    calls.add('reply $id $reply');
+    return review;
+  }
+
+  @override
+  Future<ReviewDto> reportReview(String id, String reason) async {
+    calls.add('report $id');
+    return review;
+  }
+
+  List<VoucherDto> voucherRows = [];
+  VoucherInputDto? createdVoucher;
+
+  @override
+  Future<List<VoucherDto>> vouchers() async => voucherRows;
+
+  @override
+  Future<VoucherDto> createVoucher(VoucherInputDto dto) async {
+    createdVoucher = dto;
+    final v = VoucherDto(
+      id: 'v1',
+      code: dto.code,
+      fundedBy: VoucherFunder.RESTAURANT,
+      type: dto.type,
+      value: dto.value,
+      maxDiscount: dto.maxDiscount,
+      minOrder: dto.minOrder ?? 0,
+      startsAt: dto.startsAt,
+      endsAt: dto.endsAt,
+      perUserLimit: 1,
+      firstOrderOnly: dto.firstOrderOnly ?? false,
+      usedCount: 0,
+      isActive: true,
+    );
+    voucherRows = [v];
+    return v;
+  }
+
+  @override
+  Future<VoucherDto> setVoucherActive(String id, bool active) async {
+    calls.add('voucher $id $active');
+    return voucherRows.first;
+  }
 }
 
 void main() {
@@ -273,5 +337,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, ['refund rf1 FT9999']);
     expect(find.text('Không có khoản cần hoàn'), findsOneWidget);
+  });
+
+  testWidgets('reviews: histogram, reply to a guest', (tester) async {
+    final repo = FakeBusiness();
+    await pump(tester, const ReviewsManageScreen(), repo);
+    expect(find.text('2.0 ★ · 1 đánh giá'), findsOneWidget);
+    await tester.tap(find.text('Trả lời'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Xin lỗi anh chị, lần sau quán sẽ nhanh hơn');
+    await tester.pump();
+    await tester.tap(find.text('Gửi'));
+    await tester.pumpAndSettle();
+    expect(repo.calls.single, startsWith('reply rv1 Xin lỗi'));
+  });
+
+  testWidgets('vouchers: create a 20% code capped at 30k', (tester) async {
+    final repo = FakeBusiness();
+    await pump(tester, NewVoucherScreen(now: DateTime.utc(2026, 12, 1)), repo);
+    await tester.enterText(find.widgetWithText(TextFormField, 'Mã (VD: TRUA20)'), 'trua20');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Phần trăm (1–100)'), '20');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Giảm tối đa (đ, không bắt buộc)'), '30000');
+    await tester.tap(find.text('Tạo'));
+    await tester.pumpAndSettle();
+    final v = repo.createdVoucher!;
+    expect((v.code, v.type, v.value, v.maxDiscount), ('TRUA20', VoucherType.PERCENT, 2000, 30000));
+    expect(v.endsAt, '2026-12-31T00:00:00.000Z');
   });
 }

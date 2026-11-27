@@ -56,8 +56,10 @@ export class FirebaseVerifier {
 
   private verifyDevToken(idToken: string): VerifiedFirebaseUser {
     if (this.env.NODE_ENV === 'production') throw new AppError('SERVICE_UNAVAILABLE', 'Firebase not configured');
-    const [prefix, uid, phone] = idToken.split(':');
-    if (prefix !== 'dev' || !uid) throw new AppError('INVALID_TOKEN', 'Expected dev token "dev:<uid>[:<phone>]"');
-    return { uid, phone: phone || undefined };
+    const [prefix, uid, contact] = idToken.split(':');
+    if (prefix !== 'dev' || !uid) throw new AppError('INVALID_TOKEN', 'Expected dev token "dev:<uid>[:<phone or email>]"');
+    // Third part: a phone (+84…) or, for tourists signing in with email, an address.
+    if (contact?.includes('@')) return { uid, email: contact.toLowerCase() };
+    return { uid, phone: contact || undefined };
   }
 }

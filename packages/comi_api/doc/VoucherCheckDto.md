@@ -1,0 +1,17 @@
+# comi_api.model.VoucherCheckDto
+
+## Load the model package
+```dart
+import 'package:comi_api/api.dart';
+```
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**code** | **String** |  | 
+**restaurantId** | **String** |  | 
+**items** | [**List&lt;CartLineDto&gt;**](CartLineDto.md) |  | 
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

@@ -89,6 +89,7 @@ export class RestaurantDetailDto {
   @ApiProperty() id: string;
   @ApiProperty() slug: string;
   @ApiProperty() name: string;
+  @ApiProperty({ description: 'Vietnamese name (for the taxi card)' }) originalName: string;
   @ApiPropertyOptional({ nullable: true, type: String }) description: string | null;
   @ApiProperty({ enum: ['none', 'human', 'machine'], description: 'none = Vietnamese original shown' }) translated: string;
   @ApiProperty() phone: string;
@@ -107,6 +108,8 @@ export class RestaurantDetailDto {
   @ApiProperty() allowTableChoice: boolean;
   @ApiProperty() allowCod: boolean;
   @ApiProperty({ description: 'Guests can prepay online (the restaurant connected PayOS)' }) prepaidAvailable: boolean;
+  @ApiPropertyOptional({ nullable: true, type: Number, description: 'Rating on Google Maps (refreshed weekly)' }) googleRating: number | null;
+  @ApiPropertyOptional({ nullable: true, type: Number }) googleRatingCount: number | null;
   @ApiProperty() maxGroupSize: number;
   @ApiProperty() confirmGroupsOver: number;
   @ApiProperty() cancelCutoffMinutes: number;
@@ -263,6 +266,8 @@ export class MeDto {
   @ApiProperty() noShowCount: number;
   @ApiProperty({ description: 'Too many no-shows: bookings must be prepaid' }) mustPrepay: boolean;
   @ApiProperty() createdAt: string;
+  @ApiPropertyOptional({ nullable: true, type: String, description: 'Accepted terms/privacy version; null = ask again' }) termsVersion: string | null;
+  @ApiProperty() marketingOptIn: boolean;
 }
 
 // ───── table map + holds (§8.6) ─────

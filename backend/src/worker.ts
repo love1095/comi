@@ -14,8 +14,13 @@ import { PrismaModule } from './prisma/prisma.service';
 import { KitchenService } from './modules/kitchen/kitchen.service';
 import { GroupService } from './modules/group/group.service';
 import { FeesService, previousMonth } from './modules/fees/fees.service';
-import { MailModule } from './common/mail';
+import { MailModule, MailService } from './common/mail';
+import { JobAlerts } from './jobs/alerts';
 import { PaymentsService } from './modules/payments/payments.service';
+import { VouchersService } from './modules/vouchers/vouchers.module';
+import { PlacesService } from './modules/places/places.module';
+import { NotificationsService } from './modules/notifications/notifications.module';
+import { TranslationsService } from './modules/translations/translations.module';
 import { PayOsAdapter } from './modules/payments/payos';
 import { AvailabilityService } from './modules/availability/availability.service';
 import { RealtimeModule } from './modules/realtime/realtime.service';
@@ -30,6 +35,10 @@ import { RealtimeModule } from './modules/realtime/realtime.service';
     FeesService,
     AvailabilityService,
     PaymentsService,
+    VouchersService,
+    PlacesService,
+    NotificationsService,
+    TranslationsService,
     { provide: PayOsAdapter, inject: [ENV], useFactory: (env: Env) => new PayOsAdapter(fetch, env.PAYOS_API_URL) },
   ],
 })
@@ -80,13 +89,27 @@ async function bootstrap() {
         if (job.name === 'statement-generate') return fees.generate(previousMonth(new Date()));
         if (job.name === 'statement-overdue') return fees.markOverdue();
         if (job.name === 'payment-reconcile') return payments.reconcile();
+        if (job.name === 'google-ratings') return app.get(PlacesService).refreshGoogleRatings();
+        logger.warn(`Unknown job ${job.name}`);
+      },
+      { connection, concurrency: 1 },
+    ),
+    new Worker(
+      QUEUES.CONTENT,
+      async (job: Job) => {
+        if (job.name === 'translate-sweep') return app.get(TranslationsService).sweep();
         logger.warn(`Unknown job ${job.name}`);
       },
       { connection, concurrency: 1 },
     ),
   ];
+  const mail = app.get(MailService);
+  const alerts = new JobAlerts((subject, text) => (env.ALERT_EMAIL ? mail.send({ to: env.ALERT_EMAIL, subject, text }) : Promise.resolve(false)));
   for (const w of workers) {
-    w.on('failed', (job, err) => logger.error(`${w.name}/${job?.name} ${job?.id} failed: ${err.message}`));
+    w.on('failed', (job, err) => {
+      logger.error(`${w.name}/${job?.name} ${job?.id} failed: ${err.message}`);
+      void alerts.failed(job, w.name, err).catch(() => undefined);
+    });
   }
   // §7.4 safety net: release overdue SCHEDULED dishes every minute (survives lost delayed jobs).
   await app.get(JobsService).repeat(QUEUES.KITCHEN, 'kitchen-sweep', { every: 60_000 });
@@ -95,6 +118,8 @@ async function bootstrap() {
   await app.get(JobsService).repeat(QUEUES.BILLING, 'statement-overdue', { pattern: '0 3 * * *', tz: 'Asia/Ho_Chi_Minh' });
   // §10.3: lost webhooks / stuck payments, every 5 minutes.
   await app.get(JobsService).repeat(QUEUES.BILLING, 'payment-reconcile', { every: 5 * 60_000 });
+  await app.get(JobsService).repeat(QUEUES.BILLING, 'google-ratings', { pattern: '0 4 * * *', tz: 'Asia/Ho_Chi_Minh' });
+  await app.get(JobsService).repeat(QUEUES.CONTENT, 'translate-sweep', { every: 10 * 60_000 });
   logger.log(`comi worker started: ${workers.map((w) => w.name).join(', ')}`);
 
   const shutdown = async () => {

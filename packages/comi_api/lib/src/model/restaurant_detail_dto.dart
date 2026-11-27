@@ -30,6 +30,8 @@ class RestaurantDetailDto {
 
     required  this.name,
 
+    required  this.originalName,
+
      this.description,
 
     required  this.translated,
@@ -65,6 +67,10 @@ class RestaurantDetailDto {
     required  this.allowCod,
 
     required  this.prepaidAvailable,
+
+     this.googleRating,
+
+     this.googleRatingCount,
 
     required  this.maxGroupSize,
 
@@ -114,6 +120,19 @@ class RestaurantDetailDto {
 
 
   final String name;
+
+
+
+      /// Vietnamese name (for the taxi card)
+  @JsonKey(
+    
+    name: r'originalName',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final String originalName;
 
 
 
@@ -335,6 +354,31 @@ class RestaurantDetailDto {
 
 
 
+      /// Rating on Google Maps (refreshed weekly)
+  @JsonKey(
+    
+    name: r'googleRating',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? googleRating;
+
+
+
+  @JsonKey(
+    
+    name: r'googleRatingCount',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final num? googleRatingCount;
+
+
+
   @JsonKey(
     
     name: r'maxGroupSize',
@@ -429,6 +473,7 @@ class RestaurantDetailDto {
             id,
             slug,
             name,
+            originalName,
             description,
             translated,
             phone,
@@ -447,6 +492,8 @@ class RestaurantDetailDto {
             allowTableChoice,
             allowCod,
             prepaidAvailable,
+            googleRating,
+            googleRatingCount,
             maxGroupSize,
             confirmGroupsOver,
             cancelCutoffMinutes,
@@ -459,6 +506,7 @@ class RestaurantDetailDto {
             other.id,
             other.slug,
             other.name,
+            other.originalName,
             other.description,
             other.translated,
             other.phone,
@@ -477,6 +525,8 @@ class RestaurantDetailDto {
             other.allowTableChoice,
             other.allowCod,
             other.prepaidAvailable,
+            other.googleRating,
+            other.googleRatingCount,
             other.maxGroupSize,
             other.confirmGroupsOver,
             other.cancelCutoffMinutes,
@@ -494,6 +544,7 @@ class RestaurantDetailDto {
         id,
         slug,
         name,
+        originalName,
         description,
         translated,
         phone,
@@ -512,6 +563,8 @@ class RestaurantDetailDto {
         allowTableChoice,
         allowCod,
         prepaidAvailable,
+        googleRating,
+        googleRatingCount,
         maxGroupSize,
         confirmGroupsOver,
         cancelCutoffMinutes,

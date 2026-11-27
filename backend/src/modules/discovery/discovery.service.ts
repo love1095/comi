@@ -1,4 +1,7 @@
 import { PaymentsService } from '../payments/payments.service';
+import { AvailabilityService } from '../availability/availability.service';
+import { pickTables } from '../availability/pick-tables';
+import { dietaryTags } from './dietary';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Clock } from '../../common/clock';
@@ -37,6 +40,7 @@ export class DiscoveryService {
     private readonly prisma: PrismaService,
     private readonly clock: Clock,
     private readonly payments: PaymentsService,
+    private readonly availability: AvailabilityService,
   ) {}
 
   /** GET /restaurants — nearby with filters (§14.1 + lunch/nhậu filters). */
@@ -58,6 +62,10 @@ export class DiscoveryService {
     if (q.mode === 'lunch') where.push(Prisma.sql`r."servesLunch"`);
     if (q.mode === 'nhau') where.push(Prisma.sql`r."servesNhau"`);
     if (q.groupSize) where.push(Prisma.sql`r."maxGroupSize" >= ${q.groupSize}`);
+    const dietary = dietaryTags(q.dietary);
+    if (dietary.length) {
+      where.push(Prisma.sql`EXISTS (SELECT 1 FROM "MenuItem" m WHERE m."restaurantId" = r.id AND m."deletedAt" IS NULL AND m.tags && ${dietary}::text[])`);
+    }
     if (q.maxMainPrice !== undefined) {
       where.push(Prisma.sql`EXISTS (SELECT 1 FROM "MenuItem" m WHERE m."restaurantId" = r.id AND m."deletedAt" IS NULL
         AND m.course = 'MAIN' AND m.price <= ${q.maxMainPrice})`);
@@ -74,7 +82,12 @@ export class DiscoveryService {
       where.push(Prisma.sql`('private_room' = ANY(r."ambienceTags") OR EXISTS (SELECT 1 FROM "Table" t
         WHERE t."restaurantId" = r.id AND t."isActive" AND 'private' = ANY(t.features)))`);
     }
-    const order = q.sort === 'rating' ? Prisma.sql`r."ratingAvg" DESC, "distanceM" ASC` : Prisma.sql`"distanceM" ASC`;
+    const order =
+      q.sort === 'rating'
+        ? Prisma.sql`r."ratingAvg" DESC, "distanceM" ASC`
+        : q.sort === 'score'
+          ? Prisma.sql`(r."ratingAvg"::float * ln(1 + r."ratingCount")) / (1 + ST_Distance(r.location, ${here}) / 1000.0) DESC`
+          : Prisma.sql`"distanceM" ASC`;
 
     const rows = await this.prisma.$queryRaw<RestaurantCard[]>`
       SELECT r.id, r.slug, r.name, r.address, r."priceLevel", r."ratingAvg"::float AS "ratingAvg", r."ratingCount",
@@ -87,7 +100,9 @@ export class DiscoveryService {
       ORDER BY ${order}, r.id
       LIMIT ${limit + 1} OFFSET ${offset}`;
 
-    const items = await this.translateNames(rows.slice(0, limit), locale);
+    // "Table free at …": checked per restaurant on this page (map filter, §14).
+    const page = q.availableAt && q.partySize ? await this.withFreeTable(rows.slice(0, limit), new Date(q.availableAt), q.partySize) : rows.slice(0, limit);
+    const items = await this.translateNames(page, locale);
     return { items, nextCursor: rows.length > limit ? offset + limit : null };
   }
 
@@ -124,6 +139,7 @@ export class DiscoveryService {
       id: r.id,
       slug: r.slug,
       name: t.name,
+      originalName: r.name,
       description: t.description,
       translated: t.translated,
       phone: r.phone,
@@ -142,6 +158,8 @@ export class DiscoveryService {
       allowTableChoice: r.allowTableChoice,
       allowCod: r.allowCod,
       prepaidAvailable: await this.payments.prepaidAvailable(r.id),
+      googleRating: r.googleRating === null ? null : Number(r.googleRating),
+      googleRatingCount: r.googleRatingCount,
       maxGroupSize: r.maxGroupSize,
       confirmGroupsOver: r.confirmGroupsOver,
       cancelCutoffMinutes: r.cancelCutoffMinutes,
@@ -243,6 +261,17 @@ export class DiscoveryService {
       sections.unshift({ key: 'menus_in_your_language', items: near });
     }
     return { mode, sections: sections.filter((s) => s.items.length) };
+  }
+
+  /** Keep restaurants that can seat [partySize] at [at] for a typical sitting (90 min). */
+  private async withFreeTable<T extends { id: string }>(rows: T[], at: Date, partySize: number): Promise<T[]> {
+    const window = [{ start: at, end: new Date(at.getTime() + 90 * 60_000) }];
+    const keep: T[] = [];
+    for (const r of rows) {
+      const [free] = await this.availability.freeTables(r.id, window);
+      if (pickTables(free, partySize) !== null) keep.push(r);
+    }
+    return keep;
   }
 
   private async translateNames<T extends { id: string; name: string }>(rows: T[], locale: Locale): Promise<T[]> {

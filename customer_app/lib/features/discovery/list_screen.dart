@@ -81,7 +81,13 @@ class _ListScreenState extends ConsumerState<ListScreen> {
       ('Nhóm 10+', f.groups10, () => f.copyWith(groups10: !f.groups10)),
       ('Đang mở', f.openNow, () => f.copyWith(openNow: !f.openNow)),
       ('Mở khuya', f.openLate, () => f.copyWith(openLate: !f.openLate)),
-      ('Điểm cao', f.sortByRating, () => f.copyWith(sortByRating: !f.sortByRating)),
+      ('Còn bàn ngay', f.tableSoon, () => f.copyWith(tableSoon: !f.tableSoon)),
+      ('4★ trở lên', f.rating4, () => f.copyWith(rating4: !f.rating4)),
+      ('Nổi bật', f.best, () => f.copyWith(best: !f.best, sortByRating: false)),
+      ('Điểm cao', f.sortByRating, () => f.copyWith(sortByRating: !f.sortByRating, best: false)),
+      ('Món chay', f.dietary.contains('vegetarian'), () => f.toggleDietary('vegetarian')),
+      ('Halal', f.dietary.contains('halal'), () => f.toggleDietary('halal')),
+      ('Không thịt heo', f.dietary.contains('no_pork'), () => f.toggleDietary('no_pork')),
     ];
 
     return Scaffold(

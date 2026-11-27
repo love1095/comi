@@ -15,6 +15,10 @@ class SearchFilters {
     this.openLate = false,
     this.openNow = false,
     this.sortByRating = false,
+    this.rating4 = false,
+    this.tableSoon = false,
+    this.best = false,
+    this.dietary = const {},
   });
 
   final String? q;
@@ -26,6 +30,18 @@ class SearchFilters {
   final bool openNow;
   final bool sortByRating;
 
+  /// 4★ and up.
+  final bool rating4;
+
+  /// A table for 2 free in the next ~30 minutes.
+  final bool tableSoon;
+
+  /// Ranking: rating weighted by number of reviews and distance.
+  final bool best;
+
+  /// Tourists: vegetarian, halal, no_pork, gluten_free.
+  final Set<String> dietary;
+
   SearchFilters copyWith({
     String? q,
     String? mode,
@@ -36,6 +52,10 @@ class SearchFilters {
     bool? openLate,
     bool? openNow,
     bool? sortByRating,
+    bool? rating4,
+    bool? tableSoon,
+    bool? best,
+    Set<String>? dietary,
   }) => SearchFilters(
     q: q ?? this.q,
     mode: clearMode ? null : (mode ?? this.mode),
@@ -45,7 +65,15 @@ class SearchFilters {
     openLate: openLate ?? this.openLate,
     openNow: openNow ?? this.openNow,
     sortByRating: sortByRating ?? this.sortByRating,
+    rating4: rating4 ?? this.rating4,
+    tableSoon: tableSoon ?? this.tableSoon,
+    best: best ?? this.best,
+    dietary: dietary ?? this.dietary,
   );
+
+  SearchFilters toggleDietary(String tag) => copyWith(dietary: dietary.contains(tag) ? (dietary.toSet()..remove(tag)) : {...dietary, tag});
+
+  String? get sort => best ? 'score' : (sortByRating ? 'rating' : null);
 
   @override
   bool operator ==(Object other) =>
@@ -57,10 +85,35 @@ class SearchFilters {
       other.groups10 == groups10 &&
       other.openLate == openLate &&
       other.openNow == openNow &&
-      other.sortByRating == sortByRating;
+      other.sortByRating == sortByRating &&
+      other.rating4 == rating4 &&
+      other.tableSoon == tableSoon &&
+      other.best == best &&
+      other.dietary.length == dietary.length &&
+      other.dietary.containsAll(dietary);
 
   @override
-  int get hashCode => Object.hash(q, mode, under60k, within500m, groups10, openLate, openNow, sortByRating);
+  int get hashCode => Object.hash(
+    q,
+    mode,
+    under60k,
+    within500m,
+    groups10,
+    openLate,
+    openNow,
+    sortByRating,
+    rating4,
+    tableSoon,
+    best,
+    Object.hashAllUnordered(dietary),
+  );
+}
+
+/// Start of the "table soon" window: now + 30 min, rounded up to the next quarter hour.
+DateTime tableSoonAt(DateTime now) {
+  final t = now.toUtc().add(const Duration(minutes: 30));
+  final extra = (15 - t.minute % 15) % 15;
+  return DateTime.utc(t.year, t.month, t.day, t.hour, t.minute + extra);
 }
 
 abstract class DiscoveryRepository {
@@ -94,7 +147,11 @@ class ApiDiscoveryRepository implements DiscoveryRepository {
     groupSize: f.groups10 ? 10 : null,
     openLate: f.openLate ? true : null,
     openNow: f.openNow ? true : null,
-    sort: f.sortByRating ? 'rating' : null,
+    sort: f.sort,
+    minRating: f.rating4 ? 4 : null,
+    dietary: f.dietary.isEmpty ? null : (f.dietary.toList()..sort()).join(','),
+    availableAt: f.tableSoon ? tableSoonAt(DateTime.now()).toIso8601String() : null,
+    partySize: f.tableSoon ? 2 : null,
     cursor: cursor,
   )).data!;
 

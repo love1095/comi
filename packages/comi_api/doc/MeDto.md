@@ -17,6 +17,8 @@ Name | Type | Description | Notes
 **noShowCount** | **num** |  | 
 **mustPrepay** | **bool** | Too many no-shows: bookings must be prepaid | 
 **createdAt** | **String** |  | 
+**termsVersion** | **String** | Accepted terms/privacy version; null = ask again | [optional] 
+**marketingOptIn** | **bool** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

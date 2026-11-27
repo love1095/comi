@@ -1,3 +1,4 @@
+import { TERMS_VERSION } from '../legal/legal-texts';
 import { Injectable } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { AppError } from '../../common/errors/app-error';
@@ -44,7 +45,8 @@ export class AuthService {
     const email = dto.email.trim().toLowerCase();
     if (await this.prisma.staffUser.findUnique({ where: { email } })) throw new AppError('EMAIL_TAKEN');
     const staff = await this.prisma.staffUser.create({
-      data: { email, name: dto.name, phone: dto.phone, passwordHash: await argon2.hash(dto.password) },
+      // Registering = accepting the current terms + privacy policy (the screen says so).
+      data: { email, name: dto.name, phone: dto.phone, passwordHash: await argon2.hash(dto.password), termsVersion: TERMS_VERSION, termsAcceptedAt: new Date() },
     });
     return this.tokens.issue({ kind: 'staff', staffId: staff.id, isAdmin: false });
   }

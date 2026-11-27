@@ -1,3 +1,4 @@
+import { NotificationsService } from '../notifications/notifications.module';
 import { Injectable } from '@nestjs/common';
 import { BookingStatus, Prisma } from '@prisma/client';
 import { randomInt } from 'crypto';
@@ -16,6 +17,7 @@ import { KitchenService } from '../kitchen/kitchen.service';
 import { RealtimeService } from '../realtime/realtime.service';
 import { FeesService } from '../fees/fees.service';
 import { PaymentsService } from '../payments/payments.service';
+import { VouchersService } from '../vouchers/vouchers.module';
 
 type Tx = Prisma.TransactionClient;
 
@@ -46,8 +48,10 @@ export class BookingsService {
     private readonly clock: Clock,
     private readonly kitchen: KitchenService,
     private readonly realtime: RealtimeService,
+    private readonly notifications: NotificationsService,
     private readonly fees: FeesService,
     private readonly payments: PaymentsService,
+    private readonly vouchers: VouchersService,
   ) {}
 
   /** POST /bookings (§8.2). Pay-at-restaurant (COD) only until payments arrive in Phase 4. */
@@ -96,6 +100,16 @@ export class BookingsService {
 
         // §7.6: too many pre-ordered dishes starting in the same kitchen window → KITCHEN_FULL.
         await this.kitchen.assertCapacity(r, cart.lines, { arrival: slot.start, serveStyle: dto.serveStyle ?? 'BY_COURSE' }, tx);
+        // §12: one voucher, row-locked while applied; alcohol is never discounted.
+        const voucher = dto.voucherCode
+          ? await this.vouchers.apply(tx, {
+              code: dto.voucherCode,
+              userId,
+              restaurantId: r.id,
+              eligibleSubtotal: cart.lines.filter((l) => !l.isAlcohol).reduce((s, l) => s + l.unitPrice * l.quantity, 0),
+            })
+          : null;
+        const discount = voucher?.discount ?? 0;
         const created = await tx.booking.create({
           data: {
             code: await this.uniqueCode(tx),
@@ -119,7 +133,9 @@ export class BookingsService {
               ? {
                   create: {
                     subtotal: cart.subtotal,
-                    total: cart.subtotal,
+                    restaurantDiscount: voucher?.fundedBy === 'RESTAURANT' ? discount : 0,
+                    platformDiscount: voucher?.fundedBy === 'PLATFORM' ? discount : 0,
+                    total: cart.subtotal - discount,
                     status: 'PLACED',
                     items: {
                       create: cart.lines.map(({ isAlcohol: _a, ...l }) => ({
@@ -137,6 +153,7 @@ export class BookingsService {
         // COD: dishes stay HOLD until check-in, but keep the planned fire times (capacity + "Upcoming" list).
         if (cart.lines.length) await this.kitchen.planBooking(created.id, { arrival: slot.start, statuses: ['HOLD'], release: false }, tx);
         if (dto.holdId) await tx.tableHold.deleteMany({ where: { holdId: dto.holdId, userId } });
+        if (voucher) await tx.voucherRedemption.create({ data: { voucherId: voucher.voucherId, bookingId: created.id, userId, amount: discount } });
         await this.audit.log(
           { actorType: 'USER', actorId: userId, action: 'booking.create', entity: 'Booking', entityId: created.id, data: { tableIds, total: cart.subtotal } },
           tx,
@@ -261,6 +278,7 @@ export class BookingsService {
     await this.jobs.remove(QUEUES.BOOKING, `paytimeout:${id}`);
     // Prepaid: full refund of what was paid (minimum refund before prepaid goes live).
     if (result.paymentMode === 'PREPAID') await this.payments.refundOnCancel(id, p.cancelledBy);
+    await this.vouchers.release(id);
     await this.fees.finalize(id); // waive a pending fee
     return result;
   }
@@ -276,7 +294,7 @@ export class BookingsService {
       await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
       await this.payments.schedulePaymentTimeout(id);
       const after = await this.prisma.booking.findUniqueOrThrow({ where: { id }, include: BOOKING_INCLUDE });
-      this.realtime.toUser(after.userId, 'booking.status', { bookingId: id, status: 'PENDING', approved: true });
+      void this.notifications.booking(after.userId, { bookingId: id, status: 'PENDING', approved: true });
       return after;
     }
     const result = await this.changeStatus(id, 'CONFIRMED', { actorType: 'STAFF', actorId: staffId }, { needsApproval: false });
@@ -354,8 +372,8 @@ export class BookingsService {
       return b.restaurantId;
     }).then((rid) => this.availability.invalidate(rid));
     const after = await this.prisma.booking.findUniqueOrThrow({ where: { id }, include: BOOKING_INCLUDE });
-    this.realtime.toRestaurant(after.restaurantId, 'booking.updated', { bookingId: id, status: to });
-    this.realtime.toUser(after.userId, 'booking.status', { bookingId: id, status: to });
+    this.realtime.toRestaurant(after.restaurantId, 'booking.updated', { bookingId: id, status: to, by: actor.actorType });
+    void this.notifications.booking(after.userId, { bookingId: id, status: to, by: actor.actorType });
     return after;
   }
 

@@ -1,7 +1,13 @@
 import 'package:comi_api/comi_api.dart';
+import 'package:customer_app/data/api_error.dart';
 import 'package:customer_app/data/location.dart';
 import 'package:customer_app/features/booking/bookings_repository.dart';
 import 'package:customer_app/features/discovery/discovery_repository.dart';
+import 'package:customer_app/features/reviews/reviews.dart';
+import 'package:customer_app/features/vouchers/vouchers.dart';
+import 'package:customer_app/features/tourist/tourist.dart';
+import 'package:customer_app/features/account/privacy.dart';
+import 'package:customer_app/features/notifications/notifications.dart';
 
 PublicMenuItemDto dish(
   String id,
@@ -34,6 +40,7 @@ RestaurantDetailDto restaurantDetail({num confirmGroupsOver = 10, num maxGroupSi
   id: 'r1',
   slug: 'quan-oc',
   name: 'Quán Ốc Bờ Kè',
+  originalName: 'Quán Ốc Bờ Kè',
   translated: RestaurantDetailDtoTranslatedEnum.none,
   phone: '0901234567',
   address: '12 Bờ Kè, Quận 1',
@@ -227,8 +234,15 @@ class FakeBookings implements BookingsRepository {
   }
 
   @override
-  Future<MeDto> me() async =>
-      MeDto(id: 'u1', phone: '+84901234567', locale: 'vi', noShowCount: 0, mustPrepay: false, createdAt: '2026-01-01');
+  Future<MeDto> me() async => MeDto(
+    id: 'u1',
+    phone: '+84901234567',
+    locale: 'vi',
+    noShowCount: 0,
+    mustPrepay: false,
+    createdAt: '2026-01-01',
+    marketingOptIn: false,
+  );
 
   String? checkedInWith;
   List<CartLineDto>? ordered;
@@ -296,3 +310,106 @@ MapTableStateDto mapTable(
   joinGroup: group,
   state: state,
 );
+
+class FakeReviews implements ReviewsRepository {
+  final created = <(String, int, String?)>[];
+  ReviewPageDto page = ReviewPageDto(ratingAvg: 0, ratingCount: 0, histogram: const [0, 0, 0, 0, 0], items: const []);
+
+  @override
+  Future<ReviewPageDto> list(String restaurantId, {String? cursor}) async => page;
+
+  @override
+  Future<ReviewDto> create(String bookingId, {required int rating, int? food, int? service, String? text}) async {
+    created.add((bookingId, rating, text));
+    return ReviewDto(
+      id: 'rv1',
+      bookingId: bookingId,
+      restaurantId: 'r1',
+      authorName: 'An',
+      rating: rating,
+      verifiedVisit: true,
+      visitedAt: '2026-12-02T05:00:00Z',
+      partySize: 2,
+      status: ReviewDtoStatusEnum.PUBLISHED,
+      createdAt: '2026-12-02T08:00:00Z',
+    );
+  }
+
+  @override
+  Future<ReviewDto?> mine(String bookingId) async => null;
+}
+
+class FakeVouchers implements VouchersRepository {
+  final checks = <String>[];
+
+  @override
+  Future<VoucherCheckResultDto> check(String code, String restaurantId, List<CartLineDto> items) async {
+    checks.add(code);
+    return code == 'TRUA20'
+        ? VoucherCheckResultDto(valid: true, discount: 20000)
+        : VoucherCheckResultDto(valid: false, discount: 0, problem: 'NOT_FOUND');
+  }
+}
+
+class FakeTourist implements TouristRepository {
+  @override
+  Future<Map<String, double>> rates() async => {'USD': 25400, 'KRW': 18.5};
+}
+
+class FakeNotifications implements NotificationsRepository {
+  var unread = 2;
+  final reads = <String>[];
+
+  NotificationDto _n(String id, String type, String title, {bool read = false}) => NotificationDto(
+    id: id,
+    type: type,
+    title: title,
+    body: 'Quán Ốc · AB12CD',
+    bookingId: 'b1',
+    readAt: read ? '2026-12-01T05:00:00Z' : null,
+    createdAt: '2026-12-01T04:00:00Z',
+  );
+
+  @override
+  Future<NotificationPageDto> list({String? cursor}) async => NotificationPageDto(
+    items: [
+      _n('n1', 'review.ask', 'Bữa ăn thế nào?', read: unread < 2),
+      _n('n2', 'booking.confirmed', 'Đã xác nhận đặt bàn', read: unread < 1),
+    ],
+    unread: unread,
+  );
+
+  @override
+  Future<int> readAll() async {
+    reads.add('all');
+    return unread = 0;
+  }
+
+  @override
+  Future<int> read(String id) async {
+    reads.add(id);
+    return --unread;
+  }
+}
+
+class FakePrivacy implements PrivacyRepository {
+  FakePrivacy({this.activeBookings = false});
+  final bool activeBookings;
+  var deleted = false;
+  var consents = 0;
+
+  @override
+  Future<String> consent({bool marketing = false}) async {
+    consents++;
+    return '2026-12';
+  }
+
+  @override
+  Future<String> exportJson() async => '{\n  "user": {"phone": "+84901234567"}\n}';
+
+  @override
+  Future<void> deleteAccount() async {
+    if (activeBookings) throw const ApiError('ACTIVE_BOOKINGS', 'Cancel first');
+    deleted = true;
+  }
+}

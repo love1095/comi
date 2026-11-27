@@ -31,9 +31,11 @@ export const envSchema = z.object({
 
   GOONG_API_KEY: z.string().optional(),
   GOOGLE_PLACES_API_KEY: z.string().optional(),
+  GOOGLE_TRANSLATE_API_KEY: z.string().optional(),
 
   EMAIL_FROM: z.string().default('comi <no-reply@comi.vn>'),
   SMTP_URL: z.string().optional(), // dev: smtp://localhost:1025 (Mailpit)
+  ALERT_EMAIL: z.string().optional(), // ops alerts: failed jobs (§24.4)
 
   // Where restaurants pay their monthly statement (VietQR, §11.3)
   PLATFORM_BANK_BIN: z.string().optional(), // e.g. 970436 = Vietcombank

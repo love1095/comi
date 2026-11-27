@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsDateString, IsIn, IsInt, IsLatitude, IsLongitude, IsNumber, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength } from 'class-validator';
 
 const toBool = ({ value }: { value: unknown }) => (value === 'true' || value === '1' || value === true ? true : value === 'false' || value === '0' ? false : value);
 
@@ -19,7 +19,13 @@ export class NearbyQuery {
   @ApiPropertyOptional({ description: 'Open until 23:00 or later today' }) @IsOptional() @Transform(toBool) @IsBoolean() openLate?: boolean;
   @ApiPropertyOptional() @IsOptional() @Transform(toBool) @IsBoolean() privateRoom?: boolean;
   @ApiPropertyOptional({ enum: ['lunch', 'nhau'] }) @IsOptional() @IsIn(['lunch', 'nhau']) mode?: 'lunch' | 'nhau';
-  @ApiPropertyOptional({ enum: ['distance', 'rating'] }) @IsOptional() @IsIn(['distance', 'rating']) sort?: 'distance' | 'rating';
+  @ApiPropertyOptional({ enum: ['distance', 'rating', 'score'], description: 'score = rating weighted by review count and distance' })
+  @IsOptional() @IsIn(['distance', 'rating', 'score']) sort?: 'distance' | 'rating' | 'score';
+  @ApiPropertyOptional({ description: 'Tourists: comma separated vegetarian,halal,no_pork,gluten_free' })
+  @IsOptional() @IsString() @MaxLength(100) dietary?: string;
+  @ApiPropertyOptional({ description: 'Only restaurants with a free table at this time (ISO) — needs partySize' })
+  @IsOptional() @IsDateString() availableAt?: string;
+  @ApiPropertyOptional({ description: 'With availableAt' }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) partySize?: number;
   @ApiPropertyOptional({ description: 'Offset from the previous page' }) @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(500) cursor?: number;
   @ApiPropertyOptional({ default: 20 }) @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50) limit?: number;
 }

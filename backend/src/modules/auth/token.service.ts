@@ -1,8 +1,9 @@
+import { RedisService } from '../../common/redis';
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { Clock } from '../../common/clock';
-import { AccessTokenPayload, Principal } from '../../common/auth/auth.types';
+import { AccessTokenPayload, Principal, revokedKey } from '../../common/auth/auth.types';
 import { AppError } from '../../common/errors/app-error';
 import { randomToken, sha256 } from '../../common/utils/crypto';
 import { ENV } from '../../config/config.module';
@@ -29,6 +30,7 @@ export class TokenService {
     private readonly jwt: JwtService,
     private readonly clock: Clock,
     @Inject(ENV) private readonly env: Env,
+    private readonly redis: RedisService,
   ) {}
 
   async issue(principal: Principal, familyId: string = randomUUID()): Promise<TokenPair> {
@@ -92,6 +94,11 @@ export class TokenService {
       },
       data: { revokedAt: this.clock.now() },
     });
+    // Access tokens are stateless JWTs: remember the cut-off so the guard rejects older ones (§23).
+    const id = principal.kind === 'user' ? principal.userId : principal.staffId;
+    await this.redis.client
+      .set(revokedKey(principal.kind, id), String(Math.floor(this.clock.now().getTime() / 1000)), 'EX', this.env.ACCESS_TOKEN_TTL_SECONDS)
+      .catch(() => undefined);
   }
 
   private revokeFamily(familyId: string) {
@@ -111,3 +118,4 @@ export class TokenService {
     return sha256(token, this.env.REFRESH_TOKEN_PEPPER);
   }
 }
+

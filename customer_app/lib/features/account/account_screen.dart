@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../data/language.dart';
 import '../../data/session.dart';
 import '../booking/bookings_repository.dart';
+import 'privacy.dart';
 
 final meProvider = FutureProvider.autoDispose<MeDto?>((ref) async {
   final loggedIn = ref.watch(sessionProvider).value?.loggedIn ?? false;
@@ -46,17 +48,55 @@ class AccountScreen extends ConsumerWidget {
               ),
           ],
           const Divider(),
-          const ListTile(
-            leading: Icon(Icons.language),
-            title: Text('Ngôn ngữ'),
-            subtitle: Text('Tiếng Việt (sắp có English, 한국어, 中文, 日本語)'),
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(context.l10n.language),
+            subtitle: Text(appLanguages[ref.watch(appLanguageProvider)]!),
+            onTap: () => showModalBottomSheet<void>(
+              context: context,
+              builder: (c) => SafeArea(
+                child: RadioGroup<String>(
+                  groupValue: ref.read(appLanguageProvider),
+                  onChanged: (v) {
+                    if (v != null) ref.read(appLanguageProvider.notifier).set(v);
+                    Navigator.pop(c);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [for (final e in appLanguages.entries) RadioListTile<String>(value: e.key, title: Text(e.value))],
+                  ),
+                ),
+              ),
+            ),
           ),
-          const ListTile(leading: Icon(Icons.help_outline), title: Text('Hỗ trợ'), subtitle: Text('Sắp có')),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: const Text('Quyền riêng tư'),
+            onTap: () => openLegal(ref, 'privacy'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('Điều khoản sử dụng'),
+            onTap: () => openLegal(ref, 'terms'),
+          ),
+          if (user != null)
+            ListTile(
+              leading: const Icon(Icons.download_outlined),
+              title: const Text('Dữ liệu của tôi'),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MyDataScreen())),
+            ),
+          const ListTile(leading: Icon(Icons.help_outline), title: Text('Hỗ trợ'), subtitle: Text('support@comi.vn')),
           if (user != null)
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Đăng xuất'),
               onTap: () => ref.read(sessionProvider.notifier).logout(),
+            ),
+          if (user != null)
+            ListTile(
+              leading: Icon(Icons.delete_forever_outlined, color: Theme.of(context).colorScheme.error),
+              title: Text('Xoá tài khoản', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              onTap: () => confirmDeleteAccount(context, ref),
             ),
         ],
       ),

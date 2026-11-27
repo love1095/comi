@@ -41,6 +41,7 @@ export class CreateBookingDto {
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(500) note?: string;
   @ApiPropertyOptional({ enum: Occasion }) @IsOptional() @IsEnum(Occasion) occasion?: Occasion;
   @ApiPropertyOptional({ description: 'Required when the order contains alcohol' }) @IsOptional() @IsBoolean() ageConfirmed?: boolean;
+  @ApiPropertyOptional({ description: 'One voucher per booking (§12); never discounts alcohol' }) @IsOptional() @IsString() @MaxLength(20) voucherCode?: string;
   @ApiPropertyOptional({ type: [CartLineDto] })
   @IsOptional() @IsArray() @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => CartLineDto)
   items?: CartLineDto[];

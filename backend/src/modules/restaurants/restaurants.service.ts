@@ -79,6 +79,10 @@ export class RestaurantsService {
     }
     await this.prisma.$transaction(async (tx) => {
       await tx.restaurant.update({ where: { id: restaurantId }, data });
+      // §17.2: description changed → machine translations are stale (human ones are kept).
+      if (dto.name !== undefined || dto.description !== undefined) {
+        await tx.restaurantTranslation.deleteMany({ where: { restaurantId, isMachine: true } });
+      }
       if (lat !== undefined && lng !== undefined) await this.setLocation(tx, restaurantId, lat, lng);
       await this.audit.log(
         { actorType: 'STAFF', actorId: staffId, action: 'restaurant.update_profile', entity: 'Restaurant', entityId: restaurantId, data: dto },

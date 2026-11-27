@@ -31,7 +31,7 @@ class SocketRealtimeClient implements RealtimeClient {
       '$baseUrl/customer',
       io.OptionBuilder().setTransports(['websocket']).setAuth({'token': token}).enableReconnection().enableForceNew().build(),
     );
-    for (final e in const ['booking.status', 'order.item_status', 'service.updated', 'group.updated']) {
+    for (final e in const ['booking.status', 'order.item_status', 'service.updated', 'group.updated', 'notification.new']) {
       _socket.on(e, (data) => _controller.add(RealtimeEvent(e, data is Map ? data.cast<String, dynamic>() : const {})));
     }
     var once = false;

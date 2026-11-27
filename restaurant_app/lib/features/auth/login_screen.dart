@@ -164,6 +164,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: _busy ? null : _toggleMode,
                         child: Text(_signUp ? 'Đã có tài khoản? Đăng nhập' : 'Chủ quán mới? Đăng ký'),
                       ),
+                      if (_signUp)
+                        Text(
+                          'Tạo tài khoản nghĩa là bạn đồng ý với Điều khoản sử dụng và Chính sách quyền riêng tư của comi (xem trong Tài khoản).',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                     ],
                   ),
                 ),

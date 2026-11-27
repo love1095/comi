@@ -25,6 +25,10 @@ abstract class _$MeDtoCWProxy {
 
   MeDto createdAt(String createdAt);
 
+  MeDto termsVersion(String? termsVersion);
+
+  MeDto marketingOptIn(bool marketingOptIn);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `MeDto(...).copyWith.fieldName(value)`.
@@ -43,6 +47,8 @@ abstract class _$MeDtoCWProxy {
     num noShowCount,
     bool mustPrepay,
     String createdAt,
+    String? termsVersion,
+    bool marketingOptIn,
   });
 }
 
@@ -80,6 +86,13 @@ class _$MeDtoCWProxyImpl implements _$MeDtoCWProxy {
   @override
   MeDto createdAt(String createdAt) => call(createdAt: createdAt);
 
+  @override
+  MeDto termsVersion(String? termsVersion) => call(termsVersion: termsVersion);
+
+  @override
+  MeDto marketingOptIn(bool marketingOptIn) =>
+      call(marketingOptIn: marketingOptIn);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `MeDto(...).copyWith.fieldName(value)`.
@@ -99,6 +112,8 @@ class _$MeDtoCWProxyImpl implements _$MeDtoCWProxy {
     Object? noShowCount = const $CopyWithPlaceholder(),
     Object? mustPrepay = const $CopyWithPlaceholder(),
     Object? createdAt = const $CopyWithPlaceholder(),
+    Object? termsVersion = const $CopyWithPlaceholder(),
+    Object? marketingOptIn = const $CopyWithPlaceholder(),
   }) {
     return MeDto(
       id: id == const $CopyWithPlaceholder() || id == null
@@ -139,6 +154,16 @@ class _$MeDtoCWProxyImpl implements _$MeDtoCWProxy {
           ? _value.createdAt
           // ignore: cast_nullable_to_non_nullable
           : createdAt as String,
+      termsVersion: termsVersion == const $CopyWithPlaceholder()
+          ? _value.termsVersion
+          // ignore: cast_nullable_to_non_nullable
+          : termsVersion as String?,
+      marketingOptIn:
+          marketingOptIn == const $CopyWithPlaceholder() ||
+              marketingOptIn == null
+          ? _value.marketingOptIn
+          // ignore: cast_nullable_to_non_nullable
+          : marketingOptIn as bool,
     );
   }
 }
@@ -164,6 +189,7 @@ MeDto _$MeDtoFromJson(Map<String, dynamic> json) =>
           'noShowCount',
           'mustPrepay',
           'createdAt',
+          'marketingOptIn',
         ],
       );
       final val = MeDto(
@@ -176,6 +202,8 @@ MeDto _$MeDtoFromJson(Map<String, dynamic> json) =>
         noShowCount: $checkedConvert('noShowCount', (v) => v as num),
         mustPrepay: $checkedConvert('mustPrepay', (v) => v as bool),
         createdAt: $checkedConvert('createdAt', (v) => v as String),
+        termsVersion: $checkedConvert('termsVersion', (v) => v as String?),
+        marketingOptIn: $checkedConvert('marketingOptIn', (v) => v as bool),
       );
       return val;
     });
@@ -190,4 +218,6 @@ Map<String, dynamic> _$MeDtoToJson(MeDto instance) => <String, dynamic>{
   'noShowCount': instance.noShowCount,
   'mustPrepay': instance.mustPrepay,
   'createdAt': instance.createdAt,
+  'termsVersion': ?instance.termsVersion,
+  'marketingOptIn': instance.marketingOptIn,
 };

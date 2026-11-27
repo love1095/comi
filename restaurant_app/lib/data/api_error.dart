@@ -9,6 +9,7 @@ class ApiError {
   final Map<String, dynamic> details;
 
   static ApiError from(Object e) {
+    if (e is ApiError) return e;
     if (e is DioException) {
       final data = e.response?.data;
       if (data is Map && data['error'] is Map) {

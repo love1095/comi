@@ -1,0 +1,19 @@
+# HTTPS is automatic (Let's Encrypt). Replace the domain.
+api.comi.vn {
+	encode gzip
+	reverse_proxy api1:3100 api2:3100 {
+		# Socket.IO long-polling needs the same instance for one client.
+		lb_policy cookie comi_lb
+		health_uri /api/v1/health
+		health_interval 10s
+		fail_duration 30s
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	log {
+		output stdout
+		format json
+	}
+}

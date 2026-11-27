@@ -8,7 +8,10 @@ import '../../data/api_error.dart';
 import '../../widgets/restaurant_card.dart';
 import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
+import '../../data/language.dart';
 import 'item_sheet.dart';
+import '../tourist/tourist.dart';
+import '../reviews/reviews.dart' show ReviewsSection;
 import '../booking/at_table.dart' show sendTableOrder;
 
 const _weekdayShort = {1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 0: 'CN'};
@@ -138,6 +141,8 @@ class _RestaurantBody extends ConsumerWidget {
                   Text(
                     [
                       if (r.ratingCount > 0) '★ ${r.ratingAvg.toStringAsFixed(1).replaceAll('.', ',')} (${r.ratingCount})',
+                      if (r.googleRating != null)
+                        'Google ★ ${r.googleRating!.toStringAsFixed(1).replaceAll('.', ',')} (${r.googleRatingCount ?? 0})',
                       '₫' * r.priceLevel.toInt(),
                       ...r.cuisineTags.take(3),
                     ].join(' · '),
@@ -147,7 +152,7 @@ class _RestaurantBody extends ConsumerWidget {
                     children: [
                       Icon(Icons.circle, size: 10, color: r.isOpenNow ? Colors.green : theme.colorScheme.outline),
                       const SizedBox(width: 6),
-                      Text(r.isOpenNow ? 'Đang mở' : 'Đang đóng', style: theme.textTheme.labelLarge),
+                      Text(r.isOpenNow ? context.l10n.openNow : context.l10n.closedNow, style: theme.textTheme.labelLarge),
                     ],
                   ),
                   Text(hoursSummary(r.openingHours), style: theme.textTheme.bodySmall),
@@ -158,6 +163,15 @@ class _RestaurantBody extends ConsumerWidget {
                       const Icon(Icons.place_outlined, size: 18),
                       const SizedBox(width: 6),
                       Expanded(child: Text(r.address)),
+                      IconButton(
+                        tooltip: context.l10n.showToDriver,
+                        icon: const Icon(Icons.local_taxi_outlined),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => TaxiCardScreen(name: r.originalName, address: r.address, phone: r.phone),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   for (final c in r.closures)
@@ -232,6 +246,13 @@ class _RestaurantBody extends ConsumerWidget {
                   ),
                 ),
               ],
+              if (!_atTable)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                    child: ReviewsSection(restaurantId: r.id),
+                  ),
+                ),
               const SliverToBoxAdapter(child: SizedBox(height: 96)),
             ],
           ),
@@ -334,11 +355,17 @@ class DishCard extends StatelessWidget {
                     children: [
                       Text(item.name, style: theme.textTheme.titleMedium),
                       if (item.translated != PublicMenuItemDtoTranslatedEnum.none)
-                        Text(item.originalName, style: theme.textTheme.bodySmall),
+                        Text(
+                          item.translated == PublicMenuItemDtoTranslatedEnum.machine
+                              ? '${item.originalName} · ${context.l10n.translatedAutomatically}'
+                              : item.originalName,
+                          style: theme.textTheme.bodySmall,
+                        ),
                       if (item.description != null)
                         Text(item.description!, style: theme.textTheme.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
                       Text(formatVnd(item.price), style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
+                      ApproxPrice(item.price),
                       if (note.isNotEmpty)
                         Text(note.join(' · '), style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline)),
                     ],

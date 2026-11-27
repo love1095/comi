@@ -27,6 +27,8 @@ abstract class _$CreateBookingDtoCWProxy {
 
   CreateBookingDto ageConfirmed(bool? ageConfirmed);
 
+  CreateBookingDto voucherCode(String? voucherCode);
+
   CreateBookingDto items(List<CartLineDto>? items);
 
   /// Creates a new instance with the provided field values.
@@ -48,6 +50,7 @@ abstract class _$CreateBookingDtoCWProxy {
     String? note,
     CreateBookingDtoOccasionEnum? occasion,
     bool? ageConfirmed,
+    String? voucherCode,
     List<CartLineDto>? items,
   });
 }
@@ -95,6 +98,10 @@ class _$CreateBookingDtoCWProxyImpl implements _$CreateBookingDtoCWProxy {
       call(ageConfirmed: ageConfirmed);
 
   @override
+  CreateBookingDto voucherCode(String? voucherCode) =>
+      call(voucherCode: voucherCode);
+
+  @override
   CreateBookingDto items(List<CartLineDto>? items) => call(items: items);
 
   /// Creates a new instance with the provided field values.
@@ -117,6 +124,7 @@ class _$CreateBookingDtoCWProxyImpl implements _$CreateBookingDtoCWProxy {
     Object? note = const $CopyWithPlaceholder(),
     Object? occasion = const $CopyWithPlaceholder(),
     Object? ageConfirmed = const $CopyWithPlaceholder(),
+    Object? voucherCode = const $CopyWithPlaceholder(),
     Object? items = const $CopyWithPlaceholder(),
   }) {
     return CreateBookingDto(
@@ -162,6 +170,10 @@ class _$CreateBookingDtoCWProxyImpl implements _$CreateBookingDtoCWProxy {
           ? _value.ageConfirmed
           // ignore: cast_nullable_to_non_nullable
           : ageConfirmed as bool?,
+      voucherCode: voucherCode == const $CopyWithPlaceholder()
+          ? _value.voucherCode
+          // ignore: cast_nullable_to_non_nullable
+          : voucherCode as String?,
       items: items == const $CopyWithPlaceholder()
           ? _value.items
           // ignore: cast_nullable_to_non_nullable
@@ -213,6 +225,7 @@ CreateBookingDto _$CreateBookingDtoFromJson(Map<String, dynamic> json) =>
           (v) => $enumDecodeNullable(_$CreateBookingDtoOccasionEnumEnumMap, v),
         ),
         ageConfirmed: $checkedConvert('ageConfirmed', (v) => v as bool?),
+        voucherCode: $checkedConvert('voucherCode', (v) => v as String?),
         items: $checkedConvert(
           'items',
           (v) => (v as List<dynamic>?)
@@ -237,6 +250,7 @@ Map<String, dynamic> _$CreateBookingDtoToJson(
   'note': ?instance.note,
   'occasion': ?_$CreateBookingDtoOccasionEnumEnumMap[instance.occasion],
   'ageConfirmed': ?instance.ageConfirmed,
+  'voucherCode': ?instance.voucherCode,
   'items': ?instance.items?.map((e) => e.toJson()).toList(),
 };
 

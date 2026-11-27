@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../data/api_error.dart';
 import 'group_repository.dart';
+import '../reviews/reviews.dart';
 import 'split_screen.dart';
 
 /// On the host's booking: invite friends before, split the bill and get home after (§8.4, §8.5).
@@ -65,8 +66,39 @@ class _GroupActionsState extends ConsumerState<GroupActions> {
             label: const Text('Yêu cầu hoá đơn VAT'),
           ),
         ],
+        if (seated) _ReviewButton(booking: widget.booking),
         if (s == BookingStatus.COMPLETED) ...[const SizedBox(height: 8), const GetHomeSafeCard()],
       ],
+    );
+  }
+}
+
+/// "Đánh giá" after the visit (§15) — or the review already written.
+class _ReviewButton extends ConsumerWidget {
+  const _ReviewButton({required this.booking});
+  final CustomerBookingDto booking;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mine = ref.watch(myReviewProvider(booking.id)).value;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: mine != null
+          ? ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.rate_review_outlined),
+              title: const Text('Bạn đã đánh giá'),
+              trailing: Stars(mine.rating),
+            )
+          : FilledButton.tonalIcon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<bool>(
+                  builder: (_) => WriteReviewScreen(bookingId: booking.id, restaurantName: booking.restaurant.name),
+                ),
+              ),
+              icon: const Icon(Icons.star_outline),
+              label: const Text('Đánh giá bữa ăn'),
+            ),
     );
   }
 }

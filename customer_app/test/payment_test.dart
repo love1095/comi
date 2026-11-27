@@ -9,6 +9,9 @@ import 'package:customer_app/features/booking/payment_panel.dart';
 import 'package:customer_app/features/cart/cart.dart';
 import 'package:customer_app/features/discovery/discovery_repository.dart';
 import 'package:customer_app/features/group/split_screen.dart';
+import 'package:customer_app/features/reviews/reviews.dart';
+import 'package:customer_app/features/vouchers/vouchers.dart';
+import 'package:customer_app/features/notifications/notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -30,6 +33,9 @@ void main() {
         tokenStoreProvider.overrideWithValue(MemoryTokenStore()..value = const StoredSession(accessToken: 'a', refreshToken: 'r')),
         locationServiceProvider.overrideWithValue(FakeLocation()),
         realtimeClientProvider.overrideWithValue(NoRealtimeClient()),
+        reviewsRepositoryProvider.overrideWithValue(FakeReviews()),
+        vouchersRepositoryProvider.overrideWithValue(FakeVouchers()),
+        notificationsRepositoryProvider.overrideWithValue(FakeNotifications()),
         bookingsRepositoryProvider.overrideWithValue(bookings ?? FakeBookings()),
         discoveryRepositoryProvider.overrideWithValue(discovery ?? FakeDiscovery()),
         openUrlProvider.overrideWithValue((u) async {

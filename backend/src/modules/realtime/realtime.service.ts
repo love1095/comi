@@ -21,6 +21,7 @@ export type RealtimeEvent =
   | 'booking.checked_in'
   | 'booking.eta_updated'
   | 'booking.status'
+  | 'notification.new'
   | 'kitchen.item_queued'
   | 'kitchen.item_updated'
   | 'order.item_status'

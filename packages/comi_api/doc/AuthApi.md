@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**authLogout**](AuthApi.md#authlogout) | **POST** /api/v1/auth/logout | 
 [**authRefresh**](AuthApi.md#authrefresh) | **POST** /api/v1/auth/refresh | 
 [**authRegister**](AuthApi.md#authregister) | **POST** /api/v1/auth/staff/register | 
+[**staffAccountRemove**](AuthApi.md#staffaccountremove) | **DELETE** /api/v1/auth/staff/me | 
 
 
 # **authExchange**
@@ -217,6 +218,42 @@ No authorization required
 
  - **Content-Type**: application/json
  - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **staffAccountRemove**
+> staffAccountRemove()
+
+
+
+### Example
+```dart
+import 'package:comi_api/api.dart';
+
+final api = ComiApi().getAuthApi();
+
+try {
+    api.staffAccountRemove();
+} on DioException catch (e) {
+    print('Exception when calling AuthApi->staffAccountRemove: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearer](../README.md#bearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

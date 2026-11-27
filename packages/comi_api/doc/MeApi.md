@@ -18,6 +18,8 @@ Method | HTTP request | Description
 [**meExtrasSavedOrders**](MeApi.md#meextrassavedorders) | **GET** /api/v1/me/saved-orders | 
 [**meExtrasUpdatePreferences**](MeApi.md#meextrasupdatepreferences) | **PATCH** /api/v1/me/preferences | 
 [**usersAddDeviceToken**](MeApi.md#usersadddevicetoken) | **POST** /api/v1/me/device-tokens | 
+[**usersConsent**](MeApi.md#usersconsent) | **POST** /api/v1/me/consent | 
+[**usersExport**](MeApi.md#usersexport) | **GET** /api/v1/me/export | 
 [**usersMe**](MeApi.md#usersme) | **GET** /api/v1/me | 
 [**usersRemove**](MeApi.md#usersremove) | **DELETE** /api/v1/me | 
 [**usersUpdate**](MeApi.md#usersupdate) | **PATCH** /api/v1/me | 
@@ -367,6 +369,83 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: application/json
+ - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **usersConsent**
+> MeDto usersConsent(consentDto)
+
+
+
+### Example
+```dart
+import 'package:comi_api/api.dart';
+
+final api = ComiApi().getMeApi();
+final ConsentDto consentDto = ; // ConsentDto | 
+
+try {
+    final response = api.usersConsent(consentDto);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling MeApi->usersConsent: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **consentDto** | [**ConsentDto**](ConsentDto.md)|  | 
+
+### Return type
+
+[**MeDto**](MeDto.md)
+
+### Authorization
+
+[bearer](../README.md#bearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **usersExport**
+> usersExport()
+
+
+
+### Example
+```dart
+import 'package:comi_api/api.dart';
+
+final api = ComiApi().getMeApi();
+
+try {
+    api.usersExport();
+} on DioException catch (e) {
+    print('Exception when calling MeApi->usersExport: $e\n');
+}
+```
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[bearer](../README.md#bearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
  - **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

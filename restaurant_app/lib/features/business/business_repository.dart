@@ -16,10 +16,18 @@ abstract class BusinessRepository {
   Future<PaymentAccountStatusDto> disconnectPayOs();
   Future<List<RefundDto>> refunds({bool pendingOnly = true});
   Future<RefundDto> refundDone(String id, {String? note});
+  Future<ReviewPageDto> reviews();
+  Future<ReviewDto> replyReview(String id, String reply);
+  Future<ReviewDto> reportReview(String id, String reason);
+  Future<List<VoucherDto>> vouchers();
+  Future<VoucherDto> createVoucher(VoucherInputDto dto);
+  Future<VoucherDto> setVoucherActive(String id, bool active);
 }
 
 class ApiBusinessRepository implements BusinessRepository {
-  ApiBusinessRepository(this._fees, this._vat, this._rid, this._pay);
+  ApiBusinessRepository(this._fees, this._vat, this._rid, this._pay, this._reviews, this._vouchers);
+  final RestaurantReviewsApi _reviews;
+  final RestaurantVouchersApi _vouchers;
   final RestaurantPaymentsApi _pay;
   final RestaurantFeesReportsApi _fees;
   final RestaurantVATInvoiceApi _vat;
@@ -72,6 +80,37 @@ class ApiBusinessRepository implements BusinessRepository {
     xRestaurantId: _rid,
     refundDoneDto: RefundDoneDto(note: note),
   )).data!;
+
+  @override
+  Future<ReviewPageDto> reviews() async => (await _reviews.restaurantReviewsList(xRestaurantId: _rid)).data!;
+
+  @override
+  Future<ReviewDto> replyReview(String id, String reply) async => (await _reviews.restaurantReviewsReply(
+    id: id,
+    xRestaurantId: _rid,
+    replyDto: ReplyDto(reply: reply),
+  )).data!;
+
+  @override
+  Future<ReviewDto> reportReview(String id, String reason) async => (await _reviews.restaurantReviewsReport(
+    id: id,
+    xRestaurantId: _rid,
+    reportReviewDto: ReportReviewDto(reason: reason),
+  )).data!;
+
+  @override
+  Future<List<VoucherDto>> vouchers() async => (await _vouchers.restaurantVouchersList(xRestaurantId: _rid)).data ?? const [];
+
+  @override
+  Future<VoucherDto> createVoucher(VoucherInputDto dto) async =>
+      (await _vouchers.restaurantVouchersCreate(xRestaurantId: _rid, voucherInputDto: dto)).data!;
+
+  @override
+  Future<VoucherDto> setVoucherActive(String id, bool active) async => (await _vouchers.restaurantVouchersActive(
+    id: id,
+    xRestaurantId: _rid,
+    voucherActiveDto: VoucherActiveDto(isActive: active),
+  )).data!;
 }
 
 final businessRepositoryProvider = Provider<BusinessRepository>((ref) {
@@ -81,6 +120,8 @@ final businessRepositoryProvider = Provider<BusinessRepository>((ref) {
     api.getRestaurantVATInvoiceApi(),
     ref.watch(restaurantIdProvider),
     api.getRestaurantPaymentsApi(),
+    api.getRestaurantReviewsApi(),
+    api.getRestaurantVouchersApi(),
   );
 });
 
@@ -123,3 +164,7 @@ String refundReasonLabel(String r) => switch (r) {
   'AMOUNT_MISMATCH' => 'Chuyển thiếu tiền',
   _ => r,
 };
+
+final reviewsProvider = FutureProvider.autoDispose<ReviewPageDto>((ref) => ref.watch(businessRepositoryProvider).reviews());
+
+final vouchersProvider = FutureProvider.autoDispose<List<VoucherDto>>((ref) => ref.watch(businessRepositoryProvider).vouchers());
