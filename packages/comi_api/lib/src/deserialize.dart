@@ -5,6 +5,8 @@ import 'package:comi_api/src/model/area_layout_dto.dart';
 import 'package:comi_api/src/model/area_summary_dto.dart';
 import 'package:comi_api/src/model/availability_dto.dart';
 import 'package:comi_api/src/model/availability_result_dto.dart';
+import 'package:comi_api/src/model/bill_dto.dart';
+import 'package:comi_api/src/model/bill_round_dto.dart';
 import 'package:comi_api/src/model/board_booking_dto.dart';
 import 'package:comi_api/src/model/board_order_dto.dart';
 import 'package:comi_api/src/model/board_order_item_dto.dart';
@@ -15,9 +17,14 @@ import 'package:comi_api/src/model/booking_detail_order_dto.dart';
 import 'package:comi_api/src/model/booking_restaurant_dto.dart';
 import 'package:comi_api/src/model/booking_table_dto.dart';
 import 'package:comi_api/src/model/cancel_dto.dart';
+import 'package:comi_api/src/model/capacity_rule_dto.dart';
+import 'package:comi_api/src/model/capacity_rule_input.dart';
+import 'package:comi_api/src/model/capacity_rules_dto.dart';
 import 'package:comi_api/src/model/cart_line_dto.dart';
 import 'package:comi_api/src/model/category_dto.dart';
+import 'package:comi_api/src/model/check_in_dto.dart';
 import 'package:comi_api/src/model/checklist_dto.dart';
+import 'package:comi_api/src/model/close_bill_dto.dart';
 import 'package:comi_api/src/model/closure_dto.dart';
 import 'package:comi_api/src/model/closure_info_dto.dart';
 import 'package:comi_api/src/model/create_booking_dto.dart';
@@ -26,9 +33,13 @@ import 'package:comi_api/src/model/create_table_dto.dart';
 import 'package:comi_api/src/model/customer_booking_dto.dart';
 import 'package:comi_api/src/model/customer_exchange_dto.dart';
 import 'package:comi_api/src/model/customer_order_dto.dart';
+import 'package:comi_api/src/model/depart_dto.dart';
+import 'package:comi_api/src/model/depart_result_dto.dart';
 import 'package:comi_api/src/model/device_token_dto.dart';
 import 'package:comi_api/src/model/dining_rule_dto.dart';
 import 'package:comi_api/src/model/favorite_dto.dart';
+import 'package:comi_api/src/model/fire_dto.dart';
+import 'package:comi_api/src/model/fire_result_dto.dart';
 import 'package:comi_api/src/model/geocode_result_dto.dart';
 import 'package:comi_api/src/model/hold_dto.dart';
 import 'package:comi_api/src/model/home_dto.dart';
@@ -37,6 +48,9 @@ import 'package:comi_api/src/model/import_error_dto.dart';
 import 'package:comi_api/src/model/import_preview_dto.dart';
 import 'package:comi_api/src/model/import_result_dto.dart';
 import 'package:comi_api/src/model/imported_item_dto.dart';
+import 'package:comi_api/src/model/kitchen_item_dto.dart';
+import 'package:comi_api/src/model/kitchen_queue_dto.dart';
+import 'package:comi_api/src/model/kitchen_status_dto.dart';
 import 'package:comi_api/src/model/layout_table_dto.dart';
 import 'package:comi_api/src/model/map_area_dto.dart';
 import 'package:comi_api/src/model/map_area_with_elements_dto.dart';
@@ -79,8 +93,11 @@ import 'package:comi_api/src/model/restaurant_detail_dto.dart';
 import 'package:comi_api/src/model/restaurant_page_dto.dart';
 import 'package:comi_api/src/model/restaurant_profile_dto.dart';
 import 'package:comi_api/src/model/restaurant_summary_dto.dart';
+import 'package:comi_api/src/model/round_result_dto.dart';
 import 'package:comi_api/src/model/save_layout_dto.dart';
 import 'package:comi_api/src/model/saved_order_dto.dart';
+import 'package:comi_api/src/model/service_request_create_dto.dart';
+import 'package:comi_api/src/model/service_request_dto.dart';
 import 'package:comi_api/src/model/slot_dto.dart';
 import 'package:comi_api/src/model/staff_login_dto.dart';
 import 'package:comi_api/src/model/staff_menu_category_dto.dart';
@@ -91,6 +108,7 @@ import 'package:comi_api/src/model/suggest_dto.dart';
 import 'package:comi_api/src/model/suggest_restaurant_dto.dart';
 import 'package:comi_api/src/model/table_dto.dart';
 import 'package:comi_api/src/model/table_map_dto.dart';
+import 'package:comi_api/src/model/table_order_dto.dart';
 import 'package:comi_api/src/model/token_pair_dto.dart';
 import 'package:comi_api/src/model/translation_dto.dart';
 import 'package:comi_api/src/model/unavailable_line_dto.dart';
@@ -135,6 +153,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AvailabilityDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AvailabilityResultDto':
           return AvailabilityResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BillDto':
+          return BillDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BillRoundDto':
+          return BillRoundDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BoardBookingDto':
           return BoardBookingDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BoardOrderDto':
@@ -158,12 +180,22 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return BookingTableDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CancelDto':
           return CancelDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CapacityRuleDto':
+          return CapacityRuleDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CapacityRuleInput':
+          return CapacityRuleInput.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CapacityRulesDto':
+          return CapacityRulesDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CartLineDto':
           return CartLineDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CategoryDto':
           return CategoryDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CheckInDto':
+          return CheckInDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ChecklistDto':
           return ChecklistDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'CloseBillDto':
+          return CloseBillDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ClosureDto':
           return ClosureDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ClosureInfoDto':
@@ -183,12 +215,20 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return CustomerExchangeDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'CustomerOrderDto':
           return CustomerOrderDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DepartDto':
+          return DepartDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'DepartResultDto':
+          return DepartResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DeviceTokenDto':
           return DeviceTokenDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'DiningRuleDto':
           return DiningRuleDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'FavoriteDto':
           return FavoriteDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FireDto':
+          return FireDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'FireResultDto':
+          return FireResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GeocodeResultDto':
           return GeocodeResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HoldDto':
@@ -208,9 +248,15 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'ItemKind':
           
           
+        case 'KitchenItemDto':
+          return KitchenItemDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'KitchenQueueDto':
+          return KitchenQueueDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'KitchenStatus':
           
           
+        case 'KitchenStatusDto':
+          return KitchenStatusDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'LayoutTableDto':
           return LayoutTableDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MapAreaDto':
@@ -307,11 +353,20 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'RestaurantSummaryDto':
           return RestaurantSummaryDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RoundResultDto':
+          return RoundResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SaveLayoutDto':
           return SaveLayoutDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SavedOrderDto':
           return SavedOrderDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ServeStyle':
+          
+          
+        case 'ServiceRequestCreateDto':
+          return ServiceRequestCreateDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ServiceRequestDto':
+          return ServiceRequestDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ServiceType':
           
           
         case 'SlotDto':
@@ -337,6 +392,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return TableDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TableMapDto':
           return TableMapDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'TableOrderDto':
+          return TableOrderDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'TableShape':
           
           

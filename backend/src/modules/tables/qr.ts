@@ -27,3 +27,21 @@ export function tableQrUrl(base: string, slug: string, tableCode: string, sig: s
 export function entranceQrUrl(base: string, slug: string, sig: string): string {
   return `${base.replace(/\/$/, '')}/c/${encodeURIComponent(slug)}?s=${sig}`;
 }
+
+/**
+ * Reads a scanned check-in link (§9.1): `…/c/{slug}/{tableCode}?s=sig` or `…/c/{slug}?s=sig`.
+ * Any host is accepted (staging/prod/app links); the signature is what proves it.
+ */
+export function parseQrPayload(raw: string): { slug: string; tableCode?: string; sig: string } | null {
+  let u: URL;
+  try {
+    u = new URL(raw.trim());
+  } catch {
+    return null;
+  }
+  const parts = u.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+  const i = parts.indexOf('c');
+  const sig = u.searchParams.get('s');
+  if (i < 0 || !sig || parts.length - i < 2 || parts.length - i > 3) return null;
+  return { slug: parts[i + 1], tableCode: parts[i + 2], sig };
+}

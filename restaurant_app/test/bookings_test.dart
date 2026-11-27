@@ -2,18 +2,26 @@ import 'package:comi_api/comi_api.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:restaurant_app/data/realtime.dart';
 import 'package:restaurant_app/data/session.dart';
 import 'package:restaurant_app/data/token_store.dart';
 import 'package:restaurant_app/features/bookings/board_screen.dart';
 import 'package:restaurant_app/features/bookings/booking_detail_screen.dart';
 import 'package:restaurant_app/features/bookings/bookings_repository.dart';
+import 'package:restaurant_app/features/kitchen/kitchen_repository.dart';
 import 'package:restaurant_app/features/onboarding/onboarding_repository.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 import 'fakes.dart';
 
 void main() {
-  Future<void> pump(WidgetTester tester, FakeBookingsRepository repo, Widget screen, {Size size = const Size(1280, 800)}) async {
+  Future<void> pump(
+    WidgetTester tester,
+    FakeBookingsRepository repo,
+    Widget screen, {
+    Size size = const Size(1280, 800),
+    FakeKitchenRepository? kitchen,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -24,6 +32,8 @@ void main() {
           tokenStoreProvider.overrideWithValue(store),
           bookingsRepositoryProvider.overrideWithValue(repo),
           onboardingRepositoryProvider.overrideWithValue(FakeOnboardingRepository(profile: profileDto(status: RestaurantStatus.ACTIVE))),
+          realtimeClientProvider.overrideWithValue(NoRealtimeClient()),
+          kitchenRepositoryProvider.overrideWithValue(kitchen ?? (FakeKitchenRepository()..detail = (id) => detailOf(boardDto(id)))),
         ],
         child: MaterialApp(theme: ComiTheme.light(), home: screen),
       ),

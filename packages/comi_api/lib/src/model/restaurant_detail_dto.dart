@@ -127,7 +127,7 @@ class RestaurantDetailDto {
 
 
 
-      /// True when name/description were translated to the requested language
+      /// none = Vietnamese original shown
   @JsonKey(
     
     name: r'translated',
@@ -136,7 +136,7 @@ class RestaurantDetailDto {
   )
 
 
-  final bool translated;
+  final RestaurantDetailDtoTranslatedEnum translated;
 
 
 
@@ -513,4 +513,22 @@ class RestaurantDetailDto {
   }
 
 }
+
+/// none = Vietnamese original shown
+enum RestaurantDetailDtoTranslatedEnum {
+@JsonValue(r'none')
+none(r'none'),
+@JsonValue(r'human')
+human(r'human'),
+@JsonValue(r'machine')
+machine(r'machine');
+
+const RestaurantDetailDtoTranslatedEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 

@@ -13,6 +13,7 @@ class HomeShell extends StatelessWidget {
 
   static const _tabs = [
     (path: '/board', icon: Icons.event_note_outlined, selected: Icons.event_note, label: 'Đặt bàn'),
+    (path: '/kitchen', icon: Icons.soup_kitchen_outlined, selected: Icons.soup_kitchen, label: 'Bếp'),
     (path: '/menu', icon: Icons.restaurant_menu_outlined, selected: Icons.restaurant_menu, label: 'Thực đơn'),
     (path: '/areas', icon: Icons.table_restaurant_outlined, selected: Icons.table_restaurant, label: 'Sơ đồ bàn'),
   ];
@@ -64,10 +65,12 @@ class AccountMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => PopupMenuButton<String>(
     tooltip: 'Tài khoản',
     onSelected: (v) => switch (v) {
+      'settings' => context.go('/settings'),
       'switch' => ref.read(sessionProvider.notifier).switchRestaurant(),
       _ => ref.read(sessionProvider.notifier).logout(),
     },
     itemBuilder: (_) => const [
+      PopupMenuItem(value: 'settings', child: Text('Cài đặt')),
       PopupMenuItem(value: 'switch', child: Text('Đổi quán')),
       PopupMenuItem(value: 'logout', child: Text('Đăng xuất')),
     ],

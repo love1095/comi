@@ -7,6 +7,7 @@ import 'package:shared_ui/shared_ui.dart';
 import '../../data/api_error.dart';
 import 'booking_widgets.dart';
 import 'bookings_repository.dart';
+import 'table_actions.dart';
 
 /// One booking: guest, table, pre-ordered dishes, and staff actions (approve, move table, cancel).
 class BookingDetailScreen extends ConsumerWidget {
@@ -132,6 +133,7 @@ class _Body extends StatelessWidget {
             ),
           ),
         if (actions.isNotEmpty) ...[const SizedBox(height: 12), Wrap(spacing: 8, runSpacing: 8, children: actions)],
+        TableActions(booking: b),
         const Divider(height: 32),
         Text('Khách', style: theme.textTheme.titleMedium),
         ListTile(
@@ -154,7 +156,7 @@ class _Body extends StatelessWidget {
         ),
         if (b.note?.isNotEmpty ?? false) ...[Text('Ghi chú', style: theme.textTheme.titleMedium), const SizedBox(height: 4), Text(b.note!)],
         const Divider(height: 32),
-        _OrderSection(order: b.order),
+        if (b.status == BookingStatus.CHECKED_IN) LiveBill(bookingId: b.id) else _OrderSection(order: b.order),
       ],
     );
   }

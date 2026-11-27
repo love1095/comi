@@ -75,6 +75,11 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**authLogout**](doc/AuthApi.md#authlogout) | **POST** /api/v1/auth/logout | 
 [*AuthApi*](doc/AuthApi.md) | [**authRefresh**](doc/AuthApi.md#authrefresh) | **POST** /api/v1/auth/refresh | 
 [*AuthApi*](doc/AuthApi.md) | [**authRegister**](doc/AuthApi.md#authregister) | **POST** /api/v1/auth/staff/register | 
+[*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableBill**](doc/CustomerAtTheTableApi.md#customertablebill) | **GET** /api/v1/bookings/{id}/bill | 
+[*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableCheckIn**](doc/CustomerAtTheTableApi.md#customertablecheckin) | **POST** /api/v1/bookings/{id}/check-in | 
+[*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableDepart**](doc/CustomerAtTheTableApi.md#customertabledepart) | **POST** /api/v1/bookings/{id}/depart | 
+[*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableOrder**](doc/CustomerAtTheTableApi.md#customertableorder) | **POST** /api/v1/bookings/{id}/orders | 
+[*CustomerAtTheTableApi*](doc/CustomerAtTheTableApi.md) | [**customerTableService**](doc/CustomerAtTheTableApi.md#customertableservice) | **POST** /api/v1/bookings/{id}/service-requests | 
 [*CustomerAvailabilityApi*](doc/CustomerAvailabilityApi.md) | [**availabilityGet**](doc/CustomerAvailabilityApi.md#availabilityget) | **GET** /api/v1/restaurants/{id}/availability | 
 [*CustomerAvailabilityApi*](doc/CustomerAvailabilityApi.md) | [**availabilityHold**](doc/CustomerAvailabilityApi.md#availabilityhold) | **POST** /api/v1/restaurants/{id}/table-holds | 
 [*CustomerAvailabilityApi*](doc/CustomerAvailabilityApi.md) | [**availabilityRelease**](doc/CustomerAvailabilityApi.md#availabilityrelease) | **DELETE** /api/v1/table-holds/{holdId} | 
@@ -116,11 +121,24 @@ Class | Method | HTTP request | Description
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantSubmit**](doc/RestaurantApi.md#restaurantsubmit) | **POST** /api/v1/restaurant/submit | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantUpdateProfile**](doc/RestaurantApi.md#restaurantupdateprofile) | **PATCH** /api/v1/restaurant/profile | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantUpdateSettings**](doc/RestaurantApi.md#restaurantupdatesettings) | **PATCH** /api/v1/restaurant/settings | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableApproveRound**](doc/RestaurantAtTheTableApi.md#restauranttableapproveround) | **POST** /api/v1/restaurant/bookings/{id}/rounds/{round}/approve | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableBill**](doc/RestaurantAtTheTableApi.md#restauranttablebill) | **GET** /api/v1/restaurant/bookings/{id}/bill | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableCheckIn**](doc/RestaurantAtTheTableApi.md#restauranttablecheckin) | **POST** /api/v1/restaurant/bookings/{id}/check-in | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableClose**](doc/RestaurantAtTheTableApi.md#restauranttableclose) | **POST** /api/v1/restaurant/bookings/{id}/close | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableDone**](doc/RestaurantAtTheTableApi.md#restauranttabledone) | **POST** /api/v1/restaurant/service-requests/{id}/done | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableExtendGrace**](doc/RestaurantAtTheTableApi.md#restauranttableextendgrace) | **POST** /api/v1/restaurant/bookings/{id}/extend-grace | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableOrder**](doc/RestaurantAtTheTableApi.md#restauranttableorder) | **POST** /api/v1/restaurant/bookings/{id}/orders | 
+[*RestaurantAtTheTableApi*](doc/RestaurantAtTheTableApi.md) | [**restaurantTableRequests**](doc/RestaurantAtTheTableApi.md#restauranttablerequests) | **GET** /api/v1/restaurant/service-requests | 
 [*RestaurantBookingsApi*](doc/RestaurantBookingsApi.md) | [**restaurantBookingsApprove**](doc/RestaurantBookingsApi.md#restaurantbookingsapprove) | **POST** /api/v1/restaurant/bookings/{id}/approve | 
 [*RestaurantBookingsApi*](doc/RestaurantBookingsApi.md) | [**restaurantBookingsCancel**](doc/RestaurantBookingsApi.md#restaurantbookingscancel) | **POST** /api/v1/restaurant/bookings/{id}/cancel | 
 [*RestaurantBookingsApi*](doc/RestaurantBookingsApi.md) | [**restaurantBookingsGet**](doc/RestaurantBookingsApi.md#restaurantbookingsget) | **GET** /api/v1/restaurant/bookings/{id} | 
 [*RestaurantBookingsApi*](doc/RestaurantBookingsApi.md) | [**restaurantBookingsList**](doc/RestaurantBookingsApi.md#restaurantbookingslist) | **GET** /api/v1/restaurant/bookings | 
 [*RestaurantBookingsApi*](doc/RestaurantBookingsApi.md) | [**restaurantBookingsMoveTable**](doc/RestaurantBookingsApi.md#restaurantbookingsmovetable) | **POST** /api/v1/restaurant/bookings/{id}/move-table | 
+[*RestaurantKitchenApi*](doc/RestaurantKitchenApi.md) | [**kitchenFire**](doc/RestaurantKitchenApi.md#kitchenfire) | **POST** /api/v1/restaurant/kitchen/bookings/{id}/fire | 
+[*RestaurantKitchenApi*](doc/RestaurantKitchenApi.md) | [**kitchenQueue**](doc/RestaurantKitchenApi.md#kitchenqueue) | **GET** /api/v1/restaurant/kitchen/queue | 
+[*RestaurantKitchenApi*](doc/RestaurantKitchenApi.md) | [**kitchenReplaceRules**](doc/RestaurantKitchenApi.md#kitchenreplacerules) | **PUT** /api/v1/restaurant/kitchen/capacity-rules | 
+[*RestaurantKitchenApi*](doc/RestaurantKitchenApi.md) | [**kitchenRules**](doc/RestaurantKitchenApi.md#kitchenrules) | **GET** /api/v1/restaurant/kitchen/capacity-rules | 
+[*RestaurantKitchenApi*](doc/RestaurantKitchenApi.md) | [**kitchenSetStatus**](doc/RestaurantKitchenApi.md#kitchensetstatus) | **POST** /api/v1/restaurant/kitchen/items/{id}/status | 
 [*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**menuAddPhoto**](doc/RestaurantMenuApi.md#menuaddphoto) | **POST** /api/v1/restaurant/menu/items/{id}/photos | 
 [*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**menuAvailability**](doc/RestaurantMenuApi.md#menuavailability) | **PATCH** /api/v1/restaurant/menu/items/{id}/availability | 
 [*RestaurantMenuApi*](doc/RestaurantMenuApi.md) | [**menuCreateCategory**](doc/RestaurantMenuApi.md#menucreatecategory) | **POST** /api/v1/restaurant/menu/categories | 
@@ -166,6 +184,8 @@ Class | Method | HTTP request | Description
  - [AreaSummaryDto](doc/AreaSummaryDto.md)
  - [AvailabilityDto](doc/AvailabilityDto.md)
  - [AvailabilityResultDto](doc/AvailabilityResultDto.md)
+ - [BillDto](doc/BillDto.md)
+ - [BillRoundDto](doc/BillRoundDto.md)
  - [BoardBookingDto](doc/BoardBookingDto.md)
  - [BoardOrderDto](doc/BoardOrderDto.md)
  - [BoardOrderItemDto](doc/BoardOrderItemDto.md)
@@ -177,9 +197,14 @@ Class | Method | HTTP request | Description
  - [BookingStatus](doc/BookingStatus.md)
  - [BookingTableDto](doc/BookingTableDto.md)
  - [CancelDto](doc/CancelDto.md)
+ - [CapacityRuleDto](doc/CapacityRuleDto.md)
+ - [CapacityRuleInput](doc/CapacityRuleInput.md)
+ - [CapacityRulesDto](doc/CapacityRulesDto.md)
  - [CartLineDto](doc/CartLineDto.md)
  - [CategoryDto](doc/CategoryDto.md)
+ - [CheckInDto](doc/CheckInDto.md)
  - [ChecklistDto](doc/ChecklistDto.md)
+ - [CloseBillDto](doc/CloseBillDto.md)
  - [ClosureDto](doc/ClosureDto.md)
  - [ClosureInfoDto](doc/ClosureInfoDto.md)
  - [Course](doc/Course.md)
@@ -189,9 +214,13 @@ Class | Method | HTTP request | Description
  - [CustomerBookingDto](doc/CustomerBookingDto.md)
  - [CustomerExchangeDto](doc/CustomerExchangeDto.md)
  - [CustomerOrderDto](doc/CustomerOrderDto.md)
+ - [DepartDto](doc/DepartDto.md)
+ - [DepartResultDto](doc/DepartResultDto.md)
  - [DeviceTokenDto](doc/DeviceTokenDto.md)
  - [DiningRuleDto](doc/DiningRuleDto.md)
  - [FavoriteDto](doc/FavoriteDto.md)
+ - [FireDto](doc/FireDto.md)
+ - [FireResultDto](doc/FireResultDto.md)
  - [GeocodeResultDto](doc/GeocodeResultDto.md)
  - [HoldDto](doc/HoldDto.md)
  - [HomeDto](doc/HomeDto.md)
@@ -201,7 +230,10 @@ Class | Method | HTTP request | Description
  - [ImportResultDto](doc/ImportResultDto.md)
  - [ImportedItemDto](doc/ImportedItemDto.md)
  - [ItemKind](doc/ItemKind.md)
+ - [KitchenItemDto](doc/KitchenItemDto.md)
+ - [KitchenQueueDto](doc/KitchenQueueDto.md)
  - [KitchenStatus](doc/KitchenStatus.md)
+ - [KitchenStatusDto](doc/KitchenStatusDto.md)
  - [LayoutTableDto](doc/LayoutTableDto.md)
  - [MapAreaDto](doc/MapAreaDto.md)
  - [MapAreaWithElementsDto](doc/MapAreaWithElementsDto.md)
@@ -248,9 +280,13 @@ Class | Method | HTTP request | Description
  - [RestaurantProfileDto](doc/RestaurantProfileDto.md)
  - [RestaurantStatus](doc/RestaurantStatus.md)
  - [RestaurantSummaryDto](doc/RestaurantSummaryDto.md)
+ - [RoundResultDto](doc/RoundResultDto.md)
  - [SaveLayoutDto](doc/SaveLayoutDto.md)
  - [SavedOrderDto](doc/SavedOrderDto.md)
  - [ServeStyle](doc/ServeStyle.md)
+ - [ServiceRequestCreateDto](doc/ServiceRequestCreateDto.md)
+ - [ServiceRequestDto](doc/ServiceRequestDto.md)
+ - [ServiceType](doc/ServiceType.md)
  - [SlotDto](doc/SlotDto.md)
  - [StaffLoginDto](doc/StaffLoginDto.md)
  - [StaffMenuCategoryDto](doc/StaffMenuCategoryDto.md)
@@ -262,6 +298,7 @@ Class | Method | HTTP request | Description
  - [SuggestRestaurantDto](doc/SuggestRestaurantDto.md)
  - [TableDto](doc/TableDto.md)
  - [TableMapDto](doc/TableMapDto.md)
+ - [TableOrderDto](doc/TableOrderDto.md)
  - [TableShape](doc/TableShape.md)
  - [TokenPairDto](doc/TokenPairDto.md)
  - [TranslationDto](doc/TranslationDto.md)

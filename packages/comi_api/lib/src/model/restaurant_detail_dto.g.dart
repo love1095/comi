@@ -15,7 +15,7 @@ abstract class _$RestaurantDetailDtoCWProxy {
 
   RestaurantDetailDto description(String? description);
 
-  RestaurantDetailDto translated(bool translated);
+  RestaurantDetailDto translated(RestaurantDetailDtoTranslatedEnum translated);
 
   RestaurantDetailDto phone(String phone);
 
@@ -74,7 +74,7 @@ abstract class _$RestaurantDetailDtoCWProxy {
     String slug,
     String name,
     String? description,
-    bool translated,
+    RestaurantDetailDtoTranslatedEnum translated,
     String phone,
     String address,
     num? lat,
@@ -121,8 +121,9 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
       call(description: description);
 
   @override
-  RestaurantDetailDto translated(bool translated) =>
-      call(translated: translated);
+  RestaurantDetailDto translated(
+    RestaurantDetailDtoTranslatedEnum translated,
+  ) => call(translated: translated);
 
   @override
   RestaurantDetailDto phone(String phone) => call(phone: phone);
@@ -262,7 +263,7 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
           translated == const $CopyWithPlaceholder() || translated == null
           ? _value.translated
           // ignore: cast_nullable_to_non_nullable
-          : translated as bool,
+          : translated as RestaurantDetailDtoTranslatedEnum,
       phone: phone == const $CopyWithPlaceholder() || phone == null
           ? _value.phone
           // ignore: cast_nullable_to_non_nullable
@@ -416,7 +417,10 @@ RestaurantDetailDto _$RestaurantDetailDtoFromJson(Map<String, dynamic> json) =>
         slug: $checkedConvert('slug', (v) => v as String),
         name: $checkedConvert('name', (v) => v as String),
         description: $checkedConvert('description', (v) => v as String?),
-        translated: $checkedConvert('translated', (v) => v as bool),
+        translated: $checkedConvert(
+          'translated',
+          (v) => $enumDecode(_$RestaurantDetailDtoTranslatedEnumEnumMap, v),
+        ),
         phone: $checkedConvert('phone', (v) => v as String),
         address: $checkedConvert('address', (v) => v as String),
         lat: $checkedConvert('lat', (v) => v as num?),
@@ -477,7 +481,8 @@ Map<String, dynamic> _$RestaurantDetailDtoToJson(
   'slug': instance.slug,
   'name': instance.name,
   'description': ?instance.description,
-  'translated': instance.translated,
+  'translated':
+      _$RestaurantDetailDtoTranslatedEnumEnumMap[instance.translated]!,
   'phone': instance.phone,
   'address': instance.address,
   'lat': ?instance.lat,
@@ -500,4 +505,10 @@ Map<String, dynamic> _$RestaurantDetailDtoToJson(
   'openingHours': instance.openingHours.map((e) => e.toJson()).toList(),
   'closures': instance.closures.map((e) => e.toJson()).toList(),
   'areas': instance.areas.map((e) => e.toJson()).toList(),
+};
+
+const _$RestaurantDetailDtoTranslatedEnumEnumMap = {
+  RestaurantDetailDtoTranslatedEnum.none: 'none',
+  RestaurantDetailDtoTranslatedEnum.human: 'human',
+  RestaurantDetailDtoTranslatedEnum.machine: 'machine',
 };

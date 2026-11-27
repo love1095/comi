@@ -7,9 +7,11 @@ import '../features/auth/login_screen.dart';
 import '../features/auth/restaurant_picker_screen.dart';
 import '../features/bookings/board_screen.dart';
 import '../features/bookings/booking_detail_screen.dart';
+import '../features/kitchen/kitchen_screen.dart';
 import '../features/menu/menu_screen.dart';
 import '../features/onboarding/register_restaurant_screen.dart';
 import '../features/onboarding/setup_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/tables/areas_screen.dart';
 import '../features/tables/map_editor_screen.dart';
 import 'home_shell.dart';
@@ -55,8 +57,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          GoRoute(path: '/kitchen', builder: (_, _) => const KitchenScreen()),
           GoRoute(path: '/menu', builder: (_, _) => const MenuScreen()),
           GoRoute(path: '/setup', builder: (_, _) => const SetupScreen()),
+          GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
           GoRoute(path: '/areas', builder: (_, _) => const AreasScreen()),
         ],
       ),

@@ -63,6 +63,16 @@ abstract class _$RestaurantProfileDtoCWProxy {
 
   RestaurantProfileDto cancelCutoffMinutes(num cancelCutoffMinutes);
 
+  RestaurantProfileDto startEarlyOnCheckIn(bool startEarlyOnCheckIn);
+
+  RestaurantProfileDto codStartOnDepart(bool codStartOnDepart);
+
+  RestaurantProfileDto allowTableOrdering(bool allowTableOrdering);
+
+  RestaurantProfileDto tableOrderingNeedsApproval(
+    bool tableOrderingNeedsApproval,
+  );
+
   RestaurantProfileDto ratingAvg(num ratingAvg);
 
   RestaurantProfileDto ratingCount(num ratingCount);
@@ -106,6 +116,10 @@ abstract class _$RestaurantProfileDtoCWProxy {
     num confirmGroupsOver,
     bool allowTableChoice,
     num cancelCutoffMinutes,
+    bool startEarlyOnCheckIn,
+    bool codStartOnDepart,
+    bool allowTableOrdering,
+    bool tableOrderingNeedsApproval,
     num ratingAvg,
     num ratingCount,
     List<OpeningHoursDto> openingHours,
@@ -223,6 +237,23 @@ class _$RestaurantProfileDtoCWProxyImpl
       call(cancelCutoffMinutes: cancelCutoffMinutes);
 
   @override
+  RestaurantProfileDto startEarlyOnCheckIn(bool startEarlyOnCheckIn) =>
+      call(startEarlyOnCheckIn: startEarlyOnCheckIn);
+
+  @override
+  RestaurantProfileDto codStartOnDepart(bool codStartOnDepart) =>
+      call(codStartOnDepart: codStartOnDepart);
+
+  @override
+  RestaurantProfileDto allowTableOrdering(bool allowTableOrdering) =>
+      call(allowTableOrdering: allowTableOrdering);
+
+  @override
+  RestaurantProfileDto tableOrderingNeedsApproval(
+    bool tableOrderingNeedsApproval,
+  ) => call(tableOrderingNeedsApproval: tableOrderingNeedsApproval);
+
+  @override
   RestaurantProfileDto ratingAvg(num ratingAvg) => call(ratingAvg: ratingAvg);
 
   @override
@@ -271,6 +302,10 @@ class _$RestaurantProfileDtoCWProxyImpl
     Object? confirmGroupsOver = const $CopyWithPlaceholder(),
     Object? allowTableChoice = const $CopyWithPlaceholder(),
     Object? cancelCutoffMinutes = const $CopyWithPlaceholder(),
+    Object? startEarlyOnCheckIn = const $CopyWithPlaceholder(),
+    Object? codStartOnDepart = const $CopyWithPlaceholder(),
+    Object? allowTableOrdering = const $CopyWithPlaceholder(),
+    Object? tableOrderingNeedsApproval = const $CopyWithPlaceholder(),
     Object? ratingAvg = const $CopyWithPlaceholder(),
     Object? ratingCount = const $CopyWithPlaceholder(),
     Object? openingHours = const $CopyWithPlaceholder(),
@@ -407,6 +442,30 @@ class _$RestaurantProfileDtoCWProxyImpl
           ? _value.cancelCutoffMinutes
           // ignore: cast_nullable_to_non_nullable
           : cancelCutoffMinutes as num,
+      startEarlyOnCheckIn:
+          startEarlyOnCheckIn == const $CopyWithPlaceholder() ||
+              startEarlyOnCheckIn == null
+          ? _value.startEarlyOnCheckIn
+          // ignore: cast_nullable_to_non_nullable
+          : startEarlyOnCheckIn as bool,
+      codStartOnDepart:
+          codStartOnDepart == const $CopyWithPlaceholder() ||
+              codStartOnDepart == null
+          ? _value.codStartOnDepart
+          // ignore: cast_nullable_to_non_nullable
+          : codStartOnDepart as bool,
+      allowTableOrdering:
+          allowTableOrdering == const $CopyWithPlaceholder() ||
+              allowTableOrdering == null
+          ? _value.allowTableOrdering
+          // ignore: cast_nullable_to_non_nullable
+          : allowTableOrdering as bool,
+      tableOrderingNeedsApproval:
+          tableOrderingNeedsApproval == const $CopyWithPlaceholder() ||
+              tableOrderingNeedsApproval == null
+          ? _value.tableOrderingNeedsApproval
+          // ignore: cast_nullable_to_non_nullable
+          : tableOrderingNeedsApproval as bool,
       ratingAvg: ratingAvg == const $CopyWithPlaceholder() || ratingAvg == null
           ? _value.ratingAvg
           // ignore: cast_nullable_to_non_nullable
@@ -466,6 +525,10 @@ RestaurantProfileDto _$RestaurantProfileDtoFromJson(
       'confirmGroupsOver',
       'allowTableChoice',
       'cancelCutoffMinutes',
+      'startEarlyOnCheckIn',
+      'codStartOnDepart',
+      'allowTableOrdering',
+      'tableOrderingNeedsApproval',
       'ratingAvg',
       'ratingCount',
       'openingHours',
@@ -512,6 +575,16 @@ RestaurantProfileDto _$RestaurantProfileDtoFromJson(
       'cancelCutoffMinutes',
       (v) => v as num,
     ),
+    startEarlyOnCheckIn: $checkedConvert(
+      'startEarlyOnCheckIn',
+      (v) => v as bool,
+    ),
+    codStartOnDepart: $checkedConvert('codStartOnDepart', (v) => v as bool),
+    allowTableOrdering: $checkedConvert('allowTableOrdering', (v) => v as bool),
+    tableOrderingNeedsApproval: $checkedConvert(
+      'tableOrderingNeedsApproval',
+      (v) => v as bool,
+    ),
     ratingAvg: $checkedConvert('ratingAvg', (v) => v as num),
     ratingCount: $checkedConvert('ratingCount', (v) => v as num),
     openingHours: $checkedConvert(
@@ -555,6 +628,10 @@ Map<String, dynamic> _$RestaurantProfileDtoToJson(
   'confirmGroupsOver': instance.confirmGroupsOver,
   'allowTableChoice': instance.allowTableChoice,
   'cancelCutoffMinutes': instance.cancelCutoffMinutes,
+  'startEarlyOnCheckIn': instance.startEarlyOnCheckIn,
+  'codStartOnDepart': instance.codStartOnDepart,
+  'allowTableOrdering': instance.allowTableOrdering,
+  'tableOrderingNeedsApproval': instance.tableOrderingNeedsApproval,
   'ratingAvg': instance.ratingAvg,
   'ratingCount': instance.ratingCount,
   'openingHours': instance.openingHours.map((e) => e.toJson()).toList(),

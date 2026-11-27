@@ -23,3 +23,15 @@ export function assertTransition(from: BookingStatus, to: BookingStatus): void {
     throw new AppError('INVALID_STATUS', `Booking cannot go from ${from} to ${to}`, { from, to });
   }
 }
+
+export const GRACE_EXTENSION_MINUTES = 15;
+export const NO_SHOW_LIMIT = 3; // §9.3: after 3 no-shows the account must prepay
+
+/**
+ * When a CONFIRMED booking becomes a no-show (§9.3): arrival — or a later "I'm leaving now"
+ * ETA — plus the restaurant's grace, plus 15 min once if staff chose "guest is late, keep table".
+ */
+export function noShowDeadline(b: { arrivalAt: Date; etaAt: Date | null; graceExtendedAt: Date | null }, graceMinutes: number): Date {
+  const base = b.etaAt && b.etaAt > b.arrivalAt ? b.etaAt : b.arrivalAt;
+  return new Date(base.getTime() + (graceMinutes + (b.graceExtendedAt ? GRACE_EXTENSION_MINUTES : 0)) * 60_000);
+}

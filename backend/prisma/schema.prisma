@@ -109,48 +109,53 @@ model RefreshToken {
 
 // ───────────── Restaurant ─────────────
 model Restaurant {
-  id                  String                                 @id @default(uuid())
-  slug                String                                 @unique
-  name                String
-  description         String?
-  phone               String
-  address             String
-  provinceCode        String // Vietnam administrative codes
-  wardCode            String?
+  id                         String                                 @id @default(uuid())
+  slug                       String                                 @unique
+  name                       String
+  description                String?
+  phone                      String
+  address                    String
+  provinceCode               String // Vietnam administrative codes
+  wardCode                   String?
   // Set via raw SQL (ST_MakePoint). Nullable while DRAFT, required to submit for review.
-  location            Unsupported("geography(Point, 4326)")?
-  timezone            String                                 @default("Asia/Ho_Chi_Minh")
-  cuisineTags         String[]
-  ambienceTags        String[] // romantic, rooftop, view, quiet, live_music, private_room, outdoor
-  priceLevel          Int // 1..4
-  coverPhotoUrl       String?
-  googlePlaceId       String?
-  status              RestaurantStatus                       @default(DRAFT)
-  rejectReason        String?
+  location                   Unsupported("geography(Point, 4326)")?
+  timezone                   String                                 @default("Asia/Ho_Chi_Minh")
+  cuisineTags                String[]
+  ambienceTags               String[] // romantic, rooftop, view, quiet, live_music, private_room, outdoor
+  priceLevel                 Int // 1..4
+  coverPhotoUrl              String?
+  googlePlaceId              String?
+  status                     RestaurantStatus                       @default(DRAFT)
+  rejectReason               String?
   // settings
-  slotMinutes         Int                                    @default(15) // booking time step
-  diningMinutes       Int                                    @default(90) // how long a table is held
-  graceMinutes        Int                                    @default(30) // no-show timeout
-  minLeadMinutes      Int                                    @default(60) // earliest booking from now
-  maxDaysAhead        Int                                    @default(30)
-  allowCod            Boolean                                @default(true)
-  prepaidRefundRule   RefundRule                             @default(BEFORE_COOKING)
-  servesLunch         Boolean                                @default(false)
-  servesNhau          Boolean                                @default(false)
-  maxGroupSize        Int                                    @default(20)
-  confirmGroupsOver   Int                                    @default(12) // bookings above this need restaurant approval
-  menuFullyTranslated Boolean                                @default(false)
-  allowTableChoice    Boolean                                @default(false) // turns on the seat-map picker
-  cancelCutoffMinutes Int                                    @default(60) // customer can cancel until arrivalAt − this
+  slotMinutes                Int                                    @default(15) // booking time step
+  diningMinutes              Int                                    @default(90) // how long a table is held
+  graceMinutes               Int                                    @default(30) // no-show timeout
+  minLeadMinutes             Int                                    @default(60) // earliest booking from now
+  maxDaysAhead               Int                                    @default(30)
+  allowCod                   Boolean                                @default(true)
+  prepaidRefundRule          RefundRule                             @default(BEFORE_COOKING)
+  servesLunch                Boolean                                @default(false)
+  servesNhau                 Boolean                                @default(false)
+  maxGroupSize               Int                                    @default(20)
+  confirmGroupsOver          Int                                    @default(12) // bookings above this need restaurant approval
+  menuFullyTranslated        Boolean                                @default(false)
+  allowTableChoice           Boolean                                @default(false) // turns on the seat-map picker
+  cancelCutoffMinutes        Int                                    @default(60) // customer can cancel until arrivalAt − this
+  // kitchen + at-the-table (§7, §8.5)
+  startEarlyOnCheckIn        Boolean                                @default(true) // guest early → recompute fire times from check-in
+  codStartOnDepart           Boolean                                @default(false) // "I'm leaving now" releases COD items (no-show risk on restaurant)
+  allowTableOrdering         Boolean                                @default(true)
+  tableOrderingNeedsApproval Boolean                                @default(false) // staff confirm each round ordered from the app
   // cached ratings
-  ratingAvg           Decimal                                @default(0) @db.Decimal(2, 1)
-  ratingCount         Int                                    @default(0)
-  firstOrderAt        DateTime?
-  submittedAt         DateTime?
-  approvedAt          DateTime?
-  createdAt           DateTime                               @default(now())
-  updatedAt           DateTime                               @updatedAt
-  deletedAt           DateTime?
+  ratingAvg                  Decimal                                @default(0) @db.Decimal(2, 1)
+  ratingCount                Int                                    @default(0)
+  firstOrderAt               DateTime?
+  submittedAt                DateTime?
+  approvedAt                 DateTime?
+  createdAt                  DateTime                               @default(now())
+  updatedAt                  DateTime                               @updatedAt
+  deletedAt                  DateTime?
 
   members              RestaurantMember[]
   translations         RestaurantTranslation[]
@@ -464,6 +469,7 @@ model Booking {
   needsApproval      Boolean             @default(false)
   ageConfirmedAt     DateTime?
   extraTableIds      String[] // joined tables for large groups
+  graceExtendedAt    DateTime? // staff "guest is late, keep table" (+15 min, once)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   restaurant         Restaurant          @relation(fields: [restaurantId], references: [id])

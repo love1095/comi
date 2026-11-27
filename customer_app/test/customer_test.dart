@@ -1,5 +1,6 @@
 import 'package:comi_api/comi_api.dart';
 import 'package:customer_app/data/location.dart';
+import 'package:customer_app/data/realtime.dart';
 import 'package:customer_app/data/session.dart';
 import 'package:customer_app/data/token_store.dart';
 import 'package:customer_app/features/account/login_screen.dart';
@@ -39,6 +40,7 @@ void main() {
         locationServiceProvider.overrideWithValue(FakeLocation()),
         discoveryRepositoryProvider.overrideWithValue(discovery ?? FakeDiscovery()),
         bookingsRepositoryProvider.overrideWithValue(bookings ?? FakeBookings()),
+        realtimeClientProvider.overrideWithValue(NoRealtimeClient()),
       ],
     );
     addTearDown(container.dispose);

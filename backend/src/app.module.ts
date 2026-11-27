@@ -9,6 +9,9 @@ import { RedisModule } from './common/redis';
 import { JobsModule } from './jobs/queues';
 import { AvailabilityModule } from './modules/availability/availability.controller';
 import { BookingsModule } from './modules/bookings/bookings.controller';
+import { KitchenModule } from './modules/kitchen/kitchen.module';
+import { RealtimeGatewayModule } from './modules/realtime/realtime.gateway';
+import { RealtimeModule } from './modules/realtime/realtime.service';
 import { DiscoveryModule } from './modules/discovery/discovery.controller';
 import { ConfigModule } from './config/config.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -53,6 +56,9 @@ const isDev = (process.env.NODE_ENV ?? 'development') === 'development';
     MenuModule,
     DiscoveryModule,
     BookingsModule,
+    RealtimeModule,
+    RealtimeGatewayModule,
+    KitchenModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

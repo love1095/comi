@@ -3,7 +3,7 @@
  * Staff shapes live in responses.ts.
  */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BookingStatus, Course, ItemKind, OrderStatus, PaymentMode, ServeStyle, TableShape } from '@prisma/client';
+import { BookingStatus, Course, ItemKind, OrderStatus, PaymentMode, ServeStyle, ServiceType, TableShape } from '@prisma/client';
 import { BoardOrderItemDto, MapElementResponseDto, OpeningHoursDto } from './responses';
 
 // ───── discovery ─────
@@ -90,7 +90,7 @@ export class RestaurantDetailDto {
   @ApiProperty() slug: string;
   @ApiProperty() name: string;
   @ApiPropertyOptional({ nullable: true, type: String }) description: string | null;
-  @ApiProperty({ description: 'True when name/description were translated to the requested language' }) translated: boolean;
+  @ApiProperty({ enum: ['none', 'human', 'machine'], description: 'none = Vietnamese original shown' }) translated: string;
   @ApiProperty() phone: string;
   @ApiProperty() address: string;
   @ApiPropertyOptional({ nullable: true, type: Number }) lat: number | null;
@@ -141,7 +141,7 @@ export class PublicMenuItemDto {
   @ApiProperty() id: string;
   @ApiProperty() name: string;
   @ApiPropertyOptional({ nullable: true, type: String }) description: string | null;
-  @ApiProperty() translated: boolean;
+  @ApiProperty({ enum: ['none', 'human', 'machine'], description: 'machine = show "auto-translated"' }) translated: string;
   @ApiProperty({ description: 'Vietnamese name (show to staff / taxi)' }) originalName: string;
   @ApiProperty() price: number;
   @ApiProperty({ enum: Course, enumName: 'Course' }) course: Course;
@@ -316,4 +316,45 @@ export class HoldDto {
   @ApiProperty({ description: 'Hold lasts 5 minutes' }) expiresAt: string;
   @ApiProperty({ type: [String] }) tableIds: string[];
   @ApiProperty() arrivalAt: string;
+}
+
+// ───── at the table (§7.5, §8.5) ─────
+
+export class DepartResultDto {
+  @ApiProperty() etaAt: string;
+  @ApiProperty() travelMinutes: number;
+}
+
+export class RoundResultDto {
+  @ApiProperty() round: number;
+  @ApiProperty({ description: 'Waiting for staff to confirm (restaurant setting)' }) needsApproval: boolean;
+  @ApiProperty() total: number;
+}
+
+export class BillRoundDto {
+  @ApiProperty({ description: '0 = pre-order' }) round: number;
+  @ApiProperty() waitingForStaff: boolean;
+  @ApiProperty() subtotal: number;
+  @ApiProperty({ type: [BoardOrderItemDto] }) items: BoardOrderItemDto[];
+}
+
+export class BillDto {
+  @ApiProperty() bookingId: string;
+  @ApiProperty() code: string;
+  @ApiProperty({ enum: BookingStatus, enumName: 'BookingStatus' }) status: BookingStatus;
+  @ApiProperty({ type: [BillRoundDto] }) rounds: BillRoundDto[];
+  @ApiProperty() total: number;
+  @ApiPropertyOptional({ nullable: true, type: Number }) finalBillAmount: number | null;
+}
+
+export class ServiceRequestDto {
+  @ApiProperty() id: string;
+  @ApiProperty() bookingId: string;
+  @ApiProperty() bookingCode: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) tableCode: string | null;
+  @ApiProperty({ enum: ServiceType, enumName: 'ServiceType' }) type: ServiceType;
+  @ApiPropertyOptional({ nullable: true, type: String }) note: string | null;
+  @ApiProperty({ enum: ['OPEN', 'DONE'] }) status: string;
+  @ApiProperty() createdAt: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) doneAt: string | null;
 }

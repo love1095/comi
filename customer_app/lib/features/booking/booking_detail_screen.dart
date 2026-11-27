@@ -8,6 +8,7 @@ import 'package:shared_ui/shared_ui.dart';
 import '../../data/api_error.dart';
 import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
+import 'at_table.dart';
 import 'bookings_repository.dart';
 import 'my_bookings_screen.dart' show statusColor;
 
@@ -147,9 +148,13 @@ class BookingDetailScreen extends ConsumerWidget {
               style: TextStyle(color: theme.colorScheme.error),
             ),
           ),
+        const SizedBox(height: 12),
+        AtTablePanel(booking: b),
         const Divider(height: 32),
-        if (!hasItems) Text('Không đặt món trước — gọi món khi đến quán.', style: theme.textTheme.bodyMedium),
-        if (hasItems) ...[
+        if (b.status == BookingStatus.CHECKED_IN) LiveBillView(bookingId: b.id),
+        if (!hasItems && b.status != BookingStatus.CHECKED_IN)
+          Text('Không đặt món trước — gọi món khi đến quán.', style: theme.textTheme.bodyMedium),
+        if (hasItems && b.status != BookingStatus.CHECKED_IN) ...[
           Text('Món đã đặt', style: theme.textTheme.titleMedium),
           for (final course in Course.values)
             if (items.any((i) => i.course == course)) ...[

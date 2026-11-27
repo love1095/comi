@@ -1,5 +1,5 @@
 import { createHmac } from 'crypto';
-import { entranceQrSignature, tableQrSignature, tableQrUrl, verifySignature } from './qr';
+import { entranceQrSignature, parseQrPayload, tableQrSignature, tableQrUrl, verifySignature } from './qr';
 
 describe('QR signatures (§9.1)', () => {
   const rid = '0d4c7a52-7a3c-4b6e-9f0e-111111111111';
@@ -31,5 +31,16 @@ describe('QR signatures (§9.1)', () => {
 
   it('builds the table URL', () => {
     expect(tableQrUrl('https://comi.vn/', 'quan-a', 'A1', 'abc')).toBe('https://comi.vn/c/quan-a/A1?s=abc');
+  });
+});
+
+describe('parseQrPayload', () => {
+  it('reads table and entrance links, rejects others', () => {
+    expect(parseQrPayload('https://comi.vn/c/quan-oc/A1?s=abc123')).toEqual({ slug: 'quan-oc', tableCode: 'A1', sig: 'abc123' });
+    expect(parseQrPayload('https://comi.vn/c/quan-oc?s=xyz')).toEqual({ slug: 'quan-oc', tableCode: undefined, sig: 'xyz' });
+    expect(parseQrPayload('https://comi.vn/c/qu%C3%A1n/B%202?s=q')).toEqual({ slug: 'quán', tableCode: 'B 2', sig: 'q' });
+    expect(parseQrPayload('https://comi.vn/c/quan-oc/A1')).toBeNull(); // no signature
+    expect(parseQrPayload('not a url')).toBeNull();
+    expect(parseQrPayload('https://evil.com/x/y?s=1')).toBeNull();
   });
 });

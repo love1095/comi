@@ -79,6 +79,14 @@ class RestaurantProfileDto {
 
     required  this.cancelCutoffMinutes,
 
+    required  this.startEarlyOnCheckIn,
+
+    required  this.codStartOnDepart,
+
+    required  this.allowTableOrdering,
+
+    required  this.tableOrderingNeedsApproval,
+
     required  this.ratingAvg,
 
     required  this.ratingCount,
@@ -424,6 +432,54 @@ class RestaurantProfileDto {
 
   @JsonKey(
     
+    name: r'startEarlyOnCheckIn',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool startEarlyOnCheckIn;
+
+
+
+  @JsonKey(
+    
+    name: r'codStartOnDepart',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool codStartOnDepart;
+
+
+
+  @JsonKey(
+    
+    name: r'allowTableOrdering',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool allowTableOrdering;
+
+
+
+  @JsonKey(
+    
+    name: r'tableOrderingNeedsApproval',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool tableOrderingNeedsApproval;
+
+
+
+  @JsonKey(
+    
     name: r'ratingAvg',
     required: true,
     includeIfNull: false,
@@ -493,6 +549,10 @@ class RestaurantProfileDto {
             confirmGroupsOver,
             allowTableChoice,
             cancelCutoffMinutes,
+            startEarlyOnCheckIn,
+            codStartOnDepart,
+            allowTableOrdering,
+            tableOrderingNeedsApproval,
             ratingAvg,
             ratingCount,
             openingHours,
@@ -526,6 +586,10 @@ class RestaurantProfileDto {
             other.confirmGroupsOver,
             other.allowTableChoice,
             other.cancelCutoffMinutes,
+            other.startEarlyOnCheckIn,
+            other.codStartOnDepart,
+            other.allowTableOrdering,
+            other.tableOrderingNeedsApproval,
             other.ratingAvg,
             other.ratingCount,
             other.openingHours,
@@ -564,6 +628,10 @@ class RestaurantProfileDto {
         confirmGroupsOver,
         allowTableChoice,
         cancelCutoffMinutes,
+        startEarlyOnCheckIn,
+        codStartOnDepart,
+        allowTableOrdering,
+        tableOrderingNeedsApproval,
         ratingAvg,
         ratingCount,
         openingHours,

@@ -35,6 +35,16 @@ abstract class _$UpdateSettingsDtoCWProxy {
 
   UpdateSettingsDto cancelCutoffMinutes(num? cancelCutoffMinutes);
 
+  UpdateSettingsDto startEarlyOnCheckIn(bool? startEarlyOnCheckIn);
+
+  UpdateSettingsDto codStartOnDepart(bool? codStartOnDepart);
+
+  UpdateSettingsDto allowTableOrdering(bool? allowTableOrdering);
+
+  UpdateSettingsDto tableOrderingNeedsApproval(
+    bool? tableOrderingNeedsApproval,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `UpdateSettingsDto(...).copyWith.fieldName(value)`.
@@ -57,6 +67,10 @@ abstract class _$UpdateSettingsDtoCWProxy {
     num? confirmGroupsOver,
     bool? allowTableChoice,
     num? cancelCutoffMinutes,
+    bool? startEarlyOnCheckIn,
+    bool? codStartOnDepart,
+    bool? allowTableOrdering,
+    bool? tableOrderingNeedsApproval,
   });
 }
 
@@ -119,6 +133,23 @@ class _$UpdateSettingsDtoCWProxyImpl implements _$UpdateSettingsDtoCWProxy {
   UpdateSettingsDto cancelCutoffMinutes(num? cancelCutoffMinutes) =>
       call(cancelCutoffMinutes: cancelCutoffMinutes);
 
+  @override
+  UpdateSettingsDto startEarlyOnCheckIn(bool? startEarlyOnCheckIn) =>
+      call(startEarlyOnCheckIn: startEarlyOnCheckIn);
+
+  @override
+  UpdateSettingsDto codStartOnDepart(bool? codStartOnDepart) =>
+      call(codStartOnDepart: codStartOnDepart);
+
+  @override
+  UpdateSettingsDto allowTableOrdering(bool? allowTableOrdering) =>
+      call(allowTableOrdering: allowTableOrdering);
+
+  @override
+  UpdateSettingsDto tableOrderingNeedsApproval(
+    bool? tableOrderingNeedsApproval,
+  ) => call(tableOrderingNeedsApproval: tableOrderingNeedsApproval);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `UpdateSettingsDto(...).copyWith.fieldName(value)`.
@@ -142,6 +173,10 @@ class _$UpdateSettingsDtoCWProxyImpl implements _$UpdateSettingsDtoCWProxy {
     Object? confirmGroupsOver = const $CopyWithPlaceholder(),
     Object? allowTableChoice = const $CopyWithPlaceholder(),
     Object? cancelCutoffMinutes = const $CopyWithPlaceholder(),
+    Object? startEarlyOnCheckIn = const $CopyWithPlaceholder(),
+    Object? codStartOnDepart = const $CopyWithPlaceholder(),
+    Object? allowTableOrdering = const $CopyWithPlaceholder(),
+    Object? tableOrderingNeedsApproval = const $CopyWithPlaceholder(),
   }) {
     return UpdateSettingsDto(
       slotMinutes: slotMinutes == const $CopyWithPlaceholder()
@@ -196,6 +231,23 @@ class _$UpdateSettingsDtoCWProxyImpl implements _$UpdateSettingsDtoCWProxy {
           ? _value.cancelCutoffMinutes
           // ignore: cast_nullable_to_non_nullable
           : cancelCutoffMinutes as num?,
+      startEarlyOnCheckIn: startEarlyOnCheckIn == const $CopyWithPlaceholder()
+          ? _value.startEarlyOnCheckIn
+          // ignore: cast_nullable_to_non_nullable
+          : startEarlyOnCheckIn as bool?,
+      codStartOnDepart: codStartOnDepart == const $CopyWithPlaceholder()
+          ? _value.codStartOnDepart
+          // ignore: cast_nullable_to_non_nullable
+          : codStartOnDepart as bool?,
+      allowTableOrdering: allowTableOrdering == const $CopyWithPlaceholder()
+          ? _value.allowTableOrdering
+          // ignore: cast_nullable_to_non_nullable
+          : allowTableOrdering as bool?,
+      tableOrderingNeedsApproval:
+          tableOrderingNeedsApproval == const $CopyWithPlaceholder()
+          ? _value.tableOrderingNeedsApproval
+          // ignore: cast_nullable_to_non_nullable
+          : tableOrderingNeedsApproval as bool?,
     );
   }
 }
@@ -238,6 +290,19 @@ UpdateSettingsDto _$UpdateSettingsDtoFromJson(
       'cancelCutoffMinutes',
       (v) => v as num?,
     ),
+    startEarlyOnCheckIn: $checkedConvert(
+      'startEarlyOnCheckIn',
+      (v) => v as bool?,
+    ),
+    codStartOnDepart: $checkedConvert('codStartOnDepart', (v) => v as bool?),
+    allowTableOrdering: $checkedConvert(
+      'allowTableOrdering',
+      (v) => v as bool?,
+    ),
+    tableOrderingNeedsApproval: $checkedConvert(
+      'tableOrderingNeedsApproval',
+      (v) => v as bool?,
+    ),
   );
   return val;
 });
@@ -259,6 +324,10 @@ Map<String, dynamic> _$UpdateSettingsDtoToJson(UpdateSettingsDto instance) =>
       'confirmGroupsOver': ?instance.confirmGroupsOver,
       'allowTableChoice': ?instance.allowTableChoice,
       'cancelCutoffMinutes': ?instance.cancelCutoffMinutes,
+      'startEarlyOnCheckIn': ?instance.startEarlyOnCheckIn,
+      'codStartOnDepart': ?instance.codStartOnDepart,
+      'allowTableOrdering': ?instance.allowTableOrdering,
+      'tableOrderingNeedsApproval': ?instance.tableOrderingNeedsApproval,
     };
 
 const _$UpdateSettingsDtoPrepaidRefundRuleEnumEnumMap = {

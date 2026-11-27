@@ -61,6 +61,10 @@ export class UpdateSettingsDto {
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(1) @Max(500) confirmGroupsOver?: number;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() allowTableChoice?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(1440) cancelCutoffMinutes?: number;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() startEarlyOnCheckIn?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() codStartOnDepart?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() allowTableOrdering?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() tableOrderingNeedsApproval?: boolean;
 }
 
 export class OpeningHoursItemDto {

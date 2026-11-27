@@ -9,6 +9,7 @@ import '../../widgets/restaurant_card.dart';
 import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
 import 'item_sheet.dart';
+import '../booking/at_table.dart' show sendTableOrder;
 
 const _weekdayShort = {1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 0: 'CN'};
 
@@ -37,8 +38,11 @@ String hoursSummary(List<OpeningHoursDto> hours) {
 }
 
 class RestaurantScreen extends ConsumerWidget {
-  const RestaurantScreen({super.key, required this.slug});
+  const RestaurantScreen({super.key, required this.slug, this.tableBookingId});
   final String slug;
+
+  /// Set when a seated guest orders more (§8.5): the cart goes to the kitchen, not to a new booking.
+  final String? tableBookingId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,14 +64,17 @@ class RestaurantScreen extends ConsumerWidget {
           ),
         ),
       ),
-      data: (r) => _RestaurantBody(restaurant: r),
+      data: (r) => _RestaurantBody(restaurant: r, tableBookingId: tableBookingId),
     );
   }
 }
 
 class _RestaurantBody extends ConsumerWidget {
-  const _RestaurantBody({required this.restaurant});
+  const _RestaurantBody({required this.restaurant, this.tableBookingId});
   final RestaurantDetailDto restaurant;
+  final String? tableBookingId;
+
+  bool get _atTable => tableBookingId != null;
 
   RestaurantRef get _ref => (id: restaurant.id, slug: restaurant.slug, name: restaurant.name);
 
@@ -163,19 +170,30 @@ class _RestaurantBody extends ConsumerWidget {
                     ),
                   if (r.description != null) ...[const SizedBox(height: 12), Text(r.description!)],
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () => context.push('/r/${r.slug}/book'),
-                          icon: const Icon(Icons.event_seat_outlined),
-                          label: const Text('Đặt bàn'),
-                        ),
+                  if (_atTable)
+                    Card(
+                      color: theme.colorScheme.primaryContainer,
+                      child: const ListTile(
+                        leading: Icon(Icons.table_restaurant),
+                        title: Text('Gọi thêm món cho bàn của bạn'),
+                        subtitle: Text('Món gửi thẳng vào bếp, tính vào hoá đơn của bàn.'),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text('Chọn món trước để vừa đến là có đồ ăn — hoặc chỉ đặt bàn.', style: theme.textTheme.bodySmall),
+                    )
+                  else ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () => context.push('/r/${r.slug}/book'),
+                            icon: const Icon(Icons.event_seat_outlined),
+                            label: const Text('Đặt bàn'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Chọn món trước để vừa đến là có đồ ăn — hoặc chỉ đặt bàn.', style: theme.textTheme.bodySmall),
+                  ],
                 ],
               ),
             ),
@@ -208,6 +226,7 @@ class _RestaurantBody extends ConsumerWidget {
                   itemBuilder: (_, i) => DishCard(
                     item: c.items[i],
                     quantity: myCart.quantityOf(c.items[i].id),
+                    atTable: _atTable,
                     onAdd: () => _add(context, ref, c.items[i]),
                     onRemove: () => ref.read(cartProvider.notifier).removeOne(c.items[i].id),
                   ),
@@ -225,7 +244,13 @@ class _RestaurantBody extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 child: FilledButton(
                   style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-                  onPressed: () => context.push('/r/${r.slug}/book'),
+                  onPressed: () async {
+                    if (!_atTable) {
+                      context.push('/r/${r.slug}/book');
+                    } else if (await sendTableOrder(context, ref, tableBookingId!) && context.mounted) {
+                      Navigator.of(context).maybePop();
+                    }
+                  },
                   child: Row(
                     children: [
                       CircleAvatar(
@@ -234,7 +259,7 @@ class _RestaurantBody extends ConsumerWidget {
                         child: Text('${myCart.count}', style: TextStyle(color: theme.colorScheme.primary, fontSize: 13)),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(child: Text('Đặt bàn với món đã chọn')),
+                      Expanded(child: Text(_atTable ? 'Gửi món vào bếp' : 'Đặt bàn với món đã chọn')),
                       Text(formatVnd(myCart.total)),
                     ],
                   ),
@@ -252,7 +277,15 @@ class _RestaurantBody extends ConsumerWidget {
 
 /// Dish with a big 4:3 photo when there is one (§16 — food sells by photo).
 class DishCard extends StatelessWidget {
-  const DishCard({super.key, required this.item, required this.quantity, required this.onAdd, required this.onRemove});
+  const DishCard({
+    super.key,
+    required this.item,
+    required this.quantity,
+    required this.onAdd,
+    required this.onRemove,
+    this.atTable = false,
+  });
+  final bool atTable;
   final PublicMenuItemDto item;
   final int quantity;
   final VoidCallback onAdd;
@@ -261,11 +294,11 @@ class DishCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final canOrder = item.isAvailable && item.isPreorderable;
+    final canOrder = item.isAvailable && (item.isPreorderable || atTable);
     final url = item.photos.isEmpty ? null : photoUrl(item.photos.first.publicId, width: 900);
     final note = [
       if (!item.isAvailable) 'Hết món hôm nay',
-      if (item.isAvailable && !item.isPreorderable) 'Gọi khi đến quán',
+      if (item.isAvailable && !item.isPreorderable && !atTable) 'Gọi khi đến quán',
       if (item.leadHours > 0) 'Đặt trước ${item.leadHours} giờ',
       if (item.isAlcohol) '18+',
       ...item.tags,
@@ -300,7 +333,8 @@ class DishCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(item.name, style: theme.textTheme.titleMedium),
-                      if (item.translated) Text(item.originalName, style: theme.textTheme.bodySmall),
+                      if (item.translated != PublicMenuItemDtoTranslatedEnum.none)
+                        Text(item.originalName, style: theme.textTheme.bodySmall),
                       if (item.description != null)
                         Text(item.description!, style: theme.textTheme.bodySmall, maxLines: 3, overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),

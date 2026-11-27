@@ -21,6 +21,10 @@ Name | Type | Description | Notes
 **confirmGroupsOver** | **num** |  | [optional] 
 **allowTableChoice** | **bool** |  | [optional] 
 **cancelCutoffMinutes** | **num** |  | [optional] 
+**startEarlyOnCheckIn** | **bool** |  | [optional] 
+**codStartOnDepart** | **bool** |  | [optional] 
+**allowTableOrdering** | **bool** |  | [optional] 
+**tableOrderingNeedsApproval** | **bool** |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

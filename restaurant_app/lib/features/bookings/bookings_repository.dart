@@ -4,6 +4,7 @@ import 'package:comi_api/comi_api.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_ui/shared_ui.dart';
 
+import '../../data/realtime.dart';
 import '../../data/session.dart';
 
 /// Thin wrapper over the restaurant bookings API so screens can be tested with a fake.
@@ -112,18 +113,25 @@ class BoardSearch extends Notifier<String> {
 
 final boardSearchProvider = NotifierProvider<BoardSearch, String>(BoardSearch.new);
 
-/// Bookings of the selected day. Re-fetches every 30 s until live socket events land (§19).
+/// Bookings of the selected day. Live socket hints reload it; the 30 s timer is the fallback (§19).
 final boardBookingsProvider = FutureProvider.autoDispose<List<BoardBookingDto>>((ref) async {
   final date = ref.watch(boardDateProvider);
   final q = ref.watch(boardSearchProvider);
   final timer = Timer(const Duration(seconds: 30), ref.invalidateSelf);
   ref.onDispose(timer.cancel);
+  ref.listen(realtimeEventsProvider, (_, next) {
+    if (next.value?.isBooking ?? false) ref.invalidateSelf();
+  });
   return ref.watch(bookingsRepositoryProvider).list(date, q: q.isEmpty ? null : q);
 });
 
-final bookingDetailProvider = FutureProvider.autoDispose.family<BookingDetailDto, String>(
-  (ref, id) => ref.watch(bookingsRepositoryProvider).get(id),
-);
+final bookingDetailProvider = FutureProvider.autoDispose.family<BookingDetailDto, String>((ref, id) {
+  ref.listen(realtimeEventsProvider, (_, next) {
+    final e = next.value;
+    if (e != null && e.isBooking && (e.data['bookingId'] == null || e.data['bookingId'] == id)) ref.invalidateSelf();
+  });
+  return ref.watch(bookingsRepositoryProvider).get(id);
+});
 
 /// Head counts for the summary row.
 class BoardSummary {

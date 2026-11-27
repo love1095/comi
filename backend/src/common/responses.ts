@@ -55,6 +55,10 @@ export class RestaurantProfileDto {
   @ApiProperty() confirmGroupsOver: number;
   @ApiProperty() allowTableChoice: boolean;
   @ApiProperty() cancelCutoffMinutes: number;
+  @ApiProperty() startEarlyOnCheckIn: boolean;
+  @ApiProperty() codStartOnDepart: boolean;
+  @ApiProperty() allowTableOrdering: boolean;
+  @ApiProperty() tableOrderingNeedsApproval: boolean;
   @ApiProperty() ratingAvg: number;
   @ApiProperty() ratingCount: number;
   @ApiProperty({ type: [OpeningHoursDto] }) openingHours: OpeningHoursDto[];
@@ -285,4 +289,47 @@ export class GeocodeResultDto {
   @ApiProperty() lat: number;
   @ApiProperty() lng: number;
   @ApiPropertyOptional() placeId?: string;
+}
+
+// ───── kitchen (§7) ─────
+
+export class KitchenItemDto {
+  @ApiProperty() id: string;
+  @ApiProperty() bookingId: string;
+  @ApiProperty() bookingCode: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) tableCode: string | null;
+  @ApiProperty() partySize: number;
+  @ApiProperty() arrivalAt: string;
+  @ApiProperty({ description: 'Booking is CHECKED_IN' }) guestArrived: boolean;
+  @ApiProperty() nameSnapshot: string;
+  @ApiProperty() quantity: number;
+  @ApiProperty({ type: [OptionSnapshotDto] }) optionsSnapshot: OptionSnapshotDto[];
+  @ApiPropertyOptional({ nullable: true, type: String }) note: string | null;
+  @ApiProperty({ enum: Course, enumName: 'Course' }) course: Course;
+  @ApiProperty() prepMinutes: number;
+  @ApiProperty({ enum: KitchenStatus, enumName: 'KitchenStatus' }) kitchenStatus: KitchenStatus;
+  @ApiProperty({ description: '0 = pre-order, 1..n = ordered at the table' }) round: number;
+  @ApiPropertyOptional({ nullable: true, type: String }) scheduledStartAt: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) releasedAt: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) startedAt: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) readyAt: string | null;
+}
+
+export class KitchenQueueDto {
+  @ApiProperty({ description: 'Server time, for "late by" timers' }) now: string;
+  @ApiProperty({ type: [KitchenItemDto], description: 'COOKING first, then by fire time' }) active: KitchenItemDto[];
+  @ApiProperty({ type: [KitchenItemDto], description: 'Done, waiting for a waiter' }) ready: KitchenItemDto[];
+  @ApiProperty({ type: [KitchenItemDto], description: 'SCHEDULED (next 2 h) and HOLD (COD guest not here yet)' }) upcoming: KitchenItemDto[];
+}
+
+export class FireResultDto {
+  @ApiProperty() queued: number;
+}
+
+export class CapacityRuleDto {
+  @ApiProperty({ type: [Number], description: '0 = Sunday' }) weekdays: number[];
+  @ApiProperty({ description: 'Minutes from 00:00' }) startMinute: number;
+  @ApiProperty() endMinute: number;
+  @ApiProperty() windowMinutes: number;
+  @ApiProperty({ description: 'Most pre-ordered dishes starting in one window' }) maxItems: number;
 }

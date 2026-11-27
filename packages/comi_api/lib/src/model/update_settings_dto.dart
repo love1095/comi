@@ -46,6 +46,14 @@ class UpdateSettingsDto {
      this.allowTableChoice,
 
      this.cancelCutoffMinutes,
+
+     this.startEarlyOnCheckIn,
+
+     this.codStartOnDepart,
+
+     this.allowTableOrdering,
+
+     this.tableOrderingNeedsApproval,
   });
 
   @JsonKey(
@@ -204,6 +212,54 @@ class UpdateSettingsDto {
 
 
 
+  @JsonKey(
+    
+    name: r'startEarlyOnCheckIn',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? startEarlyOnCheckIn;
+
+
+
+  @JsonKey(
+    
+    name: r'codStartOnDepart',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? codStartOnDepart;
+
+
+
+  @JsonKey(
+    
+    name: r'allowTableOrdering',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? allowTableOrdering;
+
+
+
+  @JsonKey(
+    
+    name: r'tableOrderingNeedsApproval',
+    required: false,
+    includeIfNull: false,
+  )
+
+
+  final bool? tableOrderingNeedsApproval;
+
+
+
 
     bool operator ==(Object other) {
       return identical(this, other) ||
@@ -224,6 +280,10 @@ class UpdateSettingsDto {
             confirmGroupsOver,
             allowTableChoice,
             cancelCutoffMinutes,
+            startEarlyOnCheckIn,
+            codStartOnDepart,
+            allowTableOrdering,
+            tableOrderingNeedsApproval,
         ],
         [
             other.slotMinutes,
@@ -239,6 +299,10 @@ class UpdateSettingsDto {
             other.confirmGroupsOver,
             other.allowTableChoice,
             other.cancelCutoffMinutes,
+            other.startEarlyOnCheckIn,
+            other.codStartOnDepart,
+            other.allowTableOrdering,
+            other.tableOrderingNeedsApproval,
         ]
       );
     }
@@ -259,6 +323,10 @@ class UpdateSettingsDto {
         confirmGroupsOver,
         allowTableChoice,
         cancelCutoffMinutes,
+        startEarlyOnCheckIn,
+        codStartOnDepart,
+        allowTableOrdering,
+        tableOrderingNeedsApproval,
     ],);
 
   factory UpdateSettingsDto.fromJson(Map<String, dynamic> json) => _$UpdateSettingsDtoFromJson(json);

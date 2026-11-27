@@ -9,9 +9,11 @@ import { JobsService, QUEUES } from '../../jobs/queues';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AvailabilityService, mapOverlap } from '../availability/availability.service';
 import { choiceFits, pickTables } from '../availability/pick-tables';
-import { ACTIVE_STATUSES, assertTransition } from './booking.state';
+import { ACTIVE_STATUSES, assertTransition, noShowDeadline } from './booking.state';
 import { CreateBookingDto, MyBookingsQuery, RestaurantBookingsQuery } from './bookings.dto';
 import { priceCart } from './pricing';
+import { KitchenService } from '../kitchen/kitchen.service';
+import { RealtimeService } from '../realtime/realtime.service';
 
 type Tx = Prisma.TransactionClient;
 
@@ -20,7 +22,7 @@ const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O, 1/I/L
 
 export const bookingCode = () => 'CM-' + Array.from({ length: 5 }, () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)]).join('');
 
-const BOOKING_INCLUDE = {
+export const BOOKING_INCLUDE = {
   restaurant: { select: { id: true, slug: true, name: true, address: true, phone: true, coverPhotoUrl: true, timezone: true } },
   table: { select: { id: true, code: true, areaId: true } },
   order: { include: { items: { orderBy: [{ round: 'asc' }, { course: 'asc' }] } } },
@@ -34,6 +36,8 @@ export class BookingsService {
     private readonly audit: AuditService,
     private readonly jobs: JobsService,
     private readonly clock: Clock,
+    private readonly kitchen: KitchenService,
+    private readonly realtime: RealtimeService,
   ) {}
 
   /** POST /bookings (§8.2). Pay-at-restaurant (COD) only until payments arrive in Phase 4. */
@@ -76,6 +80,8 @@ export class BookingsService {
         const slot = await this.availability.slotAt(r, arrivalAt, tx);
         const tableIds = await this.chooseTables(tx, { userId, restaurantId: r.id, slot, partySize: dto.partySize, areaId: dto.areaId, holdId: dto.holdId });
 
+        // §7.6: too many pre-ordered dishes starting in the same kitchen window → KITCHEN_FULL.
+        await this.kitchen.assertCapacity(r, cart.lines, { arrival: slot.start, serveStyle: dto.serveStyle ?? 'BY_COURSE' }, tx);
         const created = await tx.booking.create({
           data: {
             code: await this.uniqueCode(tx),
@@ -113,6 +119,8 @@ export class BookingsService {
           },
           include: BOOKING_INCLUDE,
         });
+        // COD: dishes stay HOLD until check-in, but keep the planned fire times (capacity + "Upcoming" list).
+        if (cart.lines.length) await this.kitchen.planBooking(created.id, { arrival: slot.start, statuses: ['HOLD'], release: false }, tx);
         if (dto.holdId) await tx.tableHold.deleteMany({ where: { holdId: dto.holdId, userId } });
         await this.audit.log(
           { actorType: 'USER', actorId: userId, action: 'booking.create', entity: 'Booking', entityId: created.id, data: { tableIds, total: cart.subtotal } },
@@ -131,7 +139,9 @@ export class BookingsService {
         delay: APPROVAL_TIMEOUT_MS,
       });
     }
-    // TODO(phase2/realtime): emit booking.created to r:{restaurantId} + push to staff (§19).
+    if (booking.status === 'CONFIRMED') await this.scheduleNoShow(booking.id);
+    this.realtime.toRestaurant(r.id, 'booking.created', { bookingId: booking.id, status: booking.status, arrivalAt: booking.arrivalAt.toISOString() });
+    // TODO(phase2/push): push to staff (§19.2).
     return booking;
   }
 
@@ -230,6 +240,7 @@ export class BookingsService {
       cancelReason: p.reason,
     });
     await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
+    await this.jobs.remove(QUEUES.BOOKING, `noshow:${id}`);
     return result;
   }
 
@@ -239,6 +250,7 @@ export class BookingsService {
     if (!b.needsApproval || b.status !== 'PENDING') throw new AppError('INVALID_STATUS', 'Booking is not waiting for approval');
     const result = await this.changeStatus(id, 'CONFIRMED', { actorType: 'STAFF', actorId: staffId }, { needsApproval: false });
     await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
+    await this.scheduleNoShow(id);
     return result;
   }
 
@@ -273,8 +285,20 @@ export class BookingsService {
     return this.prisma.booking.findUniqueOrThrow({ where: { id }, include: BOOKING_INCLUDE });
   }
 
-  /** The only way to change booking status: state check + optimistic update + audit + cache bust. */
-  private async changeStatus(
+  /** Schedule (or move) the no-show-check job (§9.3). The job re-checks the deadline, so a stale one does nothing. */
+  async scheduleNoShow(id: string) {
+    const b = await this.prisma.booking.findUnique({
+      where: { id },
+      select: { status: true, arrivalAt: true, etaAt: true, graceExtendedAt: true, restaurant: { select: { graceMinutes: true } } },
+    });
+    if (!b || b.status !== 'CONFIRMED') return;
+    const at = noShowDeadline(b, b.restaurant.graceMinutes);
+    await this.jobs.remove(QUEUES.BOOKING, `noshow:${id}`);
+    await this.jobs.add(QUEUES.BOOKING, 'no-show-check', { bookingId: id }, { jobId: `noshow:${id}`, delay: Math.max(0, at.getTime() - this.clock.now().getTime()) });
+  }
+
+  /** The only way to change booking status: state check + optimistic update + audit + events. */
+  async changeStatus(
     id: string,
     to: BookingStatus,
     actor: { actorType: ActorType; actorId?: string },
@@ -298,8 +322,10 @@ export class BookingsService {
       );
       return b.restaurantId;
     }).then((rid) => this.availability.invalidate(rid));
-    // TODO(phase2/realtime): emit booking.updated / booking.status.
-    return this.prisma.booking.findUniqueOrThrow({ where: { id }, include: BOOKING_INCLUDE });
+    const after = await this.prisma.booking.findUniqueOrThrow({ where: { id }, include: BOOKING_INCLUDE });
+    this.realtime.toRestaurant(after.restaurantId, 'booking.updated', { bookingId: id, status: to });
+    this.realtime.toUser(after.userId, 'booking.status', { bookingId: id, status: to });
+    return after;
   }
 
   // ───── restaurant reads ─────

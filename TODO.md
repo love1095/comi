@@ -50,16 +50,16 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 
 ## Phase 3 — Kitchen queue and at-the-table (4–5 weeks)
 
-- [ ] Kitchen status flow + fire-time calculator (tests first) §6.2, §7
-- [ ] BullMQ worker + Bull Board; jobs: kitchen-release, kitchen-sweep, no-show-check, reminders
-- [ ] Kitchen capacity limit per 15 min §7.6
-- [ ] "I'm leaving now" §7.5
-- [ ] Check-in by QR + staff button §9
-- [ ] COD waits for check-in; no-show counter → must prepay
-- [ ] Socket.IO real-time §19
-- [ ] Order more at the table + call staff (more ice, bill please) §8.5
-- [ ] Restaurant app: kitchen screen, service requests, close bill, lunch & capacity settings
-- [ ] Customer app: QR scanner, live booking screen, "I'm leaving now", at-the-table screen
+- [x] Kitchen status flow + fire-time calculator (tests first) §6.2, §7 — `kitchen.state.ts` (transitions, fire times, capacity, travel time) + KitchenService (plan, release, queue, cook taps, fire a course)
+- [ ] BullMQ worker + Bull Board; jobs: kitchen-release, kitchen-sweep, no-show-check, reminders — ✅ kitchen-release, kitchen-sweep (every minute), no-show-check; ⬜ Bull Board, reminders (need push)
+- [x] Kitchen capacity limit per 15 min §7.6 — checked at booking (KITCHEN_FULL; table-only still allowed), rules editable in the restaurant app
+- [x] "I'm leaving now" §7.5 — distance from PostGIS, walk/motorbike estimate (⬜ Goong Distance Matrix), re-plans fire times, moves the no-show deadline
+- [x] Check-in by QR + staff button §9 — signed table/entrance QR, time window, takes the scanned table if free
+- [x] COD waits for check-in; no-show counter → must prepay — COD dishes HOLD with planned times; no-show at arrival/ETA + grace (+15 once by staff), 3 → mustPrepay
+- [x] Socket.IO real-time §19 — `/restaurant` + `/customer` namespaces, JWT + membership check, Redis adapter/emitter (worker can emit), apps reload over REST on hints and on reconnect
+- [x] Order more at the table + call staff (more ice, bill please) §8.5 — rounds (optional staff approval), live bill, service requests (no double ring), close bill
+- [x] Restaurant app: kitchen screen, service requests, close bill, lunch & capacity settings — kitchen display (3 columns, late flags, sound, screen kept on), bell with requests, guest arrived / keep table / add dishes / fire / close bill, settings screen
+- [x] Customer app: QR scanner, live booking screen, "I'm leaving now", at-the-table screen — scanner with typed-link fallback, live dish status, order more (table-only dishes allowed), call staff
 - [ ] Pilot: 1 lunch restaurant + 1 quán nhậu (COD only)
 
 ## Phase 3b — Group orders and split bill (2–3 weeks)

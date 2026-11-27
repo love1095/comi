@@ -14,7 +14,7 @@ PublicMenuItemDto dish(
 }) => PublicMenuItemDto(
   id: id,
   name: name,
-  translated: false,
+  translated: PublicMenuItemDtoTranslatedEnum.none,
   originalName: name,
   price: price,
   course: course,
@@ -33,7 +33,7 @@ RestaurantDetailDto restaurantDetail({num confirmGroupsOver = 10, num maxGroupSi
   id: 'r1',
   slug: 'quan-oc',
   name: 'Quán Ốc Bờ Kè',
-  translated: false,
+  translated: RestaurantDetailDtoTranslatedEnum.none,
   phone: '0901234567',
   address: '12 Bờ Kè, Quận 1',
   timezone: 'Asia/Ho_Chi_Minh',
@@ -196,6 +196,46 @@ class FakeBookings implements BookingsRepository {
   @override
   Future<MeDto> me() async =>
       MeDto(id: 'u1', phone: '+84901234567', locale: 'vi', noShowCount: 0, mustPrepay: false, createdAt: '2026-01-01');
+
+  String? checkedInWith;
+  List<CartLineDto>? ordered;
+  BillDto? billValue;
+
+  @override
+  Future<CustomerBookingDto> checkIn(String id, String qrPayload) async {
+    checkedInWith = qrPayload;
+    upcoming = [for (final b in upcoming) b.id == id ? bookingDto(id: id, status: BookingStatus.CHECKED_IN) : b];
+    return get(id);
+  }
+
+  @override
+  Future<DepartResultDto> depart(String id, double lat, double lng) async {
+    calls.add('depart $id');
+    return DepartResultDto(etaAt: '2026-12-02T12:07:00.000Z', travelMinutes: 7);
+  }
+
+  @override
+  Future<RoundResultDto> orderMore(String id, List<CartLineDto> items, {bool? ageConfirmed}) async {
+    ordered = items;
+    return RoundResultDto(round: 1, needsApproval: false, total: 0);
+  }
+
+  @override
+  Future<BillDto> bill(String id) async =>
+      billValue ?? BillDto(bookingId: id, code: 'CM', status: BookingStatus.CHECKED_IN, rounds: const [], total: 0);
+
+  @override
+  Future<ServiceRequestDto> requestService(String id, ServiceType type) async {
+    calls.add('service ${type.value}');
+    return ServiceRequestDto(
+      id: 's1',
+      bookingId: id,
+      bookingCode: 'CM',
+      type: type,
+      status: ServiceRequestDtoStatusEnum.OPEN,
+      createdAt: '2026-12-02T12:00:00Z',
+    );
+  }
 }
 
 MapTableStateDto mapTable(

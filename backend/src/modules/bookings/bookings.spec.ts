@@ -82,3 +82,14 @@ describe('booking state machine (§6.1)', () => {
     for (const s of ['COMPLETED', 'CANCELLED', 'NO_SHOW', 'EXPIRED'] as const) expect(allowedTransitions[s]).toEqual([]);
   });
 });
+
+describe('noShowDeadline (§9.3)', () => {
+  const { noShowDeadline } = jest.requireActual('./booking.state') as typeof import('./booking.state');
+  const arrivalAt = new Date('2026-12-02T05:00:00Z');
+  it('arrival + grace, later ETA wins, staff extension adds 15 min once', () => {
+    expect(noShowDeadline({ arrivalAt, etaAt: null, graceExtendedAt: null }, 30)).toEqual(new Date('2026-12-02T05:30:00Z'));
+    expect(noShowDeadline({ arrivalAt, etaAt: new Date('2026-12-02T05:10:00Z'), graceExtendedAt: null }, 30)).toEqual(new Date('2026-12-02T05:40:00Z'));
+    expect(noShowDeadline({ arrivalAt, etaAt: new Date('2026-12-02T04:50:00Z'), graceExtendedAt: null }, 30)).toEqual(new Date('2026-12-02T05:30:00Z'));
+    expect(noShowDeadline({ arrivalAt, etaAt: null, graceExtendedAt: arrivalAt }, 30)).toEqual(new Date('2026-12-02T05:45:00Z'));
+  });
+});

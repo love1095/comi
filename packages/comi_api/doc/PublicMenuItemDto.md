@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **id** | **String** |  | 
 **name** | **String** |  | 
 **description** | **String** |  | [optional] 
-**translated** | **bool** |  | 
+**translated** | **String** | machine = show \"auto-translated\" | 
 **originalName** | **String** | Vietnamese name (show to staff / taxi) | 
 **price** | **num** |  | 
 **course** | [**Course**](Course.md) |  | 

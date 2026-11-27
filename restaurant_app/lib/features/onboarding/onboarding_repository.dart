@@ -12,6 +12,7 @@ abstract class OnboardingRepository {
   Future<List<OpeningHoursDto>> setOpeningHours(String restaurantId, List<OpeningHoursItemDto> items);
   Future<ChecklistDto> checklist(String restaurantId);
   Future<RestaurantProfileDto> submit(String restaurantId);
+  Future<RestaurantProfileDto> updateSettings(String restaurantId, UpdateSettingsDto dto);
 }
 
 class ApiOnboardingRepository implements OnboardingRepository {
@@ -45,6 +46,10 @@ class ApiOnboardingRepository implements OnboardingRepository {
 
   @override
   Future<RestaurantProfileDto> submit(String rid) async => (await _api.restaurantSubmit(xRestaurantId: rid)).data!;
+
+  @override
+  Future<RestaurantProfileDto> updateSettings(String rid, UpdateSettingsDto dto) async =>
+      (await _api.restaurantUpdateSettings(xRestaurantId: rid, updateSettingsDto: dto)).data!;
 }
 
 final onboardingRepositoryProvider = Provider<OnboardingRepository>(

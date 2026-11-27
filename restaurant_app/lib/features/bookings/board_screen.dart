@@ -8,6 +8,7 @@ import '../../app/home_shell.dart';
 import '../../data/api_error.dart';
 import '../../data/session.dart';
 import '../onboarding/setup_screen.dart' show SetupBanner;
+import '../kitchen/service_requests.dart';
 import 'booking_widgets.dart';
 import 'bookings_repository.dart';
 
@@ -79,6 +80,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
       appBar: AppBar(
         title: Text(session?.restaurantName ?? 'comi'),
         actions: [
+          const ServiceRequestsButton(),
           IconButton(tooltip: 'Tải lại', onPressed: () => ref.invalidate(boardBookingsProvider), icon: const Icon(Icons.refresh)),
           const AccountMenu(),
         ],

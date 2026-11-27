@@ -15,6 +15,8 @@ import {
 } from './bookings.dto';
 import { BookingsService } from './bookings.service';
 import { IdempotencyService } from './idempotency';
+import { CustomerTableController, RestaurantTableController } from './table-service.controller';
+import { TableServiceService } from './table-service.service';
 
 const uuid = new ParseUUIDPipe();
 
@@ -112,7 +114,7 @@ export class RestaurantBookingsController {
 }
 
 @Module({
-  controllers: [BookingsController, RestaurantBookingsController],
-  providers: [BookingsService, IdempotencyService],
+  controllers: [BookingsController, RestaurantBookingsController, CustomerTableController, RestaurantTableController],
+  providers: [BookingsService, IdempotencyService, TableServiceService],
 })
 export class BookingsModule {}

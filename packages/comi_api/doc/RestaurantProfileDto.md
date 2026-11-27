@@ -36,6 +36,10 @@ Name | Type | Description | Notes
 **confirmGroupsOver** | **num** |  | 
 **allowTableChoice** | **bool** |  | 
 **cancelCutoffMinutes** | **num** |  | 
+**startEarlyOnCheckIn** | **bool** |  | 
+**codStartOnDepart** | **bool** |  | 
+**allowTableOrdering** | **bool** |  | 
+**tableOrderingNeedsApproval** | **bool** |  | 
 **ratingAvg** | **num** |  | 
 **ratingCount** | **num** |  | 
 **openingHours** | [**List&lt;OpeningHoursDto&gt;**](OpeningHoursDto.md) |  | 

@@ -2,6 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayMinSize,
+  IsLatitude,
+  IsLongitude,
   IsArray,
   IsBoolean,
   IsDateString,
@@ -18,7 +21,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { BookingStatus, Occasion, PaymentMode, ServeStyle } from '@prisma/client';
+import { BookingStatus, Occasion, PaymentMode, ServeStyle, ServiceType } from '@prisma/client';
 
 export class CartLineDto {
   @ApiProperty() @IsUUID() menuItemId: string;
@@ -65,4 +68,36 @@ export class RestaurantBookingsQuery {
   @ApiProperty({ example: '2026-12-02' }) @Matches(/^\d{4}-\d{2}-\d{2}$/) date: string;
   @ApiPropertyOptional({ enum: BookingStatus }) @IsOptional() @IsEnum(BookingStatus) status?: BookingStatus;
   @ApiPropertyOptional({ description: 'Booking code or phone' }) @IsOptional() @IsString() @MaxLength(30) q?: string;
+}
+
+// ───── at the table (§7.5, §8.5, §9.2) ─────
+
+export class CheckInDto {
+  @ApiProperty({ description: 'The scanned link: https://…/c/{slug}/{tableCode}?s=… or …/c/{slug}?s=…' })
+  @IsString()
+  @MinLength(10)
+  @MaxLength(500)
+  qrPayload: string;
+}
+
+export class DepartDto {
+  @ApiProperty() @IsLatitude() lat: number;
+  @ApiProperty() @IsLongitude() lng: number;
+}
+
+export class TableOrderDto {
+  @ApiProperty({ type: [CartLineDto] })
+  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => CartLineDto)
+  items: CartLineDto[];
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() ageConfirmed?: boolean;
+}
+
+export class ServiceRequestCreateDto {
+  @ApiProperty({ enum: ServiceType, enumName: 'ServiceType' }) @IsEnum(ServiceType) type: ServiceType;
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(200) note?: string;
+}
+
+export class CloseBillDto {
+  @ApiPropertyOptional({ description: 'VND; default = live bill total. Edit for dishes added outside the app.' })
+  @IsOptional() @IsInt() @Min(0) @Max(1_000_000_000) finalBillAmount?: number;
 }

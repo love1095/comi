@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **slug** | **String** |  | 
 **name** | **String** |  | 
 **description** | **String** |  | [optional] 
-**translated** | **bool** | True when name/description were translated to the requested language | 
+**translated** | **String** | none = Vietnamese original shown | 
 **phone** | **String** |  | 
 **address** | **String** |  | 
 **lat** | **num** |  | [optional] 

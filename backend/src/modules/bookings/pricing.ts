@@ -51,15 +51,15 @@ export const MAX_QTY_PER_LINE = 99;
 export function priceCart(
   lines: CartLine[],
   menu: Map<string, MenuItemForPricing>,
-  ctx: { hoursUntilArrival: number },
+  ctx: { hoursUntilArrival: number; atTable?: boolean }, // atTable: guest is seated — "table only" dishes and lead times no longer apply
 ): { lines: PricedLine[]; subtotal: number; hasAlcohol: boolean } {
   const priced: PricedLine[] = [];
   for (const line of lines) {
     const item = menu.get(line.menuItemId);
     if (!item || item.deletedAt) throw new AppError('ITEM_UNAVAILABLE', 'Dish not found', { menuItemId: line.menuItemId });
     if (!item.isAvailable) throw new AppError('ITEM_UNAVAILABLE', `${item.name} is sold out`, { menuItemId: item.id });
-    if (!item.isPreorderable) throw new AppError('ITEM_UNAVAILABLE', `${item.name} can only be ordered at the table`, { menuItemId: item.id });
-    if (item.leadHours > 0 && ctx.hoursUntilArrival < item.leadHours) {
+    if (!item.isPreorderable && !ctx.atTable) throw new AppError('ITEM_UNAVAILABLE', `${item.name} can only be ordered at the table`, { menuItemId: item.id });
+    if (!ctx.atTable && item.leadHours > 0 && ctx.hoursUntilArrival < item.leadHours) {
       throw new AppError('ITEM_UNAVAILABLE', `${item.name} must be ordered ${item.leadHours} h ahead`, { menuItemId: item.id, leadHours: item.leadHours });
     }
     if (!Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > MAX_QTY_PER_LINE) {

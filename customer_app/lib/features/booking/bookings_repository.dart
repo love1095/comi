@@ -1,6 +1,7 @@
 import 'package:comi_api/comi_api.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/realtime.dart';
 import '../../data/session.dart';
 
 abstract class BookingsRepository {
@@ -10,10 +11,18 @@ abstract class BookingsRepository {
   Future<CustomerBookingDto> cancel(String id, {String? reason});
   Future<ReorderDraftDto> reorder(String id);
   Future<MeDto> me();
+
+  // at the table (§7.5, §8.5, §9.2)
+  Future<CustomerBookingDto> checkIn(String id, String qrPayload);
+  Future<DepartResultDto> depart(String id, double lat, double lng);
+  Future<RoundResultDto> orderMore(String id, List<CartLineDto> items, {bool? ageConfirmed});
+  Future<BillDto> bill(String id);
+  Future<ServiceRequestDto> requestService(String id, ServiceType type);
 }
 
 class ApiBookingsRepository implements BookingsRepository {
-  ApiBookingsRepository(this._api, this._me);
+  ApiBookingsRepository(this._api, this._me, this._table);
+  final CustomerAtTheTableApi _table;
   final CustomerBookingsApi _api;
   final MeApi _me;
 
@@ -39,11 +48,38 @@ class ApiBookingsRepository implements BookingsRepository {
 
   @override
   Future<MeDto> me() async => (await _me.usersMe()).data!;
+
+  @override
+  Future<CustomerBookingDto> checkIn(String id, String qrPayload) async => (await _table.customerTableCheckIn(
+    id: id,
+    checkInDto: CheckInDto(qrPayload: qrPayload),
+  )).data!;
+
+  @override
+  Future<DepartResultDto> depart(String id, double lat, double lng) async => (await _table.customerTableDepart(
+    id: id,
+    departDto: DepartDto(lat: lat, lng: lng),
+  )).data!;
+
+  @override
+  Future<RoundResultDto> orderMore(String id, List<CartLineDto> items, {bool? ageConfirmed}) async => (await _table.customerTableOrder(
+    id: id,
+    tableOrderDto: TableOrderDto(items: items, ageConfirmed: ageConfirmed),
+  )).data!;
+
+  @override
+  Future<BillDto> bill(String id) async => (await _table.customerTableBill(id: id)).data!;
+
+  @override
+  Future<ServiceRequestDto> requestService(String id, ServiceType type) async => (await _table.customerTableService(
+    id: id,
+    serviceRequestCreateDto: ServiceRequestCreateDto(type: type),
+  )).data!;
 }
 
 final bookingsRepositoryProvider = Provider<BookingsRepository>((ref) {
   final api = ref.watch(apiProvider);
-  return ApiBookingsRepository(api.getCustomerBookingsApi(), api.getMeApi());
+  return ApiBookingsRepository(api.getCustomerBookingsApi(), api.getMeApi(), api.getCustomerAtTheTableApi());
 });
 
 final myBookingsProvider = FutureProvider.autoDispose.family<MyBookingsPageDto, bool>((ref, upcoming) {
@@ -51,9 +87,20 @@ final myBookingsProvider = FutureProvider.autoDispose.family<MyBookingsPageDto, 
   return ref.watch(bookingsRepositoryProvider).mine(upcoming: upcoming);
 });
 
-final bookingProvider = FutureProvider.autoDispose.family<CustomerBookingDto, String>(
-  (ref, id) => ref.watch(bookingsRepositoryProvider).get(id),
-);
+final bookingProvider = FutureProvider.autoDispose.family<CustomerBookingDto, String>((ref, id) {
+  ref.listen(realtimeEventsProvider, (_, next) {
+    if (next.value?.about(id) ?? false) ref.invalidateSelf();
+  });
+  return ref.watch(bookingsRepositoryProvider).get(id);
+});
+
+/// Live bill while seated; dish statuses update over the socket.
+final billProvider = FutureProvider.autoDispose.family<BillDto, String>((ref, id) {
+  ref.listen(realtimeEventsProvider, (_, next) {
+    if (next.value?.about(id) ?? false) ref.invalidateSelf();
+  });
+  return ref.watch(bookingsRepositoryProvider).bill(id);
+});
 
 String bookingStatusLabel(BookingStatus s, {bool needsApproval = false}) => switch (s) {
   BookingStatus.PENDING => needsApproval ? 'Chờ quán duyệt' : 'Đang xử lý',

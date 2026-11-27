@@ -6,13 +6,17 @@ import { Env } from '../config/env';
 /** Queue names (§20). Add one here when a new job type arrives. */
 export const QUEUES = {
   PHOTO: 'photo-process',
-  BOOKING: 'booking', // group-approval-timeout now; payment-timeout, no-show-check, reminders later
+  BOOKING: 'booking', // group-approval-timeout, no-show-check; payment-timeout, reminders later
+  KITCHEN: 'kitchen', // kitchen-release at fire time, kitchen-sweep every minute (§7.2, §7.4)
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
 export interface JobPayloads {
   'photo-process': { photoId: string };
   'group-approval-timeout': { bookingId: string };
+  'no-show-check': { bookingId: string };
+  'kitchen-release': { bookingId: string };
+  'kitchen-sweep': Record<string, never>;
 }
 
 export function redisConnection(url: string) {
@@ -57,6 +61,15 @@ export class JobsService implements OnModuleDestroy {
       await this.queue(queue).add(name, data, opts);
     } catch (e) {
       this.logger.error(`Failed to enqueue ${name} (${opts.jobId}): ${(e as Error).message}`);
+    }
+  }
+
+  /** Repeating job (one scheduler per name, so restarts do not duplicate it). */
+  async repeat<K extends keyof JobPayloads>(queue: QueueName, name: K, opts: { every: number }) {
+    try {
+      await this.queue(queue).upsertJobScheduler(`repeat:${name}`, { every: opts.every }, { name, data: {} });
+    } catch (e) {
+      this.logger.error(`Failed to schedule ${name}: ${(e as Error).message}`);
     }
   }
 

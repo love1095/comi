@@ -50,7 +50,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/r/:slug',
-        builder: (_, s) => RestaurantScreen(slug: s.pathParameters['slug']!),
+        builder: (_, s) => RestaurantScreen(slug: s.pathParameters['slug']!, tableBookingId: s.uri.queryParameters['table']),
         routes: [
           GoRoute(
             path: 'book',

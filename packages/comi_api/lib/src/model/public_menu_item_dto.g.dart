@@ -13,7 +13,7 @@ abstract class _$PublicMenuItemDtoCWProxy {
 
   PublicMenuItemDto description(String? description);
 
-  PublicMenuItemDto translated(bool translated);
+  PublicMenuItemDto translated(PublicMenuItemDtoTranslatedEnum translated);
 
   PublicMenuItemDto originalName(String originalName);
 
@@ -51,7 +51,7 @@ abstract class _$PublicMenuItemDtoCWProxy {
     String id,
     String name,
     String? description,
-    bool translated,
+    PublicMenuItemDtoTranslatedEnum translated,
     String originalName,
     num price,
     Course course,
@@ -85,7 +85,8 @@ class _$PublicMenuItemDtoCWProxyImpl implements _$PublicMenuItemDtoCWProxy {
       call(description: description);
 
   @override
-  PublicMenuItemDto translated(bool translated) => call(translated: translated);
+  PublicMenuItemDto translated(PublicMenuItemDtoTranslatedEnum translated) =>
+      call(translated: translated);
 
   @override
   PublicMenuItemDto originalName(String originalName) =>
@@ -172,7 +173,7 @@ class _$PublicMenuItemDtoCWProxyImpl implements _$PublicMenuItemDtoCWProxy {
           translated == const $CopyWithPlaceholder() || translated == null
           ? _value.translated
           // ignore: cast_nullable_to_non_nullable
-          : translated as bool,
+          : translated as PublicMenuItemDtoTranslatedEnum,
       originalName:
           originalName == const $CopyWithPlaceholder() || originalName == null
           ? _value.originalName
@@ -270,7 +271,10 @@ PublicMenuItemDto _$PublicMenuItemDtoFromJson(
     id: $checkedConvert('id', (v) => v as String),
     name: $checkedConvert('name', (v) => v as String),
     description: $checkedConvert('description', (v) => v as String?),
-    translated: $checkedConvert('translated', (v) => v as bool),
+    translated: $checkedConvert(
+      'translated',
+      (v) => $enumDecode(_$PublicMenuItemDtoTranslatedEnumEnumMap, v),
+    ),
     originalName: $checkedConvert('originalName', (v) => v as String),
     price: $checkedConvert('price', (v) => v as num),
     course: $checkedConvert('course', (v) => $enumDecode(_$CourseEnumMap, v)),
@@ -300,25 +304,32 @@ PublicMenuItemDto _$PublicMenuItemDtoFromJson(
   return val;
 });
 
-Map<String, dynamic> _$PublicMenuItemDtoToJson(PublicMenuItemDto instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'description': ?instance.description,
-      'translated': instance.translated,
-      'originalName': instance.originalName,
-      'price': instance.price,
-      'course': _$CourseEnumMap[instance.course]!,
-      'kind': _$ItemKindEnumMap[instance.kind]!,
-      'prepMinutes': instance.prepMinutes,
-      'isAvailable': instance.isAvailable,
-      'isPreorderable': instance.isPreorderable,
-      'isAlcohol': instance.isAlcohol,
-      'leadHours': instance.leadHours,
-      'tags': instance.tags,
-      'photos': instance.photos.map((e) => e.toJson()).toList(),
-      'optionGroups': instance.optionGroups.map((e) => e.toJson()).toList(),
-    };
+Map<String, dynamic> _$PublicMenuItemDtoToJson(
+  PublicMenuItemDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'description': ?instance.description,
+  'translated': _$PublicMenuItemDtoTranslatedEnumEnumMap[instance.translated]!,
+  'originalName': instance.originalName,
+  'price': instance.price,
+  'course': _$CourseEnumMap[instance.course]!,
+  'kind': _$ItemKindEnumMap[instance.kind]!,
+  'prepMinutes': instance.prepMinutes,
+  'isAvailable': instance.isAvailable,
+  'isPreorderable': instance.isPreorderable,
+  'isAlcohol': instance.isAlcohol,
+  'leadHours': instance.leadHours,
+  'tags': instance.tags,
+  'photos': instance.photos.map((e) => e.toJson()).toList(),
+  'optionGroups': instance.optionGroups.map((e) => e.toJson()).toList(),
+};
+
+const _$PublicMenuItemDtoTranslatedEnumEnumMap = {
+  PublicMenuItemDtoTranslatedEnum.none: 'none',
+  PublicMenuItemDtoTranslatedEnum.human: 'human',
+  PublicMenuItemDtoTranslatedEnum.machine: 'machine',
+};
 
 const _$CourseEnumMap = {
   Course.DRINK: 'DRINK',

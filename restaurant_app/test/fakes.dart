@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:comi_api/comi_api.dart';
+
+import 'package:restaurant_app/data/realtime.dart';
 import 'package:restaurant_app/features/bookings/bookings_repository.dart';
+import 'package:restaurant_app/features/kitchen/kitchen_repository.dart';
 import 'package:restaurant_app/features/onboarding/onboarding_repository.dart';
 import 'package:restaurant_app/features/tables/tables_repository.dart';
 
@@ -252,6 +257,10 @@ RestaurantProfileDto profileDto({
   confirmGroupsOver: 10,
   allowTableChoice: true,
   cancelCutoffMinutes: 60,
+  startEarlyOnCheckIn: true,
+  codStartOnDepart: false,
+  allowTableOrdering: true,
+  tableOrderingNeedsApproval: false,
   ratingAvg: 0,
   ratingCount: 0,
   openingHours: hours,
@@ -301,10 +310,147 @@ class FakeOnboardingRepository implements OnboardingRepository {
   @override
   Future<ChecklistDto> checklist(String restaurantId) async => ChecklistDto(complete: missing.isEmpty, missing: missing);
 
+  UpdateSettingsDto? settings;
+
+  @override
+  Future<RestaurantProfileDto> updateSettings(String restaurantId, UpdateSettingsDto dto) async {
+    settings = dto;
+    return profileValue;
+  }
+
   @override
   Future<RestaurantProfileDto> submit(String restaurantId) async {
     calls.add('submit');
     profileValue = profileDto(status: RestaurantStatus.PENDING_REVIEW, lat: 10.7);
     return profileValue;
+  }
+}
+
+class FakeRealtime implements RealtimeClient {
+  final controller = StreamController<RealtimeEvent>.broadcast();
+
+  void send(String name, [Map<String, dynamic> data = const {}]) => controller.add(RealtimeEvent(name, data));
+
+  @override
+  Stream<RealtimeEvent> get events => controller.stream;
+
+  @override
+  void dispose() => controller.close();
+}
+
+KitchenItemDto kitchenItem(
+  String id,
+  String name, {
+  KitchenStatus status = KitchenStatus.QUEUED,
+  Course course = Course.MAIN,
+  String? scheduled,
+  String? started,
+  num quantity = 1,
+  String table = 'A1',
+}) => KitchenItemDto(
+  id: id,
+  bookingId: 'b1',
+  bookingCode: 'CM-8K2P',
+  tableCode: table,
+  partySize: 4,
+  arrivalAt: '2026-12-02T05:00:00.000Z',
+  guestArrived: status != KitchenStatus.HOLD,
+  nameSnapshot: name,
+  quantity: quantity,
+  optionsSnapshot: const [],
+  course: course,
+  prepMinutes: 15,
+  kitchenStatus: status,
+  round: 0,
+  scheduledStartAt: scheduled,
+  startedAt: started,
+);
+
+class FakeKitchenRepository implements KitchenRepository {
+  FakeKitchenRepository({List<KitchenItemDto>? items, this.requests = const [], this.billValue}) : items = items ?? [];
+
+  List<KitchenItemDto> items;
+  List<ServiceRequestDto> requests;
+  BillDto? billValue;
+  final calls = <String>[];
+  String now = '2026-12-02T05:10:00.000Z';
+
+  @override
+  Future<KitchenQueueDto> queue() async => KitchenQueueDto(
+    now: now,
+    active: items.where((i) => i.kitchenStatus == KitchenStatus.QUEUED || i.kitchenStatus == KitchenStatus.COOKING).toList(),
+    ready: items.where((i) => i.kitchenStatus == KitchenStatus.READY).toList(),
+    upcoming: items.where((i) => i.kitchenStatus == KitchenStatus.HOLD || i.kitchenStatus == KitchenStatus.SCHEDULED).toList(),
+  );
+
+  @override
+  Future<KitchenItemDto> setStatus(String itemId, KitchenStatusDtoStatusEnum to) async {
+    calls.add('status $itemId ${to.value}');
+    final i = items.indexWhere((x) => x.id == itemId);
+    final old = items[i];
+    items[i] = kitchenItem(old.id, old.nameSnapshot, status: KitchenStatus.values.byName(to.value), started: now);
+    return items[i];
+  }
+
+  @override
+  Future<int> fire(String bookingId, {Course? course}) async {
+    calls.add('fire $bookingId ${course?.value ?? 'ALL'}');
+    return 1;
+  }
+
+  @override
+  Future<List<ServiceRequestDto>> openRequests() async => requests;
+
+  @override
+  Future<void> finishRequest(String id) async {
+    calls.add('done $id');
+    requests = requests.where((r) => r.id != id).toList();
+  }
+
+  BookingDetailDto Function(String id)? detail;
+
+  @override
+  Future<BookingDetailDto> checkIn(String bookingId) async {
+    calls.add('checkIn $bookingId');
+    return detail!(bookingId);
+  }
+
+  @override
+  Future<BookingDetailDto> extendGrace(String bookingId) async {
+    calls.add('extend $bookingId');
+    return detail!(bookingId);
+  }
+
+  @override
+  Future<BillDto> bill(String bookingId) async =>
+      billValue ?? BillDto(bookingId: bookingId, code: 'CM', status: BookingStatus.CHECKED_IN, rounds: const [], total: 0);
+
+  @override
+  Future<BookingDetailDto> closeBill(String bookingId, {int? amount}) async {
+    calls.add('close $bookingId $amount');
+    return detail!(bookingId);
+  }
+
+  @override
+  Future<RoundResultDto> addRound(String bookingId, List<CartLineDto> items) async {
+    calls.add('round $bookingId ${items.map((l) => '${l.menuItemId}x${l.quantity}').join(',')}');
+    return RoundResultDto(round: 1, needsApproval: false, total: 0);
+  }
+
+  @override
+  Future<int> approveRound(String bookingId, int round) async {
+    calls.add('approve $bookingId $round');
+    return 1;
+  }
+
+  List<CapacityRuleInput>? savedRules;
+
+  @override
+  Future<List<CapacityRuleDto>> capacityRules() async => const [];
+
+  @override
+  Future<List<CapacityRuleDto>> saveCapacityRules(List<CapacityRuleInput> rules) async {
+    savedRules = rules;
+    return const [];
   }
 }

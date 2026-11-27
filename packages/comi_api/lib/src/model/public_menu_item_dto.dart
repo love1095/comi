@@ -94,6 +94,7 @@ class PublicMenuItemDto {
 
 
 
+      /// machine = show \"auto-translated\"
   @JsonKey(
     
     name: r'translated',
@@ -102,7 +103,7 @@ class PublicMenuItemDto {
   )
 
 
-  final bool translated;
+  final PublicMenuItemDtoTranslatedEnum translated;
 
 
 
@@ -327,4 +328,22 @@ class PublicMenuItemDto {
   }
 
 }
+
+/// machine = show \"auto-translated\"
+enum PublicMenuItemDtoTranslatedEnum {
+@JsonValue(r'none')
+none(r'none'),
+@JsonValue(r'human')
+human(r'human'),
+@JsonValue(r'machine')
+machine(r'machine');
+
+const PublicMenuItemDtoTranslatedEnum(this.value);
+
+final String value;
+
+@override
+String toString() => value;
+}
+
 
