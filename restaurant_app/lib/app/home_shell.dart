@@ -66,10 +66,16 @@ class AccountMenu extends ConsumerWidget {
     tooltip: 'Tài khoản',
     onSelected: (v) => switch (v) {
       'settings' => context.go('/settings'),
+      'reports' => context.go('/reports'),
+      'statements' => context.go('/statements'),
+      'invoices' => context.go('/invoices'),
       'switch' => ref.read(sessionProvider.notifier).switchRestaurant(),
       _ => ref.read(sessionProvider.notifier).logout(),
     },
     itemBuilder: (_) => const [
+      PopupMenuItem(value: 'reports', child: Text('Báo cáo')),
+      PopupMenuItem(value: 'invoices', child: Text('Hoá đơn VAT')),
+      PopupMenuItem(value: 'statements', child: Text('Phí comi')),
       PopupMenuItem(value: 'settings', child: Text('Cài đặt')),
       PopupMenuItem(value: 'switch', child: Text('Đổi quán')),
       PopupMenuItem(value: 'logout', child: Text('Đăng xuất')),

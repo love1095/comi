@@ -4,6 +4,7 @@ import { Clock } from '../../common/clock';
 import { RedisService } from '../../common/redis';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RealtimeService } from '../realtime/realtime.service';
+import { FeesService } from '../fees/fees.service';
 import { NO_SHOW_LIMIT, noShowDeadline } from './booking.state';
 
 /**
@@ -18,6 +19,7 @@ export class BookingTimeouts {
     private readonly clock: Clock,
     private readonly redis: RedisService,
     private readonly realtime: RealtimeService,
+    private readonly fees: FeesService,
   ) {}
 
   /** group-approval-timeout: large group not approved in 2 h → cancelled (§8.4). */
@@ -72,6 +74,35 @@ export class BookingTimeouts {
     this.realtime.toKitchen(done.restaurantId, 'kitchen.item_updated', { bookingId });
     this.realtime.toUser(done.userId, 'booking.status', { bookingId, status: 'NO_SHOW' });
     // TODO(phase2/push): "Your booking was marked as no-show".
+    await this.fees.finalize(bookingId);
+    return true;
+  }
+
+  /** cod-close-reminder (§10.4): seated 6 h and the bill is still open → nudge the restaurant. */
+  async codCloseReminder(bookingId: string) {
+    const b = await this.prisma.booking.findUnique({ where: { id: bookingId }, select: { status: true, restaurantId: true, code: true } });
+    if (b?.status !== 'CHECKED_IN') return false;
+    this.realtime.toRestaurant(b.restaurantId, 'booking.updated', { bookingId, reminder: 'close_bill', code: b.code });
+    // TODO(phase2/push): push to cashier "Bàn CM-… chưa tính tiền".
+    return true;
+  }
+
+  /** cod-auto-close (§10.4): still open after 24 h → COMPLETED with the bill from the app. */
+  async codAutoClose(bookingId: string) {
+    const now = this.clock.now();
+    const closed = await this.prisma.$transaction(async (tx) => {
+      const items = await tx.orderItem.findMany({ where: { order: { bookingId }, kitchenStatus: { not: 'CANCELLED' } }, select: { unitPrice: true, quantity: true } });
+      const amount = items.reduce((s, i) => s + i.unitPrice * i.quantity, 0);
+      const { count } = await tx.booking.updateMany({ where: { id: bookingId, status: 'CHECKED_IN' }, data: { status: 'COMPLETED', completedAt: now, finalBillAmount: amount } });
+      if (!count) return null;
+      await tx.order.updateMany({ where: { bookingId, status: { not: 'CANCELLED' } }, data: { status: 'SERVED' } });
+      await this.audit.log({ actorType: 'SYSTEM', action: 'booking.auto_closed', entity: 'Booking', entityId: bookingId, data: { finalBillAmount: amount } }, tx);
+      return tx.booking.findUniqueOrThrow({ where: { id: bookingId }, select: { restaurantId: true, userId: true } });
+    });
+    if (!closed) return false;
+    await this.fees.finalize(bookingId);
+    this.realtime.toRestaurant(closed.restaurantId, 'booking.updated', { bookingId, status: 'COMPLETED' });
+    this.realtime.toUser(closed.userId, 'booking.status', { bookingId, status: 'COMPLETED' });
     return true;
   }
 }

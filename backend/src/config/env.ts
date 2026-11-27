@@ -32,6 +32,12 @@ export const envSchema = z.object({
   GOOGLE_PLACES_API_KEY: z.string().optional(),
 
   EMAIL_FROM: z.string().default('comi <no-reply@comi.vn>'),
+  SMTP_URL: z.string().optional(), // dev: smtp://localhost:1025 (Mailpit)
+
+  // Where restaurants pay their monthly statement (VietQR, §11.3)
+  PLATFORM_BANK_BIN: z.string().optional(), // e.g. 970436 = Vietcombank
+  PLATFORM_BANK_ACCOUNT: z.string().optional(),
+  PLATFORM_BANK_ACCOUNT_NAME: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
 
   NO_SHOW_LIMIT: z.coerce.number().int().default(3),

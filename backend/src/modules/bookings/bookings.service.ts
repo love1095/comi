@@ -14,6 +14,7 @@ import { CreateBookingDto, MyBookingsQuery, RestaurantBookingsQuery } from './bo
 import { priceCart } from './pricing';
 import { KitchenService } from '../kitchen/kitchen.service';
 import { RealtimeService } from '../realtime/realtime.service';
+import { FeesService } from '../fees/fees.service';
 
 type Tx = Prisma.TransactionClient;
 
@@ -38,6 +39,7 @@ export class BookingsService {
     private readonly clock: Clock,
     private readonly kitchen: KitchenService,
     private readonly realtime: RealtimeService,
+    private readonly fees: FeesService,
   ) {}
 
   /** POST /bookings (§8.2). Pay-at-restaurant (COD) only until payments arrive in Phase 4. */
@@ -140,6 +142,7 @@ export class BookingsService {
       });
     }
     if (booking.status === 'CONFIRMED') await this.scheduleNoShow(booking.id);
+    await this.fees.ensurePlans(r.id, now); // §11.2: first order starts the launch fee plans
     this.realtime.toRestaurant(r.id, 'booking.created', { bookingId: booking.id, status: booking.status, arrivalAt: booking.arrivalAt.toISOString() });
     // TODO(phase2/push): push to staff (§19.2).
     return booking;
@@ -239,7 +242,8 @@ export class BookingsService {
       cancelledBy: p.cancelledBy,
       cancelReason: p.reason,
     });
-    await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
+    await this.jobs.remove(QUEUES.BOOKING, `noshow:${id}`);
+    await this.fees.finalize(id); // waive a pending fee
     await this.jobs.remove(QUEUES.BOOKING, `noshow:${id}`);
     return result;
   }

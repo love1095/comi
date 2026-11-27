@@ -333,3 +333,66 @@ export class CapacityRuleDto {
   @ApiProperty() windowMinutes: number;
   @ApiProperty({ description: 'Most pre-ordered dishes starting in one window' }) maxItems: number;
 }
+
+// ───── fees, statements, reports (§11) ─────
+
+export class StatementDto {
+  @ApiProperty() id: string;
+  @ApiProperty() restaurantId: string;
+  @ApiProperty({ example: '2026-12' }) periodMonth: string;
+  @ApiProperty() bookingCount: number;
+  @ApiProperty() totalBase: number;
+  @ApiProperty() totalFee: number;
+  @ApiProperty() platformVoucherCredit: number;
+  @ApiProperty({ description: 'Negative = comi pays the restaurant' }) amountDue: number;
+  @ApiProperty({ enum: ['DRAFT', 'ISSUED', 'PAID', 'OVERDUE'] }) status: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) issuedAt: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) paidAt: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) dueAt: string | null;
+  @ApiProperty({ description: 'Write this on the bank transfer' }) transferMemo: string;
+  @ApiPropertyOptional({ nullable: true, type: String, description: 'VietQR image to scan with a bank app' }) vietQrUrl: string | null;
+}
+
+export class StatementLineDto {
+  @ApiProperty() bookingId: string;
+  @ApiProperty() bookingCode: string;
+  @ApiProperty() arrivalAt: string;
+  @ApiProperty() partySize: number;
+  @ApiProperty() baseAmount: number;
+  @ApiProperty() rateBps: number;
+  @ApiProperty() feeAmount: number;
+}
+
+export class StatementDetailDto extends StatementDto {
+  @ApiProperty({ type: [StatementLineDto] }) lines: StatementLineDto[];
+}
+
+export class ReportDayDto {
+  @ApiProperty() date: string;
+  @ApiProperty() bookings: number;
+  @ApiProperty() guests: number;
+  @ApiProperty() revenue: number;
+}
+
+export class ReportDishDto {
+  @ApiProperty() name: string;
+  @ApiProperty() quantity: number;
+  @ApiProperty() revenue: number;
+}
+
+export class ReportDto {
+  @ApiProperty() from: string;
+  @ApiProperty() to: string;
+  @ApiProperty() bookings: number;
+  @ApiProperty() completed: number;
+  @ApiProperty() cancelled: number;
+  @ApiProperty() noShows: number;
+  @ApiProperty({ description: 'Percent of ended bookings' }) noShowRate: number;
+  @ApiProperty() guests: number;
+  @ApiProperty({ description: 'Sum of closed bills (VND)' }) revenue: number;
+  @ApiProperty() averageBill: number;
+  @ApiProperty() preOrderValue: number;
+  @ApiProperty() platformFees: number;
+  @ApiProperty({ type: [ReportDayDto] }) byDay: ReportDayDto[];
+  @ApiProperty({ type: [ReportDishDto] }) topDishes: ReportDishDto[];
+}

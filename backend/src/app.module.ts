@@ -11,8 +11,11 @@ import { AvailabilityModule } from './modules/availability/availability.controll
 import { BookingsModule } from './modules/bookings/bookings.controller';
 import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { GroupModule } from './modules/group/group.controller';
+import { FeesModule } from './modules/fees/fees.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 import { RealtimeGatewayModule } from './modules/realtime/realtime.gateway';
 import { RealtimeModule } from './modules/realtime/realtime.service';
+import { MailModule } from './common/mail';
 import { DiscoveryModule } from './modules/discovery/discovery.controller';
 import { ConfigModule } from './config/config.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -58,9 +61,12 @@ const isDev = (process.env.NODE_ENV ?? 'development') === 'development';
     DiscoveryModule,
     BookingsModule,
     RealtimeModule,
+    MailModule,
     RealtimeGatewayModule,
     KitchenModule,
     GroupModule,
+    FeesModule,
+    InvoicesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

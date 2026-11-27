@@ -78,10 +78,10 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 - [ ] Prepaid as default at lunch; COD warning
 - [ ] Group payments (each guest pays own part)
 - [ ] MoMo, then VNPay, then ZaloPay
-- [ ] Fee calculator + fee plans (1% first 3 months → 2%, min fee) §11
-- [ ] Monthly statements: job, PDF, email, VietQR to pay
-- [ ] VAT invoice requests §13
-- [ ] Restaurant reports
+- [x] Fee calculator + fee plans (1% first 3 months → 2%, min fee) §11 — pure `fee-calculator.ts` (tests first); launch plans on the first booking; fee record when a bill closes / no-show / cancel (waived); forgotten COD bills: reminder at 6 h, auto-close at 24 h
+- [x] Monthly statements: job, PDF, email, VietQR to pay — `statement-generate` 02:00 on the 1st, overdue after 15 days, restaurant paused after 30; PDF (Vietnamese font), email via SMTP (Mailpit in dev), VietQR link + transfer memo; admin marks paid / re-runs a month; restaurant app screen — ⬜ platform bank account in env
+- [x] VAT invoice requests §13 — customer form (MST check, saved profiles) during the meal or 24 h after; restaurant marks issued (invoice no.) or rejects; emails to restaurant and customer — ⬜ 3-day reminder (needs push)
+- [x] Restaurant reports — revenue, bookings, guests, average bill, no-show rate, comi fees, by day, best dishes
 - [ ] ⚠️ **Minimum refund before prepaid goes live:** at least full refund when the restaurant cancels or the customer cancels before cutoff (can be manual by restaurant + admin tracking). Full refund system is in "Later" below.
 
 ## Phase 5 — Growth + tourists (4–5 weeks)

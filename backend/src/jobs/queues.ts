@@ -8,6 +8,7 @@ export const QUEUES = {
   PHOTO: 'photo-process',
   BOOKING: 'booking', // group-approval-timeout, no-show-check; payment-timeout, reminders later
   KITCHEN: 'kitchen', // kitchen-release at fire time, kitchen-sweep every minute (§7.2, §7.4)
+  BILLING: 'billing', // statement-generate (02:00 on the 1st), statement-overdue (daily) §11.3
 } as const;
 export type QueueName = (typeof QUEUES)[keyof typeof QUEUES];
 
@@ -18,6 +19,10 @@ export interface JobPayloads {
   'kitchen-release': { bookingId: string };
   'kitchen-sweep': Record<string, never>;
   'group-cutoff': { bookingId: string };
+  'cod-close-reminder': { bookingId: string };
+  'cod-auto-close': { bookingId: string };
+  'statement-generate': Record<string, never>;
+  'statement-overdue': Record<string, never>;
 }
 
 export function redisConnection(url: string) {
@@ -66,9 +71,9 @@ export class JobsService implements OnModuleDestroy {
   }
 
   /** Repeating job (one scheduler per name, so restarts do not duplicate it). */
-  async repeat<K extends keyof JobPayloads>(queue: QueueName, name: K, opts: { every: number }) {
+  async repeat<K extends keyof JobPayloads>(queue: QueueName, name: K, opts: { every: number } | { pattern: string; tz: string }) {
     try {
-      await this.queue(queue).upsertJobScheduler(`repeat:${name}`, { every: opts.every }, { name, data: {} });
+      await this.queue(queue).upsertJobScheduler(`repeat:${name}`, opts, { name, data: {} });
     } catch (e) {
       this.logger.error(`Failed to schedule ${name}: ${(e as Error).message}`);
     }

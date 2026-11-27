@@ -55,6 +55,9 @@ import 'package:comi_api/src/model/import_error_dto.dart';
 import 'package:comi_api/src/model/import_preview_dto.dart';
 import 'package:comi_api/src/model/import_result_dto.dart';
 import 'package:comi_api/src/model/imported_item_dto.dart';
+import 'package:comi_api/src/model/invoice_profile_dto.dart';
+import 'package:comi_api/src/model/invoice_request_create_dto.dart';
+import 'package:comi_api/src/model/invoice_request_dto.dart';
 import 'package:comi_api/src/model/join_group_dto.dart';
 import 'package:comi_api/src/model/kitchen_item_dto.dart';
 import 'package:comi_api/src/model/kitchen_queue_dto.dart';
@@ -66,6 +69,7 @@ import 'package:comi_api/src/model/map_element_dto.dart';
 import 'package:comi_api/src/model/map_element_response_dto.dart';
 import 'package:comi_api/src/model/map_pin_dto.dart';
 import 'package:comi_api/src/model/map_table_state_dto.dart';
+import 'package:comi_api/src/model/mark_issued_dto.dart';
 import 'package:comi_api/src/model/mark_paid_dto.dart';
 import 'package:comi_api/src/model/me_dto.dart';
 import 'package:comi_api/src/model/membership_dto.dart';
@@ -96,6 +100,9 @@ import 'package:comi_api/src/model/reorder_draft_dto.dart';
 import 'package:comi_api/src/model/reorder_dto.dart';
 import 'package:comi_api/src/model/reorder_line_dto.dart';
 import 'package:comi_api/src/model/replace_opening_hours_dto.dart';
+import 'package:comi_api/src/model/report_day_dto.dart';
+import 'package:comi_api/src/model/report_dish_dto.dart';
+import 'package:comi_api/src/model/report_dto.dart';
 import 'package:comi_api/src/model/restaurant_cancel_dto.dart';
 import 'package:comi_api/src/model/restaurant_card_dto.dart';
 import 'package:comi_api/src/model/restaurant_detail_dto.dart';
@@ -116,6 +123,9 @@ import 'package:comi_api/src/model/staff_menu_category_dto.dart';
 import 'package:comi_api/src/model/staff_menu_item_dto.dart';
 import 'package:comi_api/src/model/staff_register_dto.dart';
 import 'package:comi_api/src/model/start_group_dto.dart';
+import 'package:comi_api/src/model/statement_detail_dto.dart';
+import 'package:comi_api/src/model/statement_dto.dart';
+import 'package:comi_api/src/model/statement_line_dto.dart';
 import 'package:comi_api/src/model/suggest_dish_dto.dart';
 import 'package:comi_api/src/model/suggest_dto.dart';
 import 'package:comi_api/src/model/suggest_restaurant_dto.dart';
@@ -272,6 +282,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ImportResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ImportedItemDto':
           return ImportedItemDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'InvoiceProfileDto':
+          return InvoiceProfileDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'InvoiceRequestCreateDto':
+          return InvoiceRequestCreateDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'InvoiceRequestDto':
+          return InvoiceRequestDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ItemKind':
           
           
@@ -303,6 +319,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return MapPinDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MapTableStateDto':
           return MapTableStateDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MarkIssuedDto':
+          return MarkIssuedDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MarkPaidDto':
           return MarkPaidDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MeDto':
@@ -369,6 +387,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ReorderLineDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ReplaceOpeningHoursDto':
           return ReplaceOpeningHoursDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReportDayDto':
+          return ReportDayDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReportDishDto':
+          return ReportDishDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ReportDto':
+          return ReportDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RestaurantCancelDto':
           return RestaurantCancelDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RestaurantCardDto':
@@ -424,6 +448,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           
         case 'StartGroupDto':
           return StartGroupDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'StatementDetailDto':
+          return StatementDetailDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'StatementDto':
+          return StatementDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'StatementLineDto':
+          return StatementLineDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SuggestDishDto':
           return SuggestDishDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'SuggestDto':

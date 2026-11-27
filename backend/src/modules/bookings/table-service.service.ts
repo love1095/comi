@@ -12,6 +12,7 @@ import { AvailabilityService } from '../availability/availability.service';
 import { KitchenService } from '../kitchen/kitchen.service';
 import { travelMinutes } from '../kitchen/kitchen.state';
 import { RealtimeService } from '../realtime/realtime.service';
+import { FeesService } from '../fees/fees.service';
 import { entranceQrSignature, parseQrPayload, tableQrSignature, verifySignature } from '../tables/qr';
 import { noShowDeadline } from './booking.state';
 import { BOOKING_INCLUDE, BookingsService } from './bookings.service';
@@ -41,6 +42,7 @@ export class TableServiceService {
     private readonly audit: AuditService,
     private readonly jobs: JobsService,
     private readonly clock: Clock,
+    private readonly fees: FeesService,
     @Inject(ENV) private readonly env: Env,
   ) {}
 
@@ -114,6 +116,9 @@ export class TableServiceService {
     // COD dishes start now (§7.2). Early guest: start now too unless the restaurant turned that off (§7.4).
     const arrival = now < b.arrivalAt && !b.restaurant.startEarlyOnCheckIn ? b.arrivalAt : now;
     await this.kitchen.planBooking(b.id, { arrival, statuses: ['HOLD', 'SCHEDULED'], release: true, courses: ['DRINK', 'STARTER', 'MAIN', 'DESSERT'] });
+    // §10.4: remind to close a forgotten bill after 6 h, close it automatically after 24 h.
+    await this.jobs.add(QUEUES.BOOKING, 'cod-close-reminder', { bookingId: b.id }, { jobId: `codclose:${b.id}`, delay: 6 * 3_600_000 });
+    await this.jobs.add(QUEUES.BOOKING, 'cod-auto-close', { bookingId: b.id }, { jobId: `codauto:${b.id}`, delay: 24 * 3_600_000 });
     this.realtime.toRestaurant(b.restaurantId, 'booking.checked_in', { bookingId: b.id, method });
     return method === 'QR' ? this.prisma.booking.findUniqueOrThrow({ where: { id: b.id }, include: BOOKING_INCLUDE }) : result;
   }
@@ -264,6 +269,9 @@ export class TableServiceService {
     if (b.status !== 'CHECKED_IN') throw new AppError('INVALID_STATUS', 'Guest has not checked in');
     const amount = finalBillAmount ?? (await this.bill(id, { restaurantId })).total;
     await this.bookings.changeStatus(id, 'COMPLETED', { actorType: 'STAFF', actorId: staffId }, { completedAt: this.clock.now(), finalBillAmount: amount });
+    await this.fees.finalize(id); // §11.1: COD fee on max(pre-order, final bill)
+    await this.jobs.remove(QUEUES.BOOKING, `codclose:${id}`);
+    await this.jobs.remove(QUEUES.BOOKING, `codauto:${id}`);
     await this.prisma.order.updateMany({ where: { bookingId: id, status: { not: 'CANCELLED' } }, data: { status: 'SERVED' } });
     await this.prisma.serviceRequest.updateMany({ where: { bookingId: id, status: 'OPEN' }, data: { status: 'DONE', doneAt: this.clock.now() } });
     // TODO(phase3b): "Get home safe" ride links; TODO(phase4): fee record from finalBillAmount.

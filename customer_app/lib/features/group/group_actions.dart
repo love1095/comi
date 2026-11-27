@@ -57,6 +57,14 @@ class _GroupActionsState extends ConsumerState<GroupActions> {
             icon: const Icon(Icons.call_split),
             label: const Text('Chia hoá đơn'),
           ),
+        if (seated) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/invoice/${widget.booking.id}'),
+            icon: const Icon(Icons.receipt_long_outlined),
+            label: const Text('Yêu cầu hoá đơn VAT'),
+          ),
+        ],
         if (s == BookingStatus.COMPLETED) ...[const SizedBox(height: 8), const GetHomeSafeCard()],
       ],
     );
