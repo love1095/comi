@@ -1,0 +1,29 @@
+name: comi_workspace
+publish_to: none
+environment:
+  sdk: ^3.14.0
+workspace:
+  - packages/comi_api
+  - packages/shared_ui
+  - restaurant_app
+  - customer_app
+dev_dependencies:
+  melos: ^7.0.0
+
+melos:
+  scripts:
+    analyze:
+      run: dart analyze .
+      exec: { concurrency: 1 }
+    test:
+      run: flutter test
+      exec: { concurrency: 1 }
+      packageFilters: { dirExists: test }
+    gen:
+      description: Run build_runner (freezed, json, riverpod)
+      run: dart run build_runner build -d
+      exec: { concurrency: 1 }
+      packageFilters: { dependsOn: build_runner }
+    api:generate:
+      description: Regenerate the Dart API client from backend/openapi.json (run "npm run openapi" in backend first)
+      run: npx -y @openapitools/openapi-generator-cli@2 generate -i backend/openapi.json -g dart-dio -o packages/comi_api -c packages/comi_api.openapi.yaml && cd packages/comi_api && dart run build_runner build -d

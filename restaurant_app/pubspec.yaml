@@ -1,0 +1,36 @@
+name: restaurant_app
+description: comi for restaurants — bookings board, table map, menu (tablet first, also phone).
+publish_to: 'none'
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  material_ui: ^1.1.0
+  comi_api:
+    path: ../packages/comi_api
+  shared_ui:
+    path: ../packages/shared_ui
+  dio: ^5.11.0
+  flutter_riverpod: ^3.5.0
+  go_router: ^18.1.0
+  flutter_secure_storage: ^11.2.0
+  intl: any
+  file_picker: ^13.4.1
+  image_picker: ^1.2.4
+  crop_your_image: ^2.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true

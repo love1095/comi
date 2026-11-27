@@ -1,0 +1,29 @@
+name: comi
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: comi
+      POSTGRES_PASSWORD: comi
+      POSTGRES_DB: comi
+    ports: ["${POSTGRES_PORT:-5433}:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U comi"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["8025:8025", "1025:1025"]
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,942 @@
+// comi — database schema. Source: docs/TECHNICAL_SPEC.md §5.3 + §5.5
+// Conventions (§5.1): uuid ids, money = Int VND, rates = Int basis points, times = UTC.
+// PostGIS location column, trigram index and booking exclusion constraint live in the
+// raw SQL migration (prisma/migrations/*_postgis_and_constraints).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, btree_gist, pg_trgm, unaccent]
+}
+
+// ───────────── Users ─────────────
+model User {
+  id              String           @id @default(uuid())
+  firebaseUid     String           @unique
+  phone           String?          @unique
+  email           String?
+  name            String?
+  avatarUrl       String?
+  locale          String           @default("vi") // vi, en, ko, zh, ja
+  noShowCount     Int              @default(0)
+  mustPrepay      Boolean          @default(false)
+  status          UserStatus       @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  bookings        Booking[]
+  deviceTokens    DeviceToken[]
+  invoiceProfiles InvoiceProfile[]
+  reviews         Review[]
+  refreshTokens   RefreshToken[]
+  favorites       FavoriteItem[]
+  savedOrders     SavedOrder[]
+  preference      UserPreference?
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+model DeviceToken {
+  id        String     @id @default(uuid())
+  userId    String?
+  staffId   String?
+  token     String     @unique
+  platform  String // ios | android
+  createdAt DateTime   @default(now())
+  user      User?      @relation(fields: [userId], references: [id])
+  staff     StaffUser? @relation(fields: [staffId], references: [id])
+}
+
+model StaffUser {
+  id            String             @id @default(uuid())
+  email         String             @unique
+  passwordHash  String
+  name          String
+  phone         String?
+  isAdmin       Boolean            @default(false) // platform admin (AdminJS / admin endpoints)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  memberships   RestaurantMember[]
+  deviceTokens  DeviceToken[]
+  refreshTokens RefreshToken[]
+}
+
+model RestaurantMember {
+  id           String     @id @default(uuid())
+  restaurantId String
+  staffId      String
+  role         StaffRole
+  createdAt    DateTime   @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  staff        StaffUser  @relation(fields: [staffId], references: [id])
+
+  @@unique([restaurantId, staffId])
+}
+
+enum StaffRole {
+  OWNER
+  MANAGER
+  CASHIER
+  KITCHEN
+}
+
+// Refresh tokens: random, stored hashed, rotated on each use (§18.1).
+// Reuse of a rotated token revokes the whole family.
+model RefreshToken {
+  id           String     @id @default(uuid())
+  tokenHash    String     @unique
+  familyId     String
+  userId       String?
+  staffId      String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?
+  createdAt    DateTime   @default(now())
+  user         User?      @relation(fields: [userId], references: [id])
+  staff        StaffUser? @relation(fields: [staffId], references: [id])
+
+  @@index([familyId])
+}
+
+// ───────────── Restaurant ─────────────
+model Restaurant {
+  id                  String                                 @id @default(uuid())
+  slug                String                                 @unique
+  name                String
+  description         String?
+  phone               String
+  address             String
+  provinceCode        String // Vietnam administrative codes
+  wardCode            String?
+  // Set via raw SQL (ST_MakePoint). Nullable while DRAFT, required to submit for review.
+  location            Unsupported("geography(Point, 4326)")?
+  timezone            String                                 @default("Asia/Ho_Chi_Minh")
+  cuisineTags         String[]
+  ambienceTags        String[] // romantic, rooftop, view, quiet, live_music, private_room, outdoor
+  priceLevel          Int // 1..4
+  coverPhotoUrl       String?
+  googlePlaceId       String?
+  status              RestaurantStatus                       @default(DRAFT)
+  rejectReason        String?
+  // settings
+  slotMinutes         Int                                    @default(15) // booking time step
+  diningMinutes       Int                                    @default(90) // how long a table is held
+  graceMinutes        Int                                    @default(30) // no-show timeout
+  minLeadMinutes      Int                                    @default(60) // earliest booking from now
+  maxDaysAhead        Int                                    @default(30)
+  allowCod            Boolean                                @default(true)
+  prepaidRefundRule   RefundRule                             @default(BEFORE_COOKING)
+  servesLunch         Boolean                                @default(false)
+  servesNhau          Boolean                                @default(false)
+  maxGroupSize        Int                                    @default(20)
+  confirmGroupsOver   Int                                    @default(12) // bookings above this need restaurant approval
+  menuFullyTranslated Boolean                                @default(false)
+  allowTableChoice    Boolean                                @default(false) // turns on the seat-map picker
+  cancelCutoffMinutes Int                                    @default(60) // customer can cancel until arrivalAt − this
+  // cached ratings
+  ratingAvg           Decimal                                @default(0) @db.Decimal(2, 1)
+  ratingCount         Int                                    @default(0)
+  firstOrderAt        DateTime?
+  submittedAt         DateTime?
+  approvedAt          DateTime?
+  createdAt           DateTime                               @default(now())
+  updatedAt           DateTime                               @updatedAt
+  deletedAt           DateTime?
+
+  members              RestaurantMember[]
+  translations         RestaurantTranslation[]
+  openingHours         OpeningHours[]
+  closures             Closure[]
+  areas                TableArea[]
+  tables               Table[]
+  categories           MenuCategory[]
+  items                MenuItem[]
+  bookings             Booking[]
+  feePlans             FeePlan[]
+  paymentAccounts      PaymentAccount[]
+  statements           Statement[]
+  diningRules          DiningRule[]
+  kitchenCapacityRules KitchenCapacityRule[]
+  savedOrders          SavedOrder[]
+  serviceRequests      ServiceRequest[]
+
+  @@index([location], type: Gist)
+}
+
+enum RestaurantStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  PAUSED
+  REJECTED
+}
+
+enum RefundRule {
+  BEFORE_COOKING
+  NEVER
+  FULL_UNTIL_CUTOFF
+}
+
+model RestaurantTranslation {
+  restaurantId String
+  locale       String
+  name         String?
+  description  String?
+  isMachine    Boolean    @default(true)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@id([restaurantId, locale])
+}
+
+model OpeningHours {
+  id              String     @id @default(uuid())
+  restaurantId    String
+  weekday         Int // 0=Sunday..6
+  openMinute      Int // minutes from 00:00, e.g. 600 = 10:00
+  closeMinute     Int // may be > 1440 for after-midnight
+  lastOrderMinute Int?
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, weekday])
+}
+
+model Closure {
+  // holidays, Tết, private events
+  id           String     @id @default(uuid())
+  restaurantId String
+  startsAt     DateTime
+  endsAt       DateTime
+  reason       String?
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId, startsAt])
+}
+
+// Table hold time per time window (lunch 45 min, evening 120 min)
+model DiningRule {
+  id            String     @id @default(uuid())
+  restaurantId  String
+  weekdays      Int[] // [1,2,3,4,5]
+  startMinute   Int // 600 = 10:00
+  endMinute     Int
+  diningMinutes Int
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
+// Max pre-ordered dishes the kitchen accepts per window
+model KitchenCapacityRule {
+  id            String     @id @default(uuid())
+  restaurantId  String
+  weekdays      Int[]
+  startMinute   Int
+  endMinute     Int
+  windowMinutes Int        @default(15)
+  maxItems      Int // e.g. 20 dishes per 15 minutes
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+}
+
+// ───────────── Tables & table map (§8.6) ─────────────
+model TableArea {
+  id            String       @id @default(uuid())
+  restaurantId  String
+  name          String // "Indoor", "Garden", "VIP room"
+  sortOrder     Int          @default(0)
+  gridCols      Int          @default(20)
+  gridRows      Int          @default(14)
+  floor         Int          @default(1)
+  backgroundUrl String?
+  restaurant    Restaurant   @relation(fields: [restaurantId], references: [id])
+  tables        Table[]
+  elements      MapElement[]
+}
+
+model Table {
+  id           String      @id @default(uuid())
+  restaurantId String
+  areaId       String
+  code         String // "A1"
+  minSeats     Int         @default(1)
+  maxSeats     Int
+  isActive     Boolean     @default(true)
+  qrSecret     String // used to sign QR token, rotate if leaked
+  posX         Int? // grid cell
+  posY         Int?
+  features     String[] // window, view, private, outdoor
+  shape        TableShape  @default(RECT)
+  width        Int         @default(2)
+  height       Int         @default(2)
+  rotation     Int         @default(0) // 0, 90, 180, 270
+  seatLayout   Json? // {top:2,bottom:2,left:0,right:0}
+  isSelectable Boolean     @default(true)
+  surcharge    Int         @default(0)
+  joinGroup    String?
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+  area         TableArea   @relation(fields: [areaId], references: [id])
+  bookings     Booking[]
+  holds        TableHold[]
+
+  @@unique([restaurantId, code])
+}
+
+enum TableShape {
+  RECT
+  ROUND
+  SQUARE
+  BOOTH
+  BAR_SEAT
+}
+
+model MapElement {
+  id       String         @id @default(uuid())
+  areaId   String
+  type     MapElementType
+  label    String?
+  x        Int
+  y        Int
+  width    Int            @default(1)
+  height   Int            @default(1)
+  rotation Int            @default(0)
+  area     TableArea      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+}
+
+enum MapElementType {
+  ENTRANCE
+  WINDOW
+  WALL
+  KITCHEN
+  BAR
+  STAGE
+  RESTROOM
+  STAIRS
+  PLANT
+  TV
+  AIRCON
+  SMOKING_AREA
+}
+
+// ───────────── Menu ─────────────
+model MenuCategory {
+  id           String     @id @default(uuid())
+  restaurantId String
+  name         String
+  sortOrder    Int        @default(0)
+  deletedAt    DateTime?
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  items        MenuItem[]
+}
+
+model MenuItem {
+  id             String                @id @default(uuid())
+  restaurantId   String
+  categoryId     String
+  name           String // Vietnamese = source language
+  description    String?
+  price          Int // VND
+  course         Course                @default(MAIN)
+  kind           ItemKind              @default(DISH)
+  prepMinutes    Int                   @default(15)
+  isAvailable    Boolean               @default(true) // sold out today toggle
+  isPreorderable Boolean               @default(true) // some dishes only at table
+  isAlcohol      Boolean               @default(false)
+  leadHours      Int                   @default(0) // e.g. cake = 24
+  tags           String[] // spicy, vegetarian, ...
+  sortOrder      Int                   @default(0)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  deletedAt      DateTime?
+  restaurant     Restaurant            @relation(fields: [restaurantId], references: [id])
+  category       MenuCategory          @relation(fields: [categoryId], references: [id])
+  photos         MenuItemPhoto[]
+  translations   MenuItemTranslation[]
+  optionGroups   OptionGroup[]
+  setContents    SetMenuItem[]         @relation("SetParent")
+  inSets         SetMenuItem[]         @relation("SetChild")
+  favorites      FavoriteItem[]
+
+  @@index([restaurantId, categoryId])
+}
+
+enum Course {
+  DRINK
+  STARTER
+  MAIN
+  DESSERT
+}
+
+enum ItemKind {
+  DISH
+  DRINK
+  SET
+  ADD_ON
+}
+
+model MenuItemPhoto {
+  id        String   @id @default(uuid())
+  itemId    String
+  publicId  String // Cloudinary id
+  width     Int
+  height    Int
+  blurhash  String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  item      MenuItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model MenuItemTranslation {
+  itemId      String
+  locale      String
+  name        String
+  description String?
+  isMachine   Boolean  @default(true)
+  item        MenuItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, locale])
+}
+
+model OptionGroup {
+  // "Size", "Spice level", "Add-ons"
+  id        String   @id @default(uuid())
+  itemId    String
+  name      String
+  minSelect Int      @default(0)
+  maxSelect Int      @default(1)
+  sortOrder Int      @default(0)
+  item      MenuItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  options   Option[]
+}
+
+model Option {
+  id         String      @id @default(uuid())
+  groupId    String
+  name       String
+  priceDelta Int         @default(0)
+  sortOrder  Int         @default(0)
+  group      OptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model SetMenuItem {
+  setId    String
+  itemId   String
+  quantity Int      @default(1)
+  set      MenuItem @relation("SetParent", fields: [setId], references: [id], onDelete: Cascade)
+  item     MenuItem @relation("SetChild", fields: [itemId], references: [id])
+
+  @@id([setId, itemId])
+}
+
+// ───────────── Booking & order ─────────────
+model Booking {
+  id                 String              @id @default(uuid())
+  code               String              @unique // short code shown to staff, e.g. "CM-8K2P"
+  restaurantId       String
+  userId             String
+  tableId            String?
+  areaId             String?
+  partySize          Int
+  arrivalAt          DateTime
+  endsAt             DateTime // arrivalAt + diningMinutes
+  paymentMode        PaymentMode
+  serveStyle         ServeStyle          @default(BY_COURSE)
+  status             BookingStatus       @default(PENDING)
+  note               String?
+  checkedInAt        DateTime?
+  checkInMethod      CheckInMethod?
+  cancelledAt        DateTime?
+  cancelReason       String?
+  cancelledBy        String? // USER | RESTAURANT | SYSTEM
+  noShowAt           DateTime?
+  completedAt        DateTime?
+  finalBillAmount    Int? // entered by restaurant (COD + extra orders)
+  occasion           Occasion?
+  tableRequest       String[]
+  departedAt         DateTime? // "I'm leaving now"
+  etaAt              DateTime?
+  isGroupOrder       Boolean             @default(false)
+  needsApproval      Boolean             @default(false)
+  ageConfirmedAt     DateTime?
+  extraTableIds      String[] // joined tables for large groups
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  restaurant         Restaurant          @relation(fields: [restaurantId], references: [id])
+  user               User                @relation(fields: [userId], references: [id])
+  table              Table?              @relation(fields: [tableId], references: [id])
+  order              Order?
+  payments           Payment[]
+  fee                FeeRecord?
+  review             Review?
+  invoiceRequest     InvoiceRequest?
+  voucherRedemptions VoucherRedemption[]
+  guests             BookingGuest[]
+  groupInvites       GroupInvite[]
+  billSplit          BillSplit?
+  serviceRequests    ServiceRequest[]
+
+  @@index([restaurantId, arrivalAt])
+  @@index([userId, arrivalAt])
+}
+
+enum PaymentMode {
+  PREPAID
+  COD
+}
+
+enum ServeStyle {
+  BY_COURSE
+  ALL_TOGETHER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  EXPIRED
+}
+
+enum CheckInMethod {
+  QR
+  STAFF
+}
+
+enum Occasion {
+  DATE
+  ANNIVERSARY
+  BIRTHDAY
+  BUSINESS
+  CELEBRATION
+}
+
+model Order {
+  id                 String      @id @default(uuid())
+  bookingId          String      @unique
+  subtotal           Int
+  restaurantDiscount Int         @default(0) // voucher paid by restaurant
+  platformDiscount   Int         @default(0) // voucher paid by platform
+  total              Int // amount customer pays
+  status             OrderStatus @default(DRAFT)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  booking            Booking     @relation(fields: [bookingId], references: [id])
+  items              OrderItem[]
+}
+
+enum OrderStatus {
+  DRAFT
+  PLACED
+  IN_KITCHEN
+  SERVED
+  CANCELLED
+}
+
+model OrderItem {
+  id               String        @id @default(uuid())
+  orderId          String
+  menuItemId       String
+  nameSnapshot     String
+  unitPrice        Int // price + option deltas at order time
+  quantity         Int
+  optionsSnapshot  Json // [{group, option, priceDelta}]
+  note             String?
+  course           Course
+  prepMinutes      Int
+  kitchenStatus    KitchenStatus @default(HOLD)
+  scheduledStartAt DateTime?
+  releasedAt       DateTime?
+  startedAt        DateTime?
+  readyAt          DateTime?
+  servedAt         DateTime?
+  round            Int           @default(0) // 0 = pre-order, 1..n = ordered at the table
+  guestId          String?
+  order            Order         @relation(fields: [orderId], references: [id])
+
+  @@index([kitchenStatus, scheduledStartAt])
+}
+
+enum KitchenStatus {
+  HOLD
+  SCHEDULED
+  QUEUED
+  COOKING
+  READY
+  SERVED
+  CANCELLED
+}
+
+// 5-minute table hold while a customer picks a table on the map (§8.6).
+// One row per table; rows of one request share holdId. Overlaps are blocked by an
+// exclusion constraint (raw SQL); expired rows are deleted before each insert.
+model TableHold {
+  id           String   @id @default(uuid())
+  holdId       String
+  restaurantId String
+  tableId      String
+  userId       String
+  partySize    Int
+  startsAt     DateTime
+  endsAt       DateTime
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  table        Table    @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@index([holdId])
+  @@index([restaurantId, startsAt])
+}
+
+model BookingGuest {
+  id          String   @id @default(uuid())
+  bookingId   String
+  userId      String? // null = guest without account (web link)
+  displayName String
+  isHost      Boolean  @default(false)
+  joinedAt    DateTime @default(now())
+  amountDue   Int      @default(0)
+  amountPaid  Int      @default(0)
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+
+  @@unique([bookingId, userId])
+}
+
+model GroupInvite {
+  token     String   @id // random, in share link
+  bookingId String
+  expiresAt DateTime // order cutoff
+  maxGuests Int
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+}
+
+model BillSplit {
+  id        String    @id @default(uuid())
+  bookingId String    @unique
+  mode      SplitMode
+  createdAt DateTime  @default(now())
+  booking   Booking   @relation(fields: [bookingId], references: [id])
+}
+
+enum SplitMode {
+  EQUAL
+  BY_ITEMS
+  CUSTOM
+}
+
+model ServiceRequest {
+  id           String      @id @default(uuid())
+  bookingId    String
+  restaurantId String
+  tableId      String?
+  type         ServiceType
+  note         String?
+  status       String      @default("OPEN") // OPEN | DONE
+  createdAt    DateTime    @default(now())
+  doneAt       DateTime?
+  booking      Booking     @relation(fields: [bookingId], references: [id])
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+
+  @@index([restaurantId, status])
+}
+
+enum ServiceType {
+  CALL_WAITER
+  MORE_ICE
+  MORE_BOWLS
+  BILL_PLEASE
+  OTHER
+}
+
+// ───────────── Payments ─────────────
+model PaymentAccount {
+  // restaurant's own merchant credentials
+  id                   String          @id @default(uuid())
+  restaurantId         String
+  provider             PaymentProvider
+  credentialsEncrypted String // AES-256-GCM, key from env/KMS
+  isActive             Boolean         @default(true)
+  restaurant           Restaurant      @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, provider])
+}
+
+enum PaymentProvider {
+  PAYOS
+  MOMO
+  VNPAY
+  ZALOPAY
+}
+
+model Payment {
+  id              String          @id @default(uuid())
+  bookingId       String
+  provider        PaymentProvider
+  providerOrderId String          @unique
+  providerTxnId   String?
+  amount          Int
+  status          PaymentStatus   @default(CREATED)
+  checkoutUrl     String?
+  expiresAt       DateTime
+  paidAt          DateTime?
+  refundedAmount  Int             @default(0)
+  rawLastWebhook  Json?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  booking         Booking         @relation(fields: [bookingId], references: [id])
+}
+
+enum PaymentStatus {
+  CREATED
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model WebhookEvent {
+  // idempotency + audit
+  id          String          @id @default(uuid())
+  provider    PaymentProvider
+  eventKey    String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime        @default(now())
+
+  @@unique([provider, eventKey])
+}
+
+// ───────────── Fees ─────────────
+model FeePlan {
+  id            String     @id @default(uuid())
+  restaurantId  String
+  rateBps       Int // 100 = 1%, 200 = 2%
+  minFee        Int        @default(2000)
+  fixedFee      Int        @default(0)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  note          String?
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@index([restaurantId, effectiveFrom])
+}
+
+model FeeRecord {
+  id           String     @id @default(uuid())
+  bookingId    String     @unique
+  restaurantId String
+  feePlanId    String
+  baseAmount   Int
+  rateBps      Int
+  feeAmount    Int
+  status       FeeStatus  @default(PENDING)
+  statementId  String?
+  computedAt   DateTime   @default(now())
+  booking      Booking    @relation(fields: [bookingId], references: [id])
+  statement    Statement? @relation(fields: [statementId], references: [id])
+}
+
+enum FeeStatus {
+  PENDING
+  FINAL
+  BILLED
+  WAIVED
+}
+
+model Statement {
+  id                    String          @id @default(uuid())
+  restaurantId          String
+  periodMonth           String // "2026-12"
+  bookingCount          Int
+  totalBase             BigInt
+  totalFee              BigInt
+  platformVoucherCredit BigInt
+  amountDue             BigInt
+  status                StatementStatus @default(DRAFT)
+  pdfUrl                String?
+  issuedAt              DateTime?
+  paidAt                DateTime?
+  restaurant            Restaurant      @relation(fields: [restaurantId], references: [id])
+  fees                  FeeRecord[]
+
+  @@unique([restaurantId, periodMonth])
+}
+
+enum StatementStatus {
+  DRAFT
+  ISSUED
+  PAID
+  OVERDUE
+}
+
+// ───────────── Vouchers ─────────────
+model Voucher {
+  id             String              @id @default(uuid())
+  code           String              @unique
+  restaurantId   String? // null = platform-wide
+  fundedBy       VoucherFunder
+  type           VoucherType
+  value          Int // VND or bps for percent
+  maxDiscount    Int?
+  minOrder       Int                 @default(0)
+  startsAt       DateTime
+  endsAt         DateTime
+  totalLimit     Int?
+  perUserLimit   Int                 @default(1)
+  firstOrderOnly Boolean             @default(false)
+  usedCount      Int                 @default(0)
+  isActive       Boolean             @default(true)
+  redemptions    VoucherRedemption[]
+}
+
+enum VoucherFunder {
+  PLATFORM
+  RESTAURANT
+}
+
+enum VoucherType {
+  FIXED
+  PERCENT
+}
+
+model VoucherRedemption {
+  id        String  @id @default(uuid())
+  voucherId String
+  bookingId String
+  userId    String
+  amount    Int
+  status    String  @default("APPLIED") // APPLIED | RELEASED
+  voucher   Voucher @relation(fields: [voucherId], references: [id])
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  @@unique([voucherId, bookingId])
+}
+
+// ───────────── Reviews ─────────────
+model Review {
+  id            String       @id @default(uuid())
+  bookingId     String       @unique
+  restaurantId  String
+  userId        String
+  rating        Int // 1..5
+  foodRating    Int?
+  serviceRating Int?
+  text          String?
+  photoIds      String[]
+  status        ReviewStatus @default(PUBLISHED)
+  reply         String?
+  createdAt     DateTime     @default(now())
+  booking       Booking      @relation(fields: [bookingId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
+
+  @@index([restaurantId, createdAt])
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  HIDDEN
+  REPORTED
+}
+
+// ───────────── VAT invoice ─────────────
+model InvoiceProfile {
+  id          String  @id @default(uuid())
+  userId      String
+  companyName String
+  taxCode     String
+  address     String
+  email       String
+  isDefault   Boolean @default(false)
+  user        User    @relation(fields: [userId], references: [id])
+}
+
+model InvoiceRequest {
+  id          String        @id @default(uuid())
+  bookingId   String        @unique
+  companyName String
+  taxCode     String
+  address     String
+  email       String
+  status      InvoiceStatus @default(REQUESTED)
+  invoiceNo   String?
+  pdfUrl      String?
+  issuedAt    DateTime?
+  booking     Booking       @relation(fields: [bookingId], references: [id])
+}
+
+enum InvoiceStatus {
+  REQUESTED
+  SENT_TO_RESTAURANT
+  ISSUED
+  EMAILED
+  REJECTED
+}
+
+// ───────────── Lunch habits & content ─────────────
+model FavoriteItem {
+  userId     String
+  menuItemId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@id([userId, menuItemId])
+}
+
+model SavedOrder {
+  id           String     @id @default(uuid())
+  userId       String
+  restaurantId String
+  name         String // "My usual"
+  items        Json // [{menuItemId, quantity, options, note}]
+  user         User       @relation(fields: [userId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([userId, restaurantId, name])
+}
+
+model UserPreference {
+  userId              String   @id
+  lunchReminder       Boolean  @default(true)
+  lunchReminderMinute Int      @default(630) // 10:30
+  dietaryTags         String[]
+  showApproxCurrency  String? // USD, KRW, CNY, JPY
+  user                User     @relation(fields: [userId], references: [id])
+}
+
+model Collection {
+  id            String   @id @default(uuid())
+  slug          String   @unique
+  title         Json // { vi: "...", en: "..." }
+  coverUrl      String?
+  startsAt      DateTime
+  endsAt        DateTime
+  restaurantIds String[]
+  sortOrder     Int      @default(0)
+}
+
+model ExchangeRate {
+  currency   String   @id // USD, KRW, CNY, JPY
+  vndPerUnit Decimal
+  updatedAt  DateTime
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorType String // USER | STAFF | ADMIN | SYSTEM
+  actorId   String?
+  action    String // "booking.check_in", "fee_plan.update"
+  entity    String
+  entityId  String
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+}

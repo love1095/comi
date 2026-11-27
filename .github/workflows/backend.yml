@@ -1,0 +1,56 @@
+name: backend
+
+on:
+  pull_request:
+    paths: ['backend/**', '.github/workflows/backend.yml']
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/backend.yml']
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: comi
+          POSTGRES_PASSWORD: comi
+          POSTGRES_DB: comi
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U comi" --health-interval 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    env:
+      NODE_ENV: test
+      REDIS_URL: redis://localhost:6379
+      DATABASE_URL: postgresql://comi:comi@localhost:5432/comi?schema=public
+      JWT_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
+      REFRESH_TOKEN_PEPPER: ci-pepper-ci-pepper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npm test
+      - run: npx prisma migrate deploy
+      - run: npm run test:e2e
+      - run: npm run build
+      - run: npm run openapi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: backend/openapi.json
+
+  # TODO(phase1): on push to main → build image, push to registry, deploy to staging (§24.3).

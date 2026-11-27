@@ -1,0 +1,36 @@
+name: customer_app
+description: comi for diners — book a table and pre-order for office lunch and nhậu groups.
+publish_to: 'none'
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  material_ui: ^1.1.0
+  comi_api:
+    path: ../packages/comi_api
+  shared_ui:
+    path: ../packages/shared_ui
+  dio: ^5.11.0
+  flutter_riverpod: ^3.5.0
+  go_router: ^18.1.0
+  flutter_secure_storage: ^11.2.0
+  intl: any
+  geolocator: ^14.0.1
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  uuid: ^4.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

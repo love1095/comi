@@ -1,0 +1,18 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+# Flutter / Dart
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+/packages/**/pubspec.lock
+!customer_app/pubspec.lock
+!restaurant_app/pubspec.lock
+backend/openapi.json
+*.tsbuildinfo

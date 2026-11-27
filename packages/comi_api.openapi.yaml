@@ -1,0 +1,6 @@
+# Options for: melos run api:generate  (dart-dio client from backend/openapi.json)
+pubName: comi_api
+pubDescription: comi API client, generated from backend/openapi.json. Do not edit by hand.
+pubVersion: 0.1.0
+serializationLibrary: json_serializable
+equalityCheckMethod: equatable
