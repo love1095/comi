@@ -8,6 +8,7 @@ import '../features/auth/restaurant_picker_screen.dart';
 import '../features/bookings/board_screen.dart';
 import '../features/bookings/booking_detail_screen.dart';
 import '../features/business/business_screens.dart';
+import '../features/business/payment_screens.dart';
 import '../features/kitchen/kitchen_screen.dart';
 import '../features/menu/menu_screen.dart';
 import '../features/onboarding/register_restaurant_screen.dart';
@@ -65,6 +66,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
           GoRoute(path: '/statements', builder: (_, _) => const StatementsScreen()),
           GoRoute(path: '/invoices', builder: (_, _) => const InvoiceRequestsScreen()),
+          GoRoute(path: '/payments', builder: (_, _) => const PaymentSettingsScreen()),
+          GoRoute(path: '/refunds', builder: (_, _) => const RefundsScreen()),
           GoRoute(path: '/areas', builder: (_, _) => const AreasScreen()),
         ],
       ),

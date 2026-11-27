@@ -23,6 +23,8 @@ export interface JobPayloads {
   'cod-auto-close': { bookingId: string };
   'statement-generate': Record<string, never>;
   'statement-overdue': Record<string, never>;
+  'payment-timeout': { bookingId: string };
+  'payment-reconcile': Record<string, never>;
 }
 
 export function redisConnection(url: string) {

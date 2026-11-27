@@ -28,6 +28,7 @@ Name | Type | Description | Notes
 **servesNhau** | **bool** |  | 
 **allowTableChoice** | **bool** |  | 
 **allowCod** | **bool** |  | 
+**prepaidAvailable** | **bool** | Guests can prepay online (the restaurant connected PayOS) | 
 **maxGroupSize** | **num** |  | 
 **confirmGroupsOver** | **num** |  | 
 **cancelCutoffMinutes** | **num** |  | 

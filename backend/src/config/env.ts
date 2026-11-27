@@ -23,6 +23,7 @@ export const envSchema = z.object({
   FIREBASE_PRIVATE_KEY: z.string().optional(),
 
   CREDENTIALS_ENCRYPTION_KEY: z.string().optional(),
+  PAYOS_API_URL: z.string().url().default('https://api-merchant.payos.vn'), // tests point this at a stub
 
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),

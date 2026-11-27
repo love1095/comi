@@ -72,17 +72,17 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 
 ## Phase 4 — Payment and fees (3–4 weeks)
 
-- [ ] Restaurant connects PayOS account (credentials encrypted) §10.1
-- [ ] Payment adapter + PayOS + webhook + idempotency §10.2–10.3
-- [ ] Prepaid flow, payment timeout, reconcile job, late payment
-- [ ] Prepaid as default at lunch; COD warning
-- [ ] Group payments (each guest pays own part)
-- [ ] MoMo, then VNPay, then ZaloPay
+- [x] Restaurant connects PayOS account (credentials encrypted) §10.1 — owner pastes client id / API key / checksum key; AES-256-GCM with `CREDENTIALS_ENCRYPTION_KEY`; restaurant app "Thanh toán online" — ⬜ server key in prod secrets
+- [x] Payment adapter + PayOS + webhook + idempotency §10.2–10.3 — adapter interface, PayOS create/status/webhook with HMAC signatures (unit-tested), `/webhooks/payos` stores each event once (WebhookEvent unique) — ⬜ verify against a PayOS sandbox before launch
+- [x] Prepaid flow, payment timeout, reconcile job, late payment — PENDING until paid, 15-min timeout → EXPIRED, reconcile every 5 min (stuck webhooks + status check), late payment re-confirms if the table is still free, else refund; prepaid big groups pay after approval
+- [x] Prepaid as default at lunch; COD warning — customer checkout
+- [x] Group payments (each guest pays own part) — after the split, each member pays their share with their own PayOS link
+- [ ] MoMo, then VNPay, then ZaloPay — ⬜ needs merchant accounts (Phase 0); adapter interface ready
 - [x] Fee calculator + fee plans (1% first 3 months → 2%, min fee) §11 — pure `fee-calculator.ts` (tests first); launch plans on the first booking; fee record when a bill closes / no-show / cancel (waived); forgotten COD bills: reminder at 6 h, auto-close at 24 h
 - [x] Monthly statements: job, PDF, email, VietQR to pay — `statement-generate` 02:00 on the 1st, overdue after 15 days, restaurant paused after 30; PDF (Vietnamese font), email via SMTP (Mailpit in dev), VietQR link + transfer memo; admin marks paid / re-runs a month; restaurant app screen — ⬜ platform bank account in env
 - [x] VAT invoice requests §13 — customer form (MST check, saved profiles) during the meal or 24 h after; restaurant marks issued (invoice no.) or rejects; emails to restaurant and customer — ⬜ 3-day reminder (needs push)
 - [x] Restaurant reports — revenue, bookings, guests, average bill, no-show rate, comi fees, by day, best dishes
-- [ ] ⚠️ **Minimum refund before prepaid goes live:** at least full refund when the restaurant cancels or the customer cancels before cutoff (can be manual by restaurant + admin tracking). Full refund system is in "Later" below.
+- [x] ⚠️ **Minimum refund before prepaid goes live:** — done as manual refunds: full refund created when the restaurant cancels, the customer cancels before cutoff, a late payment finds no table, or the amount is short; payer account taken from the webhook (customer can enter one); restaurant "Hoàn tiền" screen marks transfers done; fee base lowered. Was: at least full refund when the restaurant cancels or the customer cancels before cutoff (can be manual by restaurant + admin tracking). Full refund system is in "Later" below.
 
 ## Phase 5 — Growth + tourists (4–5 weeks)
 

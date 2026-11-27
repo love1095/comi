@@ -6,6 +6,7 @@ import 'package:restaurant_app/data/session.dart';
 import 'package:restaurant_app/data/token_store.dart';
 import 'package:restaurant_app/features/business/business_repository.dart';
 import 'package:restaurant_app/features/business/business_screens.dart';
+import 'package:restaurant_app/features/business/payment_screens.dart';
 import 'package:shared_ui/shared_ui.dart';
 
 class FakeBusiness implements BusinessRepository {
@@ -121,6 +122,63 @@ class FakeBusiness implements BusinessRepository {
     calls.add('reject $id');
     return invoices.first;
   }
+
+  var account = PaymentAccountStatusDto(provider: PaymentAccountStatusDtoProviderEnum.PAYOS, connected: false, serverReady: true);
+  List<RefundDto> refundRows = [
+    RefundDto(
+      id: 'rf1',
+      bookingId: 'b1',
+      bookingCode: 'CM-8K2P',
+      guestName: 'Lan',
+      guestPhone: '+84901112233',
+      amount: 100000,
+      reason: RefundDtoReasonEnum.RESTAURANT_CANCELLED,
+      status: RefundDtoStatusEnum.PENDING,
+      toBankBin: '970436',
+      toAccountNo: '0011223344',
+      toAccountName: 'NGUYEN THI LAN',
+      createdAt: '2026-12-02T06:00:00Z',
+    ),
+  ];
+
+  @override
+  Future<PaymentAccountStatusDto> paymentAccount() async => account;
+
+  @override
+  Future<PaymentAccountStatusDto> connectPayOs({required String clientId, required String apiKey, required String checksumKey}) async {
+    calls.add('connect $clientId');
+    return account = PaymentAccountStatusDto(
+      provider: PaymentAccountStatusDtoProviderEnum.PAYOS,
+      connected: true,
+      clientIdHint: '…${clientId.substring(clientId.length - 4)}',
+      serverReady: true,
+    );
+  }
+
+  @override
+  Future<PaymentAccountStatusDto> disconnectPayOs() async {
+    calls.add('disconnect');
+    return account = PaymentAccountStatusDto(provider: PaymentAccountStatusDtoProviderEnum.PAYOS, connected: false, serverReady: true);
+  }
+
+  @override
+  Future<List<RefundDto>> refunds({bool pendingOnly = true}) async =>
+      pendingOnly ? refundRows.where((r) => r.status == RefundDtoStatusEnum.PENDING).toList() : refundRows;
+
+  @override
+  Future<RefundDto> refundDone(String id, {String? note}) async {
+    calls.add('refund $id $note');
+    refundRows = [];
+    return RefundDto(
+      id: id,
+      bookingId: 'b1',
+      bookingCode: 'CM-8K2P',
+      amount: 100000,
+      reason: RefundDtoReasonEnum.RESTAURANT_CANCELLED,
+      status: RefundDtoStatusEnum.DONE,
+      createdAt: '2026-12-02T06:00:00Z',
+    );
+  }
 }
 
 void main() {
@@ -184,5 +242,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, ['issued inv1 0000123']);
     expect(find.text('Không có yêu cầu xuất hoá đơn'), findsOneWidget); // done → off the open list
+  });
+
+  testWidgets('PayOS: connect with the three keys, then it shows connected', (tester) async {
+    final repo = FakeBusiness();
+    await pump(tester, const PaymentSettingsScreen(), repo);
+    expect(find.text('Chưa nhận trả trước'), findsOneWidget);
+
+    await tester.tap(find.text('Kết nối'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dán đúng khoá từ trang PayOS'), findsNWidgets(3));
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Client ID'), 'client-abcd-1234');
+    await tester.enterText(find.widgetWithText(TextFormField, 'API Key'), 'api-key-123456');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Checksum Key'), 'checksum-123456');
+    await tester.tap(find.text('Kết nối'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, ['connect client-abcd-1234']);
+    expect(find.text('Đã kết nối PayOS (…1234)'), findsOneWidget);
+  });
+
+  testWidgets('refunds: account to send to, mark done with the transfer reference', (tester) async {
+    final repo = FakeBusiness();
+    await pump(tester, const RefundsScreen(), repo);
+    expect(find.textContaining('STK 0011223344'), findsOneWidget);
+    await tester.tap(find.text('Đã hoàn tiền'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'FT9999');
+    await tester.tap(find.text('Xác nhận'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, ['refund rf1 FT9999']);
+    expect(find.text('Không có khoản cần hoàn'), findsOneWidget);
   });
 }

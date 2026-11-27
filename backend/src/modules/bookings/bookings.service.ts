@@ -15,6 +15,7 @@ import { priceCart } from './pricing';
 import { KitchenService } from '../kitchen/kitchen.service';
 import { RealtimeService } from '../realtime/realtime.service';
 import { FeesService } from '../fees/fees.service';
+import { PaymentsService } from '../payments/payments.service';
 
 type Tx = Prisma.TransactionClient;
 
@@ -27,6 +28,12 @@ export const BOOKING_INCLUDE = {
   restaurant: { select: { id: true, slug: true, name: true, address: true, phone: true, coverPhotoUrl: true, timezone: true } },
   table: { select: { id: true, code: true, areaId: true } },
   order: { include: { items: { orderBy: [{ round: 'asc' }, { course: 'asc' }] } } },
+  payments: {
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: { id: true, amount: true, status: true, purpose: true, guestId: true, checkoutUrl: true, qrCode: true, expiresAt: true, paidAt: true, refundedAmount: true },
+  },
+  refunds: { orderBy: { createdAt: 'desc' }, select: { id: true, amount: true, status: true, reason: true, createdAt: true, doneAt: true } },
 } satisfies Prisma.BookingInclude;
 
 @Injectable()
@@ -40,6 +47,7 @@ export class BookingsService {
     private readonly kitchen: KitchenService,
     private readonly realtime: RealtimeService,
     private readonly fees: FeesService,
+    private readonly payments: PaymentsService,
   ) {}
 
   /** POST /bookings (§8.2). Pay-at-restaurant (COD) only until payments arrive in Phase 4. */
@@ -53,9 +61,13 @@ export class BookingsService {
 
     // 1–3. who and how
     if (user.status !== 'ACTIVE') throw new AppError('USER_BLOCKED');
-    if (dto.paymentMode === 'PREPAID') throw new AppError('PAYMENT_NOT_AVAILABLE', 'Online payment is coming soon — choose pay at restaurant');
-    if (user.mustPrepay) throw new AppError('PREPAY_REQUIRED', 'Too many no-shows: this account must prepay');
-    if (!r.allowCod) throw new AppError('COD_NOT_ALLOWED');
+    const prepaid = dto.paymentMode === 'PREPAID';
+    if (prepaid && !(await this.payments.prepaidAvailable(r.id))) {
+      throw new AppError('PAYMENT_NOT_CONNECTED', 'This restaurant does not take online payments yet — choose pay at restaurant');
+    }
+    if (!prepaid && user.mustPrepay) throw new AppError('PREPAY_REQUIRED', 'Too many no-shows: this account must prepay');
+    if (!prepaid && !r.allowCod) throw new AppError('COD_NOT_ALLOWED');
+    if (prepaid && !dto.items?.length) throw new AppError('NOTHING_TO_PAY', 'Prepay needs at least one dish — or choose pay at restaurant');
     if (dto.partySize > r.maxGroupSize) throw new AppError('PARTY_TOO_LARGE', `Max ${r.maxGroupSize} people`, { max: r.maxGroupSize });
 
     // 4. prices are always computed here
@@ -95,9 +107,10 @@ export class BookingsService {
             partySize: dto.partySize,
             arrivalAt: slot.start,
             endsAt: slot.end,
-            paymentMode: 'COD',
+            paymentMode: prepaid ? 'PREPAID' : 'COD',
             serveStyle: dto.serveStyle ?? 'BY_COURSE',
-            status: needsApproval ? 'PENDING' : 'CONFIRMED',
+            // COD is confirmed now; prepaid waits for the payment (§10.3); big groups wait for approval.
+            status: needsApproval || prepaid ? 'PENDING' : 'CONFIRMED',
             needsApproval,
             note: dto.note,
             occasion: dto.occasion,
@@ -135,6 +148,7 @@ export class BookingsService {
     }
 
     await this.availability.invalidate(r.id);
+    if (prepaid && !needsApproval) await this.payments.schedulePaymentTimeout(booking.id);
     if (needsApproval) {
       await this.jobs.add(QUEUES.BOOKING, 'group-approval-timeout', { bookingId: booking.id }, {
         jobId: `approval:${booking.id}`,
@@ -242,9 +256,12 @@ export class BookingsService {
       cancelledBy: p.cancelledBy,
       cancelReason: p.reason,
     });
+    await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
     await this.jobs.remove(QUEUES.BOOKING, `noshow:${id}`);
+    await this.jobs.remove(QUEUES.BOOKING, `paytimeout:${id}`);
+    // Prepaid: full refund of what was paid (minimum refund before prepaid goes live).
+    if (result.paymentMode === 'PREPAID') await this.payments.refundOnCancel(id, p.cancelledBy);
     await this.fees.finalize(id); // waive a pending fee
-    await this.jobs.remove(QUEUES.BOOKING, `noshow:${id}`);
     return result;
   }
 
@@ -252,6 +269,16 @@ export class BookingsService {
   async approve(restaurantId: string, staffId: string, id: string) {
     const b = await this.forRestaurant(restaurantId, id);
     if (!b.needsApproval || b.status !== 'PENDING') throw new AppError('INVALID_STATUS', 'Booking is not waiting for approval');
+    if (b.paymentMode === 'PREPAID') {
+      // Approved big group still has to pay: stays PENDING, the payment clock starts now.
+      await this.prisma.booking.updateMany({ where: { id, status: 'PENDING' }, data: { needsApproval: false } });
+      await this.audit.log({ actorType: 'STAFF', actorId: staffId, action: 'booking.approved', entity: 'Booking', entityId: id, data: { awaiting: 'payment' } });
+      await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
+      await this.payments.schedulePaymentTimeout(id);
+      const after = await this.prisma.booking.findUniqueOrThrow({ where: { id }, include: BOOKING_INCLUDE });
+      this.realtime.toUser(after.userId, 'booking.status', { bookingId: id, status: 'PENDING', approved: true });
+      return after;
+    }
     const result = await this.changeStatus(id, 'CONFIRMED', { actorType: 'STAFF', actorId: staffId }, { needsApproval: false });
     await this.jobs.remove(QUEUES.BOOKING, `approval:${id}`);
     await this.scheduleNoShow(id);

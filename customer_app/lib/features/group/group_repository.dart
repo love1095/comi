@@ -17,6 +17,7 @@ abstract class GroupRepository {
   Future<GroupViewDto> removeItem(String token, String guestKey, String itemId);
   Future<SplitDto> split(String bookingId);
   Future<SplitDto> saveSplit(String bookingId, SplitMode mode, {Map<String, int>? amounts});
+  Future<PaymentDto> payShare(String token, String guestKey);
 }
 
 class ApiGroupRepository implements GroupRepository {
@@ -61,6 +62,12 @@ class ApiGroupRepository implements GroupRepository {
   Future<SplitDto> saveSplit(String bookingId, SplitMode mode, {Map<String, int>? amounts}) async => (await _host.customerGroupSaveSplit(
     id: bookingId,
     saveSplitDto: SaveSplitDto(mode: mode, amounts: amounts),
+  )).data!;
+
+  @override
+  Future<PaymentDto> payShare(String token, String guestKey) async => (await _public.groupPaymentsPay(
+    token: token,
+    guestKeyPayDto: GuestKeyPayDto(guestKey: guestKey),
   )).data!;
 }
 

@@ -78,8 +78,9 @@ describe('booking state machine (§6.1)', () => {
     expect(() => assertTransition('CANCELLED', 'CONFIRMED')).toThrow('cannot go from CANCELLED');
   });
 
-  it('terminal states have no exits', () => {
-    for (const s of ['COMPLETED', 'CANCELLED', 'NO_SHOW', 'EXPIRED'] as const) expect(allowedTransitions[s]).toEqual([]);
+  it('terminal states have no exits; an expired prepaid booking can only be revived by a late payment', () => {
+    for (const s of ['COMPLETED', 'CANCELLED', 'NO_SHOW'] as const) expect(allowedTransitions[s]).toEqual([]);
+    expect(allowedTransitions.EXPIRED).toEqual(['CONFIRMED']); // §10.3: paid late while the table is still free
   });
 });
 

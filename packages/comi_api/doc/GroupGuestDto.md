@@ -12,6 +12,8 @@ Name | Type | Description | Notes
 **displayName** | **String** |  | 
 **isHost** | **bool** |  | 
 **subtotal** | **num** | Their dishes so far (VND) | 
+**amountDue** | **num** | Their part after the bill was split (0 before) | 
+**amountPaid** | **num** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -4,11 +4,13 @@
 
 // ignore_for_file: unused_element
 import 'package:comi_api/src/model/booking_restaurant_dto.dart';
+import 'package:comi_api/src/model/booking_payment_dto.dart';
 import 'package:comi_api/src/model/customer_order_dto.dart';
 import 'package:comi_api/src/model/payment_mode.dart';
 import 'package:comi_api/src/model/booking_table_dto.dart';
 import 'package:comi_api/src/model/booking_status.dart';
 import 'package:comi_api/src/model/serve_style.dart';
+import 'package:comi_api/src/model/booking_refund_dto.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/src/equatable_utils.dart';
@@ -66,6 +68,10 @@ class CustomerBookingDto {
      this.table,
 
      this.order,
+
+    required  this.payments,
+
+    required  this.refunds,
   });
 
   @JsonKey(
@@ -309,6 +315,30 @@ class CustomerBookingDto {
 
 
 
+  @JsonKey(
+    
+    name: r'payments',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<BookingPaymentDto> payments;
+
+
+
+  @JsonKey(
+    
+    name: r'refunds',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final List<BookingRefundDto> refunds;
+
+
+
 
     bool operator ==(Object other) {
       return identical(this, other) ||
@@ -336,6 +366,8 @@ class CustomerBookingDto {
             restaurant,
             table,
             order,
+            payments,
+            refunds,
         ],
         [
             other.id,
@@ -358,6 +390,8 @@ class CustomerBookingDto {
             other.restaurant,
             other.table,
             other.order,
+            other.payments,
+            other.refunds,
         ]
       );
     }
@@ -385,6 +419,8 @@ class CustomerBookingDto {
         restaurant,
         table,
         order,
+        payments,
+        refunds,
     ],);
 
   factory CustomerBookingDto.fromJson(Map<String, dynamic> json) => _$CustomerBookingDtoFromJson(json);

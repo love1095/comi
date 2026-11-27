@@ -35,6 +35,10 @@ abstract class _$BookingDetailDtoCWProxy {
 
   BookingDetailDto order(BookingDetailOrderDto? order);
 
+  BookingDetailDto payments(List<BookingPaymentDto> payments);
+
+  BookingDetailDto refunds(List<BookingRefundDto> refunds);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `BookingDetailDto(...).copyWith.fieldName(value)`.
@@ -58,6 +62,8 @@ abstract class _$BookingDetailDtoCWProxy {
     BoardTableDto? table,
     BoardUserDto user,
     BookingDetailOrderDto? order,
+    List<BookingPaymentDto> payments,
+    List<BookingRefundDto> refunds,
   });
 }
 
@@ -113,6 +119,14 @@ class _$BookingDetailDtoCWProxyImpl implements _$BookingDetailDtoCWProxy {
   @override
   BookingDetailDto order(BookingDetailOrderDto? order) => call(order: order);
 
+  @override
+  BookingDetailDto payments(List<BookingPaymentDto> payments) =>
+      call(payments: payments);
+
+  @override
+  BookingDetailDto refunds(List<BookingRefundDto> refunds) =>
+      call(refunds: refunds);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `BookingDetailDto(...).copyWith.fieldName(value)`.
@@ -137,6 +151,8 @@ class _$BookingDetailDtoCWProxyImpl implements _$BookingDetailDtoCWProxy {
     Object? table = const $CopyWithPlaceholder(),
     Object? user = const $CopyWithPlaceholder(),
     Object? order = const $CopyWithPlaceholder(),
+    Object? payments = const $CopyWithPlaceholder(),
+    Object? refunds = const $CopyWithPlaceholder(),
   }) {
     return BookingDetailDto(
       id: id == const $CopyWithPlaceholder() || id == null
@@ -198,6 +214,14 @@ class _$BookingDetailDtoCWProxyImpl implements _$BookingDetailDtoCWProxy {
           ? _value.order
           // ignore: cast_nullable_to_non_nullable
           : order as BookingDetailOrderDto?,
+      payments: payments == const $CopyWithPlaceholder() || payments == null
+          ? _value.payments
+          // ignore: cast_nullable_to_non_nullable
+          : payments as List<BookingPaymentDto>,
+      refunds: refunds == const $CopyWithPlaceholder() || refunds == null
+          ? _value.refunds
+          // ignore: cast_nullable_to_non_nullable
+          : refunds as List<BookingRefundDto>,
     );
   }
 }
@@ -228,6 +252,8 @@ BookingDetailDto _$BookingDetailDtoFromJson(Map<String, dynamic> json) =>
           'needsApproval',
           'extraTableIds',
           'user',
+          'payments',
+          'refunds',
         ],
       );
       final val = BookingDetailDto(
@@ -267,6 +293,18 @@ BookingDetailDto _$BookingDetailDtoFromJson(Map<String, dynamic> json) =>
               ? null
               : BookingDetailOrderDto.fromJson(v as Map<String, dynamic>),
         ),
+        payments: $checkedConvert(
+          'payments',
+          (v) => (v as List<dynamic>)
+              .map((e) => BookingPaymentDto.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
+        refunds: $checkedConvert(
+          'refunds',
+          (v) => (v as List<dynamic>)
+              .map((e) => BookingRefundDto.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        ),
       );
       return val;
     });
@@ -287,6 +325,8 @@ Map<String, dynamic> _$BookingDetailDtoToJson(BookingDetailDto instance) =>
       'table': ?instance.table?.toJson(),
       'user': instance.user.toJson(),
       'order': ?instance.order?.toJson(),
+      'payments': instance.payments.map((e) => e.toJson()).toList(),
+      'refunds': instance.refunds.map((e) => e.toJson()).toList(),
     };
 
 const _$BookingStatusEnumMap = {

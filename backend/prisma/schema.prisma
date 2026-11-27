@@ -477,6 +477,7 @@ model Booking {
   table              Table?              @relation(fields: [tableId], references: [id])
   order              Order?
   payments           Payment[]
+  refunds            Refund[]
   fee                FeeRecord?
   review             Review?
   invoiceRequest     InvoiceRequest?
@@ -695,9 +696,18 @@ model Payment {
   paidAt          DateTime?
   refundedAmount  Int             @default(0)
   rawLastWebhook  Json?
+  qrCode          String? // VietQR payload to show as a QR in the app
+  guestId         String? // a group member paying their own share (§8.4)
+  purpose         String          @default("BOOKING") // BOOKING = prepaid order · SHARE = a guest's split share
+  payerBankBin    String? // from the webhook — where a manual refund goes
+  payerAccountNo  String?
+  payerName       String?
+  refunds         Refund[]
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   booking         Booking         @relation(fields: [bookingId], references: [id])
+
+  @@index([status, createdAt])
 }
 
 enum PaymentStatus {
@@ -948,4 +958,32 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@index([entity, entityId])
+}
+
+// ───────────── Minimum refunds (Phase 4, before prepaid goes live) ─────────────
+// PayOS has no refund API: the restaurant transfers the money back and marks it done here.
+// The full refund system (per dish, provider APIs, disputes) comes later (§10.5–10.14).
+model Refund {
+  id            String       @id @default(uuid())
+  paymentId     String
+  bookingId     String
+  amount        Int
+  reason        String // RESTAURANT_CANCELLED | CUSTOMER_CANCELLED | LATE_PAYMENT_NO_TABLE | AMOUNT_MISMATCH
+  status        RefundStatus @default(PENDING)
+  toBankBin     String?
+  toAccountNo   String?
+  toAccountName String?
+  note          String? // transfer reference written by staff
+  createdAt     DateTime     @default(now())
+  doneAt        DateTime?
+  doneByStaffId String?
+  payment       Payment      @relation(fields: [paymentId], references: [id])
+  booking       Booking      @relation(fields: [bookingId], references: [id])
+
+  @@index([status])
+}
+
+enum RefundStatus {
+  PENDING
+  DONE
 }

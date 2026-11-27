@@ -64,6 +64,8 @@ class RestaurantDetailDto {
 
     required  this.allowCod,
 
+    required  this.prepaidAvailable,
+
     required  this.maxGroupSize,
 
     required  this.confirmGroupsOver,
@@ -320,6 +322,19 @@ class RestaurantDetailDto {
 
 
 
+      /// Guests can prepay online (the restaurant connected PayOS)
+  @JsonKey(
+    
+    name: r'prepaidAvailable',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final bool prepaidAvailable;
+
+
+
   @JsonKey(
     
     name: r'maxGroupSize',
@@ -431,6 +446,7 @@ class RestaurantDetailDto {
             servesNhau,
             allowTableChoice,
             allowCod,
+            prepaidAvailable,
             maxGroupSize,
             confirmGroupsOver,
             cancelCutoffMinutes,
@@ -460,6 +476,7 @@ class RestaurantDetailDto {
             other.servesNhau,
             other.allowTableChoice,
             other.allowCod,
+            other.prepaidAvailable,
             other.maxGroupSize,
             other.confirmGroupsOver,
             other.cancelCutoffMinutes,
@@ -494,6 +511,7 @@ class RestaurantDetailDto {
         servesNhau,
         allowTableChoice,
         allowCod,
+        prepaidAvailable,
         maxGroupSize,
         confirmGroupsOver,
         cancelCutoffMinutes,

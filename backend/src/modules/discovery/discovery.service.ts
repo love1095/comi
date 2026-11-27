@@ -1,3 +1,4 @@
+import { PaymentsService } from '../payments/payments.service';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Clock } from '../../common/clock';
@@ -35,6 +36,7 @@ export class DiscoveryService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly clock: Clock,
+    private readonly payments: PaymentsService,
   ) {}
 
   /** GET /restaurants — nearby with filters (§14.1 + lunch/nhậu filters). */
@@ -139,6 +141,7 @@ export class DiscoveryService {
       servesNhau: r.servesNhau,
       allowTableChoice: r.allowTableChoice,
       allowCod: r.allowCod,
+      prepaidAvailable: await this.payments.prepaidAvailable(r.id),
       maxGroupSize: r.maxGroupSize,
       confirmGroupsOver: r.confirmGroupsOver,
       cancelCutoffMinutes: r.cancelCutoffMinutes,

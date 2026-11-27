@@ -20,6 +20,8 @@ doc/BoardTableDto.md
 doc/BoardUserDto.md
 doc/BookingDetailDto.md
 doc/BookingDetailOrderDto.md
+doc/BookingPaymentDto.md
+doc/BookingRefundDto.md
 doc/BookingRestaurantDto.md
 doc/BookingStatus.md
 doc/BookingTableDto.md
@@ -34,6 +36,7 @@ doc/ChecklistDto.md
 doc/CloseBillDto.md
 doc/ClosureDto.md
 doc/ClosureInfoDto.md
+doc/ConnectPayOsDto.md
 doc/Course.md
 doc/CreateBookingDto.md
 doc/CreateHoldDto.md
@@ -46,6 +49,7 @@ doc/CustomerDiscoveryApi.md
 doc/CustomerExchangeDto.md
 doc/CustomerGroupOrderApi.md
 doc/CustomerOrderDto.md
+doc/CustomerPaymentsApi.md
 doc/CustomerVATInvoiceApi.md
 doc/DepartDto.md
 doc/DepartResultDto.md
@@ -62,6 +66,7 @@ doc/GroupMemberDto.md
 doc/GroupRestaurantDto.md
 doc/GroupViewDto.md
 doc/GuestKeyDto.md
+doc/GuestKeyPayDto.md
 doc/HealthApi.md
 doc/HoldDto.md
 doc/HomeDto.md
@@ -108,6 +113,8 @@ doc/OptionGroupDto.md
 doc/OptionGroupResponseDto.md
 doc/OptionSnapshotDto.md
 doc/OrderStatus.md
+doc/PaymentAccountStatusDto.md
+doc/PaymentDto.md
 doc/PaymentMode.md
 doc/PreferencesDto.md
 doc/PublicGroupOrderApi.md
@@ -117,6 +124,9 @@ doc/PublicOptionDto.md
 doc/PublicOptionGroupDto.md
 doc/PublicPhotoDto.md
 doc/RefreshDto.md
+doc/RefundAccountDto.md
+doc/RefundDoneDto.md
+doc/RefundDto.md
 doc/RegisterRestaurantDto.md
 doc/RejectDto.md
 doc/ReorderDraftDto.md
@@ -136,6 +146,7 @@ doc/RestaurantFeesReportsApi.md
 doc/RestaurantKitchenApi.md
 doc/RestaurantMenuApi.md
 doc/RestaurantPageDto.md
+doc/RestaurantPaymentsApi.md
 doc/RestaurantProfileDto.md
 doc/RestaurantSettingsApi.md
 doc/RestaurantSplitBillApi.md
@@ -181,7 +192,9 @@ doc/UpdateMenuItemDto.md
 doc/UpdateProfileDto.md
 doc/UpdateSettingsDto.md
 doc/UpdateTableDto.md
+doc/UpdatedDto.md
 doc/UploadSignatureDto.md
+doc/WebhooksApi.md
 lib/comi_api.dart
 lib/src/api.dart
 lib/src/api/admin_api.dart
@@ -192,6 +205,7 @@ lib/src/api/customer_availability_api.dart
 lib/src/api/customer_bookings_api.dart
 lib/src/api/customer_discovery_api.dart
 lib/src/api/customer_group_order_api.dart
+lib/src/api/customer_payments_api.dart
 lib/src/api/customer_vat_invoice_api.dart
 lib/src/api/health_api.dart
 lib/src/api/me_api.dart
@@ -203,10 +217,12 @@ lib/src/api/restaurant_bookings_api.dart
 lib/src/api/restaurant_fees_reports_api.dart
 lib/src/api/restaurant_kitchen_api.dart
 lib/src/api/restaurant_menu_api.dart
+lib/src/api/restaurant_payments_api.dart
 lib/src/api/restaurant_settings_api.dart
 lib/src/api/restaurant_split_bill_api.dart
 lib/src/api/restaurant_tables_api.dart
 lib/src/api/restaurant_vat_invoice_api.dart
+lib/src/api/webhooks_api.dart
 lib/src/auth/api_key_auth.dart
 lib/src/auth/auth.dart
 lib/src/auth/basic_auth.dart
@@ -229,6 +245,8 @@ lib/src/model/board_table_dto.dart
 lib/src/model/board_user_dto.dart
 lib/src/model/booking_detail_dto.dart
 lib/src/model/booking_detail_order_dto.dart
+lib/src/model/booking_payment_dto.dart
+lib/src/model/booking_refund_dto.dart
 lib/src/model/booking_restaurant_dto.dart
 lib/src/model/booking_status.dart
 lib/src/model/booking_table_dto.dart
@@ -243,6 +261,7 @@ lib/src/model/checklist_dto.dart
 lib/src/model/close_bill_dto.dart
 lib/src/model/closure_dto.dart
 lib/src/model/closure_info_dto.dart
+lib/src/model/connect_pay_os_dto.dart
 lib/src/model/course.dart
 lib/src/model/create_booking_dto.dart
 lib/src/model/create_hold_dto.dart
@@ -265,6 +284,7 @@ lib/src/model/group_member_dto.dart
 lib/src/model/group_restaurant_dto.dart
 lib/src/model/group_view_dto.dart
 lib/src/model/guest_key_dto.dart
+lib/src/model/guest_key_pay_dto.dart
 lib/src/model/hold_dto.dart
 lib/src/model/home_dto.dart
 lib/src/model/home_section_dto.dart
@@ -308,6 +328,8 @@ lib/src/model/option_group_dto.dart
 lib/src/model/option_group_response_dto.dart
 lib/src/model/option_snapshot_dto.dart
 lib/src/model/order_status.dart
+lib/src/model/payment_account_status_dto.dart
+lib/src/model/payment_dto.dart
 lib/src/model/payment_mode.dart
 lib/src/model/preferences_dto.dart
 lib/src/model/public_menu_category_dto.dart
@@ -316,6 +338,9 @@ lib/src/model/public_option_dto.dart
 lib/src/model/public_option_group_dto.dart
 lib/src/model/public_photo_dto.dart
 lib/src/model/refresh_dto.dart
+lib/src/model/refund_account_dto.dart
+lib/src/model/refund_done_dto.dart
+lib/src/model/refund_dto.dart
 lib/src/model/register_restaurant_dto.dart
 lib/src/model/reject_dto.dart
 lib/src/model/reorder_draft_dto.dart
@@ -370,18 +395,5 @@ lib/src/model/update_menu_item_dto.dart
 lib/src/model/update_profile_dto.dart
 lib/src/model/update_settings_dto.dart
 lib/src/model/update_table_dto.dart
+lib/src/model/updated_dto.dart
 lib/src/model/upload_signature_dto.dart
-test/admin_statements_api_test.dart
-test/customer_vat_invoice_api_test.dart
-test/invoice_profile_dto_test.dart
-test/invoice_request_create_dto_test.dart
-test/invoice_request_dto_test.dart
-test/mark_issued_dto_test.dart
-test/report_day_dto_test.dart
-test/report_dish_dto_test.dart
-test/report_dto_test.dart
-test/restaurant_fees_reports_api_test.dart
-test/restaurant_vat_invoice_api_test.dart
-test/statement_detail_dto_test.dart
-test/statement_dto_test.dart
-test/statement_line_dto_test.dart

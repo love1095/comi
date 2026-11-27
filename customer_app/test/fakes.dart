@@ -29,7 +29,8 @@ PublicMenuItemDto dish(
   optionGroups: groups,
 );
 
-RestaurantDetailDto restaurantDetail({num confirmGroupsOver = 10, num maxGroupSize = 30}) => RestaurantDetailDto(
+RestaurantDetailDto restaurantDetail({num confirmGroupsOver = 10, num maxGroupSize = 30, bool prepaid = false}) => RestaurantDetailDto(
+  prepaidAvailable: prepaid,
   id: 'r1',
   slug: 'quan-oc',
   name: 'Quán Ốc Bờ Kè',
@@ -82,7 +83,8 @@ class FakeLocation implements LocationService {
 }
 
 class FakeDiscovery implements DiscoveryRepository {
-  FakeDiscovery({this.menuCats = const [], List<SlotDto>? slots, this.homeDto}) : slots = slots ?? const [];
+  FakeDiscovery({this.menuCats = const [], List<SlotDto>? slots, this.homeDto, this.prepaid = false}) : slots = slots ?? const [];
+  bool prepaid;
   List<PublicMenuCategoryDto> menuCats;
   List<SlotDto> slots;
   HomeDto? homeDto;
@@ -102,7 +104,7 @@ class FakeDiscovery implements DiscoveryRepository {
   Future<SuggestDto> suggest(String q, LatLngPoint at) async => SuggestDto(restaurants: const [], dishes: const []);
 
   @override
-  Future<RestaurantDetailDto> detail(String slug) async => restaurantDetail();
+  Future<RestaurantDetailDto> detail(String slug) async => restaurantDetail(prepaid: prepaid);
 
   @override
   Future<List<PublicMenuCategoryDto>> menu(String restaurantId) async => menuCats;
@@ -122,6 +124,9 @@ CustomerBookingDto bookingDto({
   BookingStatus status = BookingStatus.CONFIRMED,
   bool needsApproval = false,
   List<BoardOrderItemDto> items = const [],
+  PaymentMode paymentMode = PaymentMode.COD,
+  List<BookingPaymentDto> payments = const [],
+  List<BookingRefundDto> refunds = const [],
 }) => CustomerBookingDto(
   id: id,
   code: 'CM-8K2P',
@@ -129,7 +134,9 @@ CustomerBookingDto bookingDto({
   partySize: 4,
   arrivalAt: '2026-12-02T12:00:00.000Z',
   endsAt: '2026-12-02T14:00:00.000Z',
-  paymentMode: PaymentMode.COD,
+  paymentMode: paymentMode,
+  payments: payments,
+  refunds: refunds,
   serveStyle: ServeStyle.BY_COURSE,
   status: status,
   needsApproval: needsApproval,
@@ -163,6 +170,8 @@ class FakeBookings implements BookingsRepository {
   final keys = <String>[];
   final calls = <String>[];
   Object? createError;
+  BookingStatus createdStatus = BookingStatus.CONFIRMED;
+  PaymentMode createdMode = PaymentMode.COD;
 
   @override
   Future<CustomerBookingDto> create(CreateBookingDto dto, {required String idempotencyKey}) async {
@@ -173,7 +182,7 @@ class FakeBookings implements BookingsRepository {
       throw e;
     }
     created = dto;
-    return bookingDto(id: 'new', status: BookingStatus.CONFIRMED);
+    return bookingDto(id: 'new', status: createdStatus, paymentMode: createdMode);
   }
 
   @override
@@ -192,6 +201,30 @@ class FakeBookings implements BookingsRepository {
 
   @override
   Future<ReorderDraftDto> reorder(String id) => throw UnimplementedError();
+
+  PaymentDto? payResult;
+  ({String bankBin, String accountNo, String accountName})? refundAccount;
+
+  @override
+  Future<PaymentDto> pay(String id) async {
+    calls.add('pay $id');
+    return payResult ??
+        PaymentDto(
+          id: 'p1',
+          bookingId: id,
+          amount: 100000,
+          status: PaymentDtoStatusEnum.PENDING,
+          purpose: PaymentDtoPurposeEnum.BOOKING,
+          checkoutUrl: 'https://pay.payos.vn/web/x',
+          expiresAt: '2026-12-02T04:15:00Z',
+          refundedAmount: 0,
+        );
+  }
+
+  @override
+  Future<void> setRefundAccount(String id, {required String bankBin, required String accountNo, required String accountName}) async {
+    refundAccount = (bankBin: bankBin, accountNo: accountNo, accountName: accountName);
+  }
 
   @override
   Future<MeDto> me() async =>

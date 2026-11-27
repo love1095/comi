@@ -4,7 +4,7 @@
  */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BookingStatus, Course, ItemKind, OrderStatus, PaymentMode, ServeStyle, ServiceType, TableShape } from '@prisma/client';
-import { BoardOrderItemDto, MapElementResponseDto, OpeningHoursDto, OptionSnapshotDto } from './responses';
+import { BoardOrderItemDto, BookingPaymentDto, BookingRefundDto, MapElementResponseDto, OpeningHoursDto, OptionSnapshotDto } from './responses';
 
 // ───── discovery ─────
 
@@ -106,6 +106,7 @@ export class RestaurantDetailDto {
   @ApiProperty() servesNhau: boolean;
   @ApiProperty() allowTableChoice: boolean;
   @ApiProperty() allowCod: boolean;
+  @ApiProperty({ description: 'Guests can prepay online (the restaurant connected PayOS)' }) prepaidAvailable: boolean;
   @ApiProperty() maxGroupSize: number;
   @ApiProperty() confirmGroupsOver: number;
   @ApiProperty() cancelCutoffMinutes: number;
@@ -220,6 +221,8 @@ export class CustomerBookingDto {
   @ApiProperty({ type: BookingRestaurantDto }) restaurant: BookingRestaurantDto;
   @ApiPropertyOptional({ nullable: true, type: BookingTableDto }) table: BookingTableDto | null;
   @ApiPropertyOptional({ nullable: true, type: CustomerOrderDto }) order: CustomerOrderDto | null;
+  @ApiProperty({ type: [BookingPaymentDto] }) payments: BookingPaymentDto[];
+  @ApiProperty({ type: [BookingRefundDto] }) refunds: BookingRefundDto[];
 }
 
 export class MyBookingsPageDto {
@@ -373,6 +376,8 @@ export class GroupGuestDto {
   @ApiProperty() displayName: string;
   @ApiProperty() isHost: boolean;
   @ApiProperty({ description: 'Their dishes so far (VND)' }) subtotal: number;
+  @ApiProperty({ description: 'Their part after the bill was split (0 before)' }) amountDue: number;
+  @ApiProperty() amountPaid: number;
 }
 
 export class GroupItemDto {

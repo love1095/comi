@@ -28,6 +28,10 @@ class GroupGuestDto {
     required  this.isHost,
 
     required  this.subtotal,
+
+    required  this.amountDue,
+
+    required  this.amountPaid,
   });
 
   @JsonKey(
@@ -79,6 +83,31 @@ class GroupGuestDto {
 
 
 
+      /// Their part after the bill was split (0 before)
+  @JsonKey(
+    
+    name: r'amountDue',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num amountDue;
+
+
+
+  @JsonKey(
+    
+    name: r'amountPaid',
+    required: true,
+    includeIfNull: false,
+  )
+
+
+  final num amountPaid;
+
+
+
 
     bool operator ==(Object other) {
       return identical(this, other) ||
@@ -90,12 +119,16 @@ class GroupGuestDto {
             displayName,
             isHost,
             subtotal,
+            amountDue,
+            amountPaid,
         ],
         [
             other.id,
             other.displayName,
             other.isHost,
             other.subtotal,
+            other.amountDue,
+            other.amountPaid,
         ]
       );
     }
@@ -107,6 +140,8 @@ class GroupGuestDto {
         displayName,
         isHost,
         subtotal,
+        amountDue,
+        amountPaid,
     ],);
 
   factory GroupGuestDto.fromJson(Map<String, dynamic> json) => _$GroupGuestDtoFromJson(json);

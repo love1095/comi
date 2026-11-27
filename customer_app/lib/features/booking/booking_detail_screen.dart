@@ -10,6 +10,7 @@ import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
 import '../group/group_actions.dart';
 import 'at_table.dart';
+import 'payment_panel.dart';
 import 'bookings_repository.dart';
 import 'my_bookings_screen.dart' show statusColor;
 
@@ -150,6 +151,7 @@ class BookingDetailScreen extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: 12),
+        PaymentPanel(booking: b),
         AtTablePanel(booking: b),
         const SizedBox(height: 8),
         GroupActions(booking: b),

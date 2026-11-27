@@ -15,6 +15,10 @@ abstract class _$GroupGuestDtoCWProxy {
 
   GroupGuestDto subtotal(num subtotal);
 
+  GroupGuestDto amountDue(num amountDue);
+
+  GroupGuestDto amountPaid(num amountPaid);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `GroupGuestDto(...).copyWith.fieldName(value)`.
@@ -28,6 +32,8 @@ abstract class _$GroupGuestDtoCWProxy {
     String displayName,
     bool isHost,
     num subtotal,
+    num amountDue,
+    num amountPaid,
   });
 }
 
@@ -51,6 +57,12 @@ class _$GroupGuestDtoCWProxyImpl implements _$GroupGuestDtoCWProxy {
   @override
   GroupGuestDto subtotal(num subtotal) => call(subtotal: subtotal);
 
+  @override
+  GroupGuestDto amountDue(num amountDue) => call(amountDue: amountDue);
+
+  @override
+  GroupGuestDto amountPaid(num amountPaid) => call(amountPaid: amountPaid);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `GroupGuestDto(...).copyWith.fieldName(value)`.
@@ -65,6 +77,8 @@ class _$GroupGuestDtoCWProxyImpl implements _$GroupGuestDtoCWProxy {
     Object? displayName = const $CopyWithPlaceholder(),
     Object? isHost = const $CopyWithPlaceholder(),
     Object? subtotal = const $CopyWithPlaceholder(),
+    Object? amountDue = const $CopyWithPlaceholder(),
+    Object? amountPaid = const $CopyWithPlaceholder(),
   }) {
     return GroupGuestDto(
       id: id == const $CopyWithPlaceholder() || id == null
@@ -84,6 +98,15 @@ class _$GroupGuestDtoCWProxyImpl implements _$GroupGuestDtoCWProxy {
           ? _value.subtotal
           // ignore: cast_nullable_to_non_nullable
           : subtotal as num,
+      amountDue: amountDue == const $CopyWithPlaceholder() || amountDue == null
+          ? _value.amountDue
+          // ignore: cast_nullable_to_non_nullable
+          : amountDue as num,
+      amountPaid:
+          amountPaid == const $CopyWithPlaceholder() || amountPaid == null
+          ? _value.amountPaid
+          // ignore: cast_nullable_to_non_nullable
+          : amountPaid as num,
     );
   }
 }
@@ -103,13 +126,22 @@ GroupGuestDto _$GroupGuestDtoFromJson(Map<String, dynamic> json) =>
     $checkedCreate('GroupGuestDto', json, ($checkedConvert) {
       $checkKeys(
         json,
-        requiredKeys: const ['id', 'displayName', 'isHost', 'subtotal'],
+        requiredKeys: const [
+          'id',
+          'displayName',
+          'isHost',
+          'subtotal',
+          'amountDue',
+          'amountPaid',
+        ],
       );
       final val = GroupGuestDto(
         id: $checkedConvert('id', (v) => v as String),
         displayName: $checkedConvert('displayName', (v) => v as String),
         isHost: $checkedConvert('isHost', (v) => v as bool),
         subtotal: $checkedConvert('subtotal', (v) => v as num),
+        amountDue: $checkedConvert('amountDue', (v) => v as num),
+        amountPaid: $checkedConvert('amountPaid', (v) => v as num),
       );
       return val;
     });
@@ -120,4 +152,6 @@ Map<String, dynamic> _$GroupGuestDtoToJson(GroupGuestDto instance) =>
       'displayName': instance.displayName,
       'isHost': instance.isHost,
       'subtotal': instance.subtotal,
+      'amountDue': instance.amountDue,
+      'amountPaid': instance.amountPaid,
     };

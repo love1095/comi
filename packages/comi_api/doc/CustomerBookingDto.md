@@ -28,6 +28,8 @@ Name | Type | Description | Notes
 **restaurant** | [**BookingRestaurantDto**](BookingRestaurantDto.md) |  | 
 **table** | [**BookingTableDto**](BookingTableDto.md) |  | [optional] 
 **order** | [**CustomerOrderDto**](CustomerOrderDto.md) |  | [optional] 
+**payments** | [**List&lt;BookingPaymentDto&gt;**](BookingPaymentDto.md) |  | 
+**refunds** | [**List&lt;BookingRefundDto&gt;**](BookingRefundDto.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

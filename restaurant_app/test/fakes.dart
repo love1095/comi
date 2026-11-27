@@ -128,6 +128,8 @@ BookingDetailDto detailOf(BoardBookingDto b, {List<BoardOrderItemDto> items = co
   extraTableIds: b.extraTableIds,
   table: b.table,
   user: b.user,
+  payments: const [],
+  refunds: const [],
   order: items.isEmpty
       ? null
       : BookingDetailOrderDto(

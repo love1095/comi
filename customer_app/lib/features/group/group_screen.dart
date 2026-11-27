@@ -8,6 +8,7 @@ import '../../data/api_error.dart';
 import '../booking/bookings_repository.dart' show arrivalLabel;
 import '../discovery/discovery_repository.dart';
 import 'group_repository.dart';
+import 'split_screen.dart' show openUrlProvider;
 
 /// Shared cart of a group order (§8.4): everyone adds their own dishes until the cutoff.
 /// Opened from the host's booking or from a share link `/g/{token}`.
@@ -229,10 +230,40 @@ class _GroupScreenState extends ConsumerState<GroupScreen> {
             Text(formatVnd(g.total), style: theme.textTheme.titleMedium),
           ],
         ),
+        ..._myShare(g),
         if (!g.locked && _keyLoaded && me == null) ..._joinForm(),
         if (!g.locked && me != null) ..._menu(g),
       ],
     );
+  }
+
+  /// After the bill is split: pay my part online (§8.4 "each pays own").
+  List<Widget> _myShare(GroupViewDto g) {
+    final me = _me;
+    final mine = me == null ? null : g.guests.where((x) => x.id == me.guestId).firstOrNull;
+    if (mine == null || mine.amountDue <= 0) return const [];
+    final left = mine.amountDue - mine.amountPaid;
+    return [
+      const SizedBox(height: 16),
+      if (left <= 0)
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.check_circle, color: ComiColors.available),
+          title: Text('Bạn đã trả phần của mình (${formatVnd(mine.amountPaid)})'),
+        )
+      else
+        FilledButton.icon(
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+          onPressed: _busy
+              ? null
+              : () => _run(() async {
+                  final p = await _repo.payShare(widget.token, me!.guestKey);
+                  if (p.checkoutUrl != null) await ref.read(openUrlProvider)(Uri.parse(p.checkoutUrl!));
+                }),
+          icon: const Icon(Icons.qr_code_2),
+          label: Text('Trả phần của tôi · ${formatVnd(left)}'),
+        ),
+    ];
   }
 
   List<Widget> _joinForm() => [

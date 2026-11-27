@@ -13,6 +13,7 @@ import { KitchenModule } from './modules/kitchen/kitchen.module';
 import { GroupModule } from './modules/group/group.controller';
 import { FeesModule } from './modules/fees/fees.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { RealtimeGatewayModule } from './modules/realtime/realtime.gateway';
 import { RealtimeModule } from './modules/realtime/realtime.service';
 import { MailModule } from './common/mail';
@@ -67,6 +68,7 @@ const isDev = (process.env.NODE_ENV ?? 'development') === 'development';
     GroupModule,
     FeesModule,
     InvoicesModule,
+    PaymentsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

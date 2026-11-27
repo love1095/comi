@@ -18,10 +18,15 @@ abstract class BookingsRepository {
   Future<RoundResultDto> orderMore(String id, List<CartLineDto> items, {bool? ageConfirmed});
   Future<BillDto> bill(String id);
   Future<ServiceRequestDto> requestService(String id, ServiceType type);
+
+  // payments (§10)
+  Future<PaymentDto> pay(String id);
+  Future<void> setRefundAccount(String id, {required String bankBin, required String accountNo, required String accountName});
 }
 
 class ApiBookingsRepository implements BookingsRepository {
-  ApiBookingsRepository(this._api, this._me, this._table);
+  ApiBookingsRepository(this._api, this._me, this._table, this._pay);
+  final CustomerPaymentsApi _pay;
   final CustomerAtTheTableApi _table;
   final CustomerBookingsApi _api;
   final MeApi _me;
@@ -75,11 +80,21 @@ class ApiBookingsRepository implements BookingsRepository {
     id: id,
     serviceRequestCreateDto: ServiceRequestCreateDto(type: type),
   )).data!;
+
+  @override
+  Future<PaymentDto> pay(String id) async => (await _pay.customerPaymentsPay(id: id)).data!;
+
+  @override
+  Future<void> setRefundAccount(String id, {required String bankBin, required String accountNo, required String accountName}) =>
+      _pay.customerPaymentsRefundAccount(
+        id: id,
+        refundAccountDto: RefundAccountDto(bankBin: bankBin, accountNo: accountNo, accountName: accountName),
+      );
 }
 
 final bookingsRepositoryProvider = Provider<BookingsRepository>((ref) {
   final api = ref.watch(apiProvider);
-  return ApiBookingsRepository(api.getCustomerBookingsApi(), api.getMeApi(), api.getCustomerAtTheTableApi());
+  return ApiBookingsRepository(api.getCustomerBookingsApi(), api.getMeApi(), api.getCustomerAtTheTableApi(), api.getCustomerPaymentsApi());
 });
 
 final myBookingsProvider = FutureProvider.autoDispose.family<MyBookingsPageDto, bool>((ref, upcoming) {

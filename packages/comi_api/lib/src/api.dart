@@ -15,6 +15,7 @@ import 'package:comi_api/src/api/customer_availability_api.dart';
 import 'package:comi_api/src/api/customer_bookings_api.dart';
 import 'package:comi_api/src/api/customer_discovery_api.dart';
 import 'package:comi_api/src/api/customer_group_order_api.dart';
+import 'package:comi_api/src/api/customer_payments_api.dart';
 import 'package:comi_api/src/api/customer_vat_invoice_api.dart';
 import 'package:comi_api/src/api/health_api.dart';
 import 'package:comi_api/src/api/me_api.dart';
@@ -26,10 +27,12 @@ import 'package:comi_api/src/api/restaurant_bookings_api.dart';
 import 'package:comi_api/src/api/restaurant_fees_reports_api.dart';
 import 'package:comi_api/src/api/restaurant_kitchen_api.dart';
 import 'package:comi_api/src/api/restaurant_menu_api.dart';
+import 'package:comi_api/src/api/restaurant_payments_api.dart';
 import 'package:comi_api/src/api/restaurant_settings_api.dart';
 import 'package:comi_api/src/api/restaurant_split_bill_api.dart';
 import 'package:comi_api/src/api/restaurant_tables_api.dart';
 import 'package:comi_api/src/api/restaurant_vat_invoice_api.dart';
+import 'package:comi_api/src/api/webhooks_api.dart';
 
 class ComiApi {
   static const String basePath = r'http://localhost';
@@ -170,6 +173,12 @@ class ComiApi {
     return CustomerGroupOrderApi(dio);
   }
 
+  /// Get CustomerPaymentsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  CustomerPaymentsApi getCustomerPaymentsApi() {
+    return CustomerPaymentsApi(dio);
+  }
+
   /// Get CustomerVATInvoiceApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   CustomerVATInvoiceApi getCustomerVATInvoiceApi() {
@@ -236,6 +245,12 @@ class ComiApi {
     return RestaurantMenuApi(dio);
   }
 
+  /// Get RestaurantPaymentsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  RestaurantPaymentsApi getRestaurantPaymentsApi() {
+    return RestaurantPaymentsApi(dio);
+  }
+
   /// Get RestaurantSettingsApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   RestaurantSettingsApi getRestaurantSettingsApi() {
@@ -258,5 +273,11 @@ class ComiApi {
   /// by doing that all interceptors will not be executed
   RestaurantVATInvoiceApi getRestaurantVATInvoiceApi() {
     return RestaurantVATInvoiceApi(dio);
+  }
+
+  /// Get WebhooksApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WebhooksApi getWebhooksApi() {
+    return WebhooksApi(dio);
   }
 }

@@ -47,6 +47,8 @@ abstract class _$RestaurantDetailDtoCWProxy {
 
   RestaurantDetailDto allowCod(bool allowCod);
 
+  RestaurantDetailDto prepaidAvailable(bool prepaidAvailable);
+
   RestaurantDetailDto maxGroupSize(num maxGroupSize);
 
   RestaurantDetailDto confirmGroupsOver(num confirmGroupsOver);
@@ -90,6 +92,7 @@ abstract class _$RestaurantDetailDtoCWProxy {
     bool servesNhau,
     bool allowTableChoice,
     bool allowCod,
+    bool prepaidAvailable,
     num maxGroupSize,
     num confirmGroupsOver,
     num cancelCutoffMinutes,
@@ -179,6 +182,10 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
   RestaurantDetailDto allowCod(bool allowCod) => call(allowCod: allowCod);
 
   @override
+  RestaurantDetailDto prepaidAvailable(bool prepaidAvailable) =>
+      call(prepaidAvailable: prepaidAvailable);
+
+  @override
   RestaurantDetailDto maxGroupSize(num maxGroupSize) =>
       call(maxGroupSize: maxGroupSize);
 
@@ -234,6 +241,7 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
     Object? servesNhau = const $CopyWithPlaceholder(),
     Object? allowTableChoice = const $CopyWithPlaceholder(),
     Object? allowCod = const $CopyWithPlaceholder(),
+    Object? prepaidAvailable = const $CopyWithPlaceholder(),
     Object? maxGroupSize = const $CopyWithPlaceholder(),
     Object? confirmGroupsOver = const $CopyWithPlaceholder(),
     Object? cancelCutoffMinutes = const $CopyWithPlaceholder(),
@@ -332,6 +340,12 @@ class _$RestaurantDetailDtoCWProxyImpl implements _$RestaurantDetailDtoCWProxy {
           ? _value.allowCod
           // ignore: cast_nullable_to_non_nullable
           : allowCod as bool,
+      prepaidAvailable:
+          prepaidAvailable == const $CopyWithPlaceholder() ||
+              prepaidAvailable == null
+          ? _value.prepaidAvailable
+          // ignore: cast_nullable_to_non_nullable
+          : prepaidAvailable as bool,
       maxGroupSize:
           maxGroupSize == const $CopyWithPlaceholder() || maxGroupSize == null
           ? _value.maxGroupSize
@@ -403,6 +417,7 @@ RestaurantDetailDto _$RestaurantDetailDtoFromJson(Map<String, dynamic> json) =>
           'servesNhau',
           'allowTableChoice',
           'allowCod',
+          'prepaidAvailable',
           'maxGroupSize',
           'confirmGroupsOver',
           'cancelCutoffMinutes',
@@ -442,6 +457,7 @@ RestaurantDetailDto _$RestaurantDetailDtoFromJson(Map<String, dynamic> json) =>
         servesNhau: $checkedConvert('servesNhau', (v) => v as bool),
         allowTableChoice: $checkedConvert('allowTableChoice', (v) => v as bool),
         allowCod: $checkedConvert('allowCod', (v) => v as bool),
+        prepaidAvailable: $checkedConvert('prepaidAvailable', (v) => v as bool),
         maxGroupSize: $checkedConvert('maxGroupSize', (v) => v as num),
         confirmGroupsOver: $checkedConvert(
           'confirmGroupsOver',
@@ -498,6 +514,7 @@ Map<String, dynamic> _$RestaurantDetailDtoToJson(
   'servesNhau': instance.servesNhau,
   'allowTableChoice': instance.allowTableChoice,
   'allowCod': instance.allowCod,
+  'prepaidAvailable': instance.prepaidAvailable,
   'maxGroupSize': instance.maxGroupSize,
   'confirmGroupsOver': instance.confirmGroupsOver,
   'cancelCutoffMinutes': instance.cancelCutoffMinutes,

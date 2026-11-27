@@ -77,7 +77,14 @@ export class GroupService {
       cutoffAt: inv.expiresAt.toISOString(),
       locked: this.isLocked(inv),
       maxGuests: inv.maxGuests,
-      guests: b.guests.map((g) => ({ id: g.id, displayName: g.displayName, isHost: g.isHost, subtotal: subtotal(g.id) })),
+      guests: b.guests.map((g) => ({
+        id: g.id,
+        displayName: g.displayName,
+        isHost: g.isHost,
+        subtotal: subtotal(g.id),
+        amountDue: g.amountDue,
+        amountPaid: g.amountPaid,
+      })),
       items: items.map((i) => ({
         id: i.id,
         guestId: i.guestId,

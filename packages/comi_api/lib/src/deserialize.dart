@@ -14,6 +14,8 @@ import 'package:comi_api/src/model/board_table_dto.dart';
 import 'package:comi_api/src/model/board_user_dto.dart';
 import 'package:comi_api/src/model/booking_detail_dto.dart';
 import 'package:comi_api/src/model/booking_detail_order_dto.dart';
+import 'package:comi_api/src/model/booking_payment_dto.dart';
+import 'package:comi_api/src/model/booking_refund_dto.dart';
 import 'package:comi_api/src/model/booking_restaurant_dto.dart';
 import 'package:comi_api/src/model/booking_table_dto.dart';
 import 'package:comi_api/src/model/cancel_dto.dart';
@@ -27,6 +29,7 @@ import 'package:comi_api/src/model/checklist_dto.dart';
 import 'package:comi_api/src/model/close_bill_dto.dart';
 import 'package:comi_api/src/model/closure_dto.dart';
 import 'package:comi_api/src/model/closure_info_dto.dart';
+import 'package:comi_api/src/model/connect_pay_os_dto.dart';
 import 'package:comi_api/src/model/create_booking_dto.dart';
 import 'package:comi_api/src/model/create_hold_dto.dart';
 import 'package:comi_api/src/model/create_table_dto.dart';
@@ -48,6 +51,7 @@ import 'package:comi_api/src/model/group_member_dto.dart';
 import 'package:comi_api/src/model/group_restaurant_dto.dart';
 import 'package:comi_api/src/model/group_view_dto.dart';
 import 'package:comi_api/src/model/guest_key_dto.dart';
+import 'package:comi_api/src/model/guest_key_pay_dto.dart';
 import 'package:comi_api/src/model/hold_dto.dart';
 import 'package:comi_api/src/model/home_dto.dart';
 import 'package:comi_api/src/model/home_section_dto.dart';
@@ -87,6 +91,8 @@ import 'package:comi_api/src/model/option_dto.dart';
 import 'package:comi_api/src/model/option_group_dto.dart';
 import 'package:comi_api/src/model/option_group_response_dto.dart';
 import 'package:comi_api/src/model/option_snapshot_dto.dart';
+import 'package:comi_api/src/model/payment_account_status_dto.dart';
+import 'package:comi_api/src/model/payment_dto.dart';
 import 'package:comi_api/src/model/preferences_dto.dart';
 import 'package:comi_api/src/model/public_menu_category_dto.dart';
 import 'package:comi_api/src/model/public_menu_item_dto.dart';
@@ -94,6 +100,9 @@ import 'package:comi_api/src/model/public_option_dto.dart';
 import 'package:comi_api/src/model/public_option_group_dto.dart';
 import 'package:comi_api/src/model/public_photo_dto.dart';
 import 'package:comi_api/src/model/refresh_dto.dart';
+import 'package:comi_api/src/model/refund_account_dto.dart';
+import 'package:comi_api/src/model/refund_done_dto.dart';
+import 'package:comi_api/src/model/refund_dto.dart';
 import 'package:comi_api/src/model/register_restaurant_dto.dart';
 import 'package:comi_api/src/model/reject_dto.dart';
 import 'package:comi_api/src/model/reorder_draft_dto.dart';
@@ -142,6 +151,7 @@ import 'package:comi_api/src/model/update_menu_item_dto.dart';
 import 'package:comi_api/src/model/update_profile_dto.dart';
 import 'package:comi_api/src/model/update_settings_dto.dart';
 import 'package:comi_api/src/model/update_table_dto.dart';
+import 'package:comi_api/src/model/updated_dto.dart';
 import 'package:comi_api/src/model/upload_signature_dto.dart';
 
 final _regList = RegExp(r'^List<(.*)>$');
@@ -194,6 +204,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return BookingDetailDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BookingDetailOrderDto':
           return BookingDetailOrderDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BookingPaymentDto':
+          return BookingPaymentDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BookingRefundDto':
+          return BookingRefundDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BookingRestaurantDto':
           return BookingRestaurantDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BookingStatus':
@@ -223,6 +237,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return ClosureDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'ClosureInfoDto':
           return ClosureInfoDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'ConnectPayOsDto':
+          return ConnectPayOsDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'Course':
           
           
@@ -268,6 +284,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return GroupViewDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'GuestKeyDto':
           return GuestKeyDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'GuestKeyPayDto':
+          return GuestKeyPayDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HoldDto':
           return HoldDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'HomeDto':
@@ -358,6 +376,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
         case 'OrderStatus':
           
           
+        case 'PaymentAccountStatusDto':
+          return PaymentAccountStatusDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'PaymentDto':
+          return PaymentDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'PaymentMode':
           
           
@@ -375,6 +397,12 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return PublicPhotoDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RefreshDto':
           return RefreshDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RefundAccountDto':
+          return RefundAccountDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RefundDoneDto':
+          return RefundDoneDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'RefundDto':
+          return RefundDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RegisterRestaurantDto':
           return RegisterRestaurantDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'RejectDto':
@@ -489,6 +517,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return UpdateSettingsDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UpdateTableDto':
           return UpdateTableDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'UpdatedDto':
+          return UpdatedDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'UploadSignatureDto':
           return UploadSignatureDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         default:

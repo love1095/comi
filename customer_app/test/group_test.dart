@@ -26,7 +26,7 @@ GroupViewDto groupView({List<GroupGuestDto>? guests, List<GroupItemDto> items = 
   cutoffAt: '2026-12-02T04:40:00.000Z',
   locked: locked,
   maxGuests: 4,
-  guests: guests ?? [GroupGuestDto(id: 'host', displayName: 'Tuấn', isHost: true, subtotal: 0)],
+  guests: guests ?? [GroupGuestDto(id: 'host', displayName: 'Tuấn', isHost: true, subtotal: 0, amountDue: 0, amountPaid: 0)],
   items: items,
   total: items.fold<num>(0, (s, i) => s + i.unitPrice * i.quantity),
 );
@@ -76,7 +76,7 @@ class FakeGroups implements GroupRepository {
     view = groupView(
       guests: [
         ...view.guests,
-        GroupGuestDto(id: 'lan', displayName: displayName, isHost: false, subtotal: 0),
+        GroupGuestDto(id: 'lan', displayName: displayName, isHost: false, subtotal: 0, amountDue: 0, amountPaid: 0),
       ],
       items: view.items,
     );
@@ -112,6 +112,21 @@ class FakeGroups implements GroupRepository {
 
   @override
   Future<SplitDto> split(String bookingId) async => splitValue;
+
+  @override
+  Future<PaymentDto> payShare(String token, String guestKey) async {
+    calls.add('payShare $guestKey');
+    return PaymentDto(
+      id: 'ps1',
+      bookingId: 'b1',
+      amount: 60000,
+      status: PaymentDtoStatusEnum.PENDING,
+      purpose: PaymentDtoPurposeEnum.SHARE,
+      checkoutUrl: 'https://pay.payos.vn/web/share',
+      expiresAt: '2026-12-02T06:15:00Z',
+      refundedAmount: 0,
+    );
+  }
 
   @override
   Future<SplitDto> saveSplit(String bookingId, SplitMode mode, {Map<String, int>? amounts}) async {
@@ -237,5 +252,34 @@ void main() {
     );
     await tester.tap(find.text('Grab'));
     expect(opened.single.host, 'www.grab.com');
+  });
+
+  testWidgets('after the split: pay my share online', (tester) async {
+    final groups = FakeGroups()
+      ..view = groupView(
+        locked: true,
+        guests: [
+          GroupGuestDto(id: 'host', displayName: 'Tuấn', isHost: true, subtotal: 0, amountDue: 60000, amountPaid: 0),
+          GroupGuestDto(id: 'lan', displayName: 'Lan', isHost: false, subtotal: 0, amountDue: 60000, amountPaid: 0),
+        ],
+      );
+    final keys = MemoryGroupKeyStore()..values['tok123456'] = (guestId: 'lan', guestKey: 'key-lan-0123456789');
+    final opened = <Uri>[];
+    await pump(
+      tester,
+      const GroupScreen(token: 'tok123456'),
+      groups: groups,
+      keys: keys,
+      extra: [
+        openUrlProvider.overrideWithValue((u) async {
+          opened.add(u);
+          return true;
+        }),
+      ],
+    );
+    await tester.tap(find.text('Trả phần của tôi · ${formatVnd(60000)}'));
+    await tester.pumpAndSettle();
+    expect(groups.calls.last, 'payShare key-lan-0123456789');
+    expect(opened.single.path, '/web/share');
   });
 }

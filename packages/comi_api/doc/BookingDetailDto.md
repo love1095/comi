@@ -22,6 +22,8 @@ Name | Type | Description | Notes
 **table** | [**BoardTableDto**](BoardTableDto.md) |  | [optional] 
 **user** | [**BoardUserDto**](BoardUserDto.md) |  | 
 **order** | [**BookingDetailOrderDto**](BookingDetailOrderDto.md) |  | [optional] 
+**payments** | [**List&lt;BookingPaymentDto&gt;**](BookingPaymentDto.md) |  | 
+**refunds** | [**List&lt;BookingRefundDto&gt;**](BookingRefundDto.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

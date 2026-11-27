@@ -9,11 +9,55 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**groupPaymentsPay**](PublicGroupOrderApi.md#grouppaymentspay) | **POST** /api/v1/groups/{token}/pay | 
 [**publicGroupAdd**](PublicGroupOrderApi.md#publicgroupadd) | **POST** /api/v1/groups/{token}/items | 
 [**publicGroupGet**](PublicGroupOrderApi.md#publicgroupget) | **GET** /api/v1/groups/{token} | 
 [**publicGroupJoin**](PublicGroupOrderApi.md#publicgroupjoin) | **POST** /api/v1/groups/{token}/join | 
 [**publicGroupRemove**](PublicGroupOrderApi.md#publicgroupremove) | **POST** /api/v1/groups/{token}/items/{itemId}/remove | 
 
+
+# **groupPaymentsPay**
+> PaymentDto groupPaymentsPay(token, guestKeyPayDto)
+
+
+
+### Example
+```dart
+import 'package:comi_api/api.dart';
+
+final api = ComiApi().getPublicGroupOrderApi();
+final String token = token_example; // String | 
+final GuestKeyPayDto guestKeyPayDto = ; // GuestKeyPayDto | 
+
+try {
+    final response = api.groupPaymentsPay(token, guestKeyPayDto);
+    print(response);
+} on DioException catch (e) {
+    print('Exception when calling PublicGroupOrderApi->groupPaymentsPay: $e\n');
+}
+```
+
+### Parameters
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **token** | **String**|  | 
+ **guestKeyPayDto** | [**GuestKeyPayDto**](GuestKeyPayDto.md)|  | 
+
+### Return type
+
+[**PaymentDto**](PaymentDto.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **publicGroupAdd**
 > GroupViewDto publicGroupAdd(token, groupItemsDto)

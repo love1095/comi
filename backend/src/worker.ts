@@ -15,11 +15,23 @@ import { KitchenService } from './modules/kitchen/kitchen.service';
 import { GroupService } from './modules/group/group.service';
 import { FeesService, previousMonth } from './modules/fees/fees.service';
 import { MailModule } from './common/mail';
+import { PaymentsService } from './modules/payments/payments.service';
+import { PayOsAdapter } from './modules/payments/payos';
+import { AvailabilityService } from './modules/availability/availability.service';
 import { RealtimeModule } from './modules/realtime/realtime.service';
 
 @Module({
   imports: [ConfigModule, PrismaModule, ClockModule, AuditModule, RedisModule, JobsModule, RealtimeModule, MailModule],
-  providers: [PhotoProcessor, BookingTimeouts, KitchenService, GroupService, FeesService],
+  providers: [
+    PhotoProcessor,
+    BookingTimeouts,
+    KitchenService,
+    GroupService,
+    FeesService,
+    AvailabilityService,
+    PaymentsService,
+    { provide: PayOsAdapter, inject: [ENV], useFactory: (env: Env) => new PayOsAdapter(fetch, env.PAYOS_API_URL) },
+  ],
 })
 class WorkerModule {}
 
@@ -36,6 +48,7 @@ async function bootstrap() {
   const kitchen = app.get(KitchenService);
   const groups = app.get(GroupService);
   const fees = app.get(FeesService);
+  const payments = app.get(PaymentsService);
 
   const workers = [
     new Worker(QUEUES.PHOTO, (job: Job<{ photoId: string }>) => photos.process(job.data.photoId), { connection, concurrency: 4 }),
@@ -47,6 +60,7 @@ async function bootstrap() {
         if (job.name === 'group-cutoff') return groups.lock(job.data.bookingId as string, 'system').catch(() => undefined);
         if (job.name === 'cod-close-reminder') return bookings.codCloseReminder(job.data.bookingId as string);
         if (job.name === 'cod-auto-close') return bookings.codAutoClose(job.data.bookingId as string);
+        if (job.name === 'payment-timeout') return payments.paymentTimeout(job.data.bookingId as string);
         logger.warn(`Unknown job ${job.name}`);
       },
       { connection, concurrency: 8 },
@@ -65,6 +79,7 @@ async function bootstrap() {
       async (job: Job) => {
         if (job.name === 'statement-generate') return fees.generate(previousMonth(new Date()));
         if (job.name === 'statement-overdue') return fees.markOverdue();
+        if (job.name === 'payment-reconcile') return payments.reconcile();
         logger.warn(`Unknown job ${job.name}`);
       },
       { connection, concurrency: 1 },
@@ -78,6 +93,8 @@ async function bootstrap() {
   // §11.3: statements at 02:00 on the 1st (Vietnam), overdue check every morning.
   await app.get(JobsService).repeat(QUEUES.BILLING, 'statement-generate', { pattern: '0 2 1 * *', tz: 'Asia/Ho_Chi_Minh' });
   await app.get(JobsService).repeat(QUEUES.BILLING, 'statement-overdue', { pattern: '0 3 * * *', tz: 'Asia/Ho_Chi_Minh' });
+  // §10.3: lost webhooks / stuck payments, every 5 minutes.
+  await app.get(JobsService).repeat(QUEUES.BILLING, 'payment-reconcile', { every: 5 * 60_000 });
   logger.log(`comi worker started: ${workers.map((w) => w.name).join(', ')}`);
 
   const shutdown = async () => {

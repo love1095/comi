@@ -11,6 +11,7 @@ import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
 import 'bookings_repository.dart';
 import 'table_picker_screen.dart';
+import '../group/split_screen.dart' show openUrlProvider;
 
 typedef SlotQuery = ({String restaurantId, String date, int partySize});
 
@@ -62,6 +63,21 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
 
   var _serveStyle = CreateBookingDtoServeStyleEnum.BY_COURSE;
   var _ageConfirmed = false;
+
+  /// null = the default (prepay at lunch when the restaurant takes it, §Phase 4).
+  bool? _prepaidChoice;
+
+  bool get _isLunch {
+    final local = _slot?.local;
+    final hour = local == null ? toVietnamTime(DateTime.now()).hour : int.parse(local.split(':').first);
+    return hour < 15;
+  }
+
+  bool _isPrepaid(CartState cart) {
+    if (!r.prepaidAvailable || cart.isEmpty) return false;
+    return _prepaidChoice ?? _isLunch;
+  }
+
   final _note = TextEditingController();
 
   /// One key per checkout: a retry after a network drop returns the same booking (§8.2).
@@ -108,7 +124,7 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
               arrivalAt: slot.time,
               holdId: _held != null && _held!.expiresAt.isAfter(DateTime.now()) ? _held!.holdId : null,
               partySize: _party,
-              paymentMode: CreateBookingDtoPaymentModeEnum.COD,
+              paymentMode: _isPrepaid(cart) ? CreateBookingDtoPaymentModeEnum.PREPAID : CreateBookingDtoPaymentModeEnum.COD,
               serveStyle: cart.isEmpty ? null : _serveStyle,
               note: _note.text.trim().isEmpty ? null : _note.text.trim(),
               ageConfirmed: cart.hasAlcohol ? _ageConfirmed : null,
@@ -118,6 +134,15 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
           );
       ref.read(cartProvider.notifier).clear();
       ref.invalidate(myBookingsProvider);
+      // Prepaid: open the payment page right away; the booking screen keeps a "Pay" button too.
+      if (b.paymentMode == PaymentMode.PREPAID && b.status == BookingStatus.PENDING && !b.needsApproval) {
+        try {
+          final p = await ref.read(bookingsRepositoryProvider).pay(b.id);
+          if (p.checkoutUrl != null) await ref.read(openUrlProvider)(Uri.parse(p.checkoutUrl!));
+        } catch (_) {
+          // The detail screen shows the payment panel with a retry.
+        }
+      }
       if (mounted) context.go('/bookings/${b.id}?new=1');
     } catch (e) {
       final err = ApiError.from(e);
@@ -141,6 +166,9 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
     final slots = ref.watch(slotsProvider((restaurantId: r.id, date: _date, partySize: _party)));
     final bigGroup = _party > r.confirmGroupsOver;
     final blocked = _slot == null || (cart.hasAlcohol && !_ageConfirmed) || _submitting;
+    final canPrepay = r.prepaidAvailable && !cart.isEmpty;
+    final lunch = _isLunch;
+    final prepaid = _isPrepaid(cart);
 
     return Scaffold(
       appBar: AppBar(title: Text('Đặt bàn · ${r.name}')),
@@ -320,19 +348,34 @@ class _BookingFormState extends ConsumerState<_BookingForm> {
             ),
           ),
           Text('Thanh toán', style: theme.textTheme.titleMedium),
-          const ListTile(
-            leading: Icon(Icons.radio_button_checked),
-            contentPadding: EdgeInsets.zero,
-            title: Text('Trả tại quán'),
-            subtitle: Text('Tiền mặt hoặc chuyển khoản khi ăn xong'),
+          _PayOption(
+            selected: prepaid,
+            enabled: canPrepay,
+            icon: Icons.qr_code_2,
+            title: 'Trả trước bằng VietQR',
+            subtitle: !r.prepaidAvailable
+                ? 'Quán chưa nhận trả trước'
+                : cart.isEmpty
+                ? 'Chọn món trước để trả trước'
+                : 'Vừa ngồi là có món · tiền chuyển thẳng cho quán',
+            onTap: () => setState(() => _prepaidChoice = true),
           ),
-          const ListTile(
-            contentPadding: EdgeInsets.zero,
-            enabled: false,
-            leading: Icon(Icons.lock_clock),
-            title: Text('Trả trước online (MoMo, VNPay…)'),
-            subtitle: Text('Sắp có'),
+          _PayOption(
+            selected: !prepaid,
+            enabled: true,
+            icon: Icons.payments_outlined,
+            title: 'Trả tại quán',
+            subtitle: 'Tiền mặt hoặc chuyển khoản khi ăn xong',
+            onTap: () => setState(() => _prepaidChoice = false),
           ),
+          if (!prepaid && canPrepay && lunch)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                'Trả tại quán: bếp chỉ bắt đầu nấu khi bạn tới. Trả trước để món lên ngay khi ngồi.',
+                style: theme.textTheme.bodySmall?.copyWith(color: ComiColors.held),
+              ),
+            ),
           Text('Huỷ miễn phí trước giờ đến ${r.cancelCutoffMinutes} phút.', style: theme.textTheme.bodySmall),
           const SizedBox(height: 80),
         ],
@@ -393,4 +436,37 @@ class _CartRow extends ConsumerWidget {
       ],
     );
   }
+}
+
+class _PayOption extends StatelessWidget {
+  const _PayOption({
+    required this.selected,
+    required this.enabled,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+  final bool selected;
+  final bool enabled;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: EdgeInsets.zero,
+    enabled: enabled,
+    onTap: enabled ? onTap : null,
+    leading: Icon(selected && enabled ? Icons.radio_button_checked : Icons.radio_button_off),
+    title: Row(
+      children: [
+        Icon(icon, size: 18),
+        const SizedBox(width: 6),
+        Flexible(child: Text(title)),
+      ],
+    ),
+    subtitle: Text(subtitle),
+  );
 }

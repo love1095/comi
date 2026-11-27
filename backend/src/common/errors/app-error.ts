@@ -39,6 +39,11 @@ export const ErrorCode = {
   CANCEL_TOO_LATE: HttpStatus.UNPROCESSABLE_ENTITY,
   // kitchen + at the table (§7, §8.5, §9)
   KITCHEN_FULL: HttpStatus.CONFLICT,
+  // payments (§10)
+  PAYMENT_PROVIDER_ERROR: HttpStatus.BAD_GATEWAY,
+  PAYMENT_NOT_CONNECTED: HttpStatus.UNPROCESSABLE_ENTITY,
+  AWAITING_APPROVAL: HttpStatus.CONFLICT,
+  NOTHING_TO_PAY: HttpStatus.UNPROCESSABLE_ENTITY,
   // group orders + split bill (§8.4, §8.5)
   SPLIT_MISMATCH: HttpStatus.UNPROCESSABLE_ENTITY,
   GROUP_LOCKED: HttpStatus.CONFLICT,

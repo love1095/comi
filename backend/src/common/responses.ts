@@ -173,9 +173,35 @@ export class BookingDetailOrderDto extends BoardOrderDto {
   @ApiProperty({ type: [BoardOrderItemDto] }) items: BoardOrderItemDto[];
 }
 
+// ───── payments on a booking (§10) ─────
+
+export class BookingPaymentDto {
+  @ApiProperty() id: string;
+  @ApiProperty() amount: number;
+  @ApiProperty({ enum: ['CREATED', 'PENDING', 'PAID', 'FAILED', 'EXPIRED', 'REFUNDED', 'PARTIALLY_REFUNDED'] }) status: string;
+  @ApiProperty({ enum: ['BOOKING', 'SHARE'] }) purpose: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) guestId: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) checkoutUrl: string | null;
+  @ApiPropertyOptional({ nullable: true, type: String }) qrCode: string | null;
+  @ApiProperty() expiresAt: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) paidAt: string | null;
+  @ApiProperty() refundedAmount: number;
+}
+
+export class BookingRefundDto {
+  @ApiProperty() id: string;
+  @ApiProperty() amount: number;
+  @ApiProperty({ enum: ['PENDING', 'DONE'] }) status: string;
+  @ApiProperty() reason: string;
+  @ApiProperty() createdAt: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) doneAt: string | null;
+}
+
 /** One booking for staff (GET :id and actions): board fields + full order lines. */
 export class BookingDetailDto extends BoardBookingDto {
   @ApiPropertyOptional({ nullable: true, type: BookingDetailOrderDto }) override order: BookingDetailOrderDto | null;
+  @ApiProperty({ type: [BookingPaymentDto] }) payments: BookingPaymentDto[];
+  @ApiProperty({ type: [BookingRefundDto] }) refunds: BookingRefundDto[];
 }
 
 // ───── menu (staff) ─────

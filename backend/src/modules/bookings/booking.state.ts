@@ -9,7 +9,7 @@ export const allowedTransitions: Record<BookingStatus, readonly BookingStatus[]>
   COMPLETED: [],
   CANCELLED: [],
   NO_SHOW: [],
-  EXPIRED: [],
+  EXPIRED: ['CONFIRMED'], // late payment while the table is still free (§10.3)
 };
 
 export const ACTIVE_STATUSES: BookingStatus[] = ['PENDING', 'CONFIRMED', 'CHECKED_IN'];
