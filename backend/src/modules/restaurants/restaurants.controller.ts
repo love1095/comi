@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiProperty, ApiPropertyOptional, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ChecklistDto, GeocodeResultDto, MembershipDto, OpeningHoursDto, RestaurantProfileDto } from '../../common/responses';
 import { RestaurantStatus } from '@prisma/client';
 import { Perm } from '../../common/auth/auth.types';
@@ -107,7 +107,17 @@ export class RestaurantController {
   }
 }
 
-/** Minimal admin endpoints until AdminJS is wired in (§18.4). */
+
+export class AdminRestaurantRowDto {
+  @ApiProperty() id: string;
+  @ApiProperty() slug: string;
+  @ApiProperty() name: string;
+  @ApiProperty() address: string;
+  @ApiProperty() phone: string;
+  @ApiProperty({ enum: RestaurantStatus, enumName: 'RestaurantStatus' }) status: RestaurantStatus;
+  @ApiPropertyOptional({ nullable: true, type: String }) submittedAt: string | null;
+}
+/** Restaurant review for the admin website (§18.4). Status changes return the updated profile. */
 @ApiTags('admin')
 @AdminOnly()
 @Controller('admin/restaurants')
@@ -116,30 +126,38 @@ export class AdminRestaurantsController {
 
   @Get()
   @ApiQuery({ name: 'status', enum: RestaurantStatus, required: false })
+  @ApiOkResponse({ type: [AdminRestaurantRowDto] })
   list(@Query('status') status?: RestaurantStatus) {
     return this.restaurants.listForReview(status);
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: RestaurantProfileDto })
   get(@Param('id', ParseUUIDPipe) id: string) {
     return this.restaurants.getProfile(id);
   }
 
   @Post(':id/approve')
   @HttpCode(200)
-  approve(@CurrentStaffId() adminId: string, @Param('id', ParseUUIDPipe) id: string) {
-    return this.restaurants.approve(adminId, id);
+  @ApiOkResponse({ type: RestaurantProfileDto })
+  async approve(@CurrentStaffId() adminId: string, @Param('id', ParseUUIDPipe) id: string) {
+    await this.restaurants.approve(adminId, id);
+    return this.restaurants.getProfile(id);
   }
 
   @Post(':id/reject')
   @HttpCode(200)
-  reject(@CurrentStaffId() adminId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: RejectDto) {
-    return this.restaurants.reject(adminId, id, dto.reason);
+  @ApiOkResponse({ type: RestaurantProfileDto })
+  async reject(@CurrentStaffId() adminId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: RejectDto) {
+    await this.restaurants.reject(adminId, id, dto.reason);
+    return this.restaurants.getProfile(id);
   }
 
   @Post(':id/pause')
   @HttpCode(200)
-  pause(@CurrentStaffId() adminId: string, @Param('id', ParseUUIDPipe) id: string) {
-    return this.restaurants.pause(adminId, id);
+  @ApiOkResponse({ type: RestaurantProfileDto })
+  async pause(@CurrentStaffId() adminId: string, @Param('id', ParseUUIDPipe) id: string) {
+    await this.restaurants.pause(adminId, id);
+    return this.restaurants.getProfile(id);
   }
 }

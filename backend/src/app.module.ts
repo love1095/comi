@@ -21,6 +21,7 @@ import { PlacesModule } from './modules/places/places.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { TranslationsModule } from './modules/translations/translations.module';
 import { LegalModule } from './modules/legal/legal.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { RealtimeGatewayModule } from './modules/realtime/realtime.gateway';
 import { RealtimeModule } from './modules/realtime/realtime.service';
 import { MailModule } from './common/mail';
@@ -86,6 +87,7 @@ const isDev = (process.env.NODE_ENV ?? 'development') === 'development';
     NotificationsModule,
     TranslationsModule,
     LegalModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

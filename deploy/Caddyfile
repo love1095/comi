@@ -17,3 +17,18 @@ api.comi.vn {
 		format json
 	}
 }
+
+# Admin website (Flutter web): `flutter build web --dart-define=API_URL=https://api.comi.vn` in admin_app,
+# then copy admin_app/build/web to deploy/admin-web on the server. Optionally limit by IP (remote_ip matcher).
+admin.comi.vn {
+	encode gzip
+	root * /srv/admin
+	try_files {path} /index.html
+	file_server
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Frame-Options DENY
+		Referrer-Policy no-referrer
+		-Server
+	}
+}

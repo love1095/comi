@@ -7,6 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import { ChildProcess, spawn } from 'child_process';
 import { join } from 'path';
 import request from 'supertest';
+import { adminSession } from './helpers';
 
 const PORT = 3999;
 const BASE = `http://localhost:${PORT}`;
@@ -148,16 +149,14 @@ describe('comi API (e2e)', () => {
     await api().post(`/api/v1/admin/restaurants/${rid}/approve`).set(auth).expect(403);
 
     const admin = await staffToken('admin');
-    await prisma.staffUser.update({ where: { email: `admin-${run}@test.comi.vn` }, data: { isAdmin: true } });
-    const adminLogin = await api()
-      .post('/api/v1/auth/staff/login')
-      .send({ email: `admin-${run}@test.comi.vn`, password: 'password123' })
-      .expect(200);
+    const adminHeader = await adminSession(BASE, prisma, `admin-${run}@test.comi.vn`);
     expect(admin.accessToken).toBeDefined();
-    const approved = await api()
-      .post(`/api/v1/admin/restaurants/${rid}/approve`)
-      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`)
-      .expect(200);
+    // An admin signed in through the normal staff login (no 2FA code) is refused admin routes.
+    const plain = await api().post('/api/v1/auth/staff/login').send({ email: `admin-${run}@test.comi.vn`, password: 'password123' }).expect(200);
+    const refused = await api().post(`/api/v1/admin/restaurants/${rid}/approve`).set('Authorization', `Bearer ${plain.body.accessToken}`).expect(403);
+    expect(refused.body.error.code).toBe('MFA_REQUIRED');
+    await api().post('/api/v1/auth/admin/login').send({ email: `admin-${run}@test.comi.vn`, password: 'password123' }).expect(401);
+    const approved = await api().post(`/api/v1/admin/restaurants/${rid}/approve`).set(adminHeader).expect(200);
     expect(approved.body.status).toBe('ACTIVE');
   });
 

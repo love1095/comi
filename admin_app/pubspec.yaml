@@ -1,0 +1,30 @@
+name: admin_app
+description: comi admin website — approve restaurants, moderate reviews, guests, fees, vouchers (Flutter web).
+publish_to: 'none'
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  material_ui: ^1.1.0
+  comi_api:
+    path: ../packages/comi_api
+  shared_ui:
+    path: ../packages/shared_ui
+  dio: ^5.11.0
+  flutter_riverpod: ^3.5.0
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

@@ -41,6 +41,7 @@ export class TokenService {
         familyId,
         userId: principal.kind === 'user' ? principal.userId : null,
         staffId: principal.kind === 'staff' ? principal.staffId : null,
+        mfa: principal.kind === 'staff' && !!principal.mfa,
         expiresAt: new Date(this.clock.now().getTime() + this.env.REFRESH_TOKEN_TTL_DAYS * DAY_MS),
       },
     });
@@ -73,7 +74,7 @@ export class TokenService {
     }
 
     const principal: Principal = row.staff
-      ? { kind: 'staff', staffId: row.staff.id, isAdmin: row.staff.isAdmin }
+      ? { kind: 'staff', staffId: row.staff.id, isAdmin: row.staff.isAdmin, mfa: row.mfa && row.staff.isAdmin }
       : { kind: 'user', userId: row.userId! };
     const pair = await this.issue(principal, row.familyId);
     const next = await this.prisma.refreshToken.findUnique({ where: { tokenHash: this.hash(pair.refreshToken) } });
@@ -110,7 +111,9 @@ export class TokenService {
 
   private signAccess(p: Principal): Promise<string> {
     const payload: AccessTokenPayload =
-      p.kind === 'user' ? { sub: p.userId, typ: 'user' } : { sub: p.staffId, typ: 'staff', adm: p.isAdmin || undefined };
+      p.kind === 'user'
+        ? { sub: p.userId, typ: 'user' }
+        : { sub: p.staffId, typ: 'staff', adm: p.isAdmin || undefined, mfa: (p.isAdmin && p.mfa) || undefined };
     return this.jwt.signAsync(payload, { expiresIn: this.env.ACCESS_TOKEN_TTL_SECONDS });
   }
 

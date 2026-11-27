@@ -76,3 +76,19 @@ write a new one).
 - **Apple**: phone sign-in is fine; if Google/Facebook sign-in is ever added, Sign in with Apple becomes mandatory. Alcohol is shown → age rating 17+ (or 18+ in VN listing). Location is "when in use" only.
 - **Google Play**: Data safety form — phone/email, name, approximate location, purchase history; data encrypted in transit; deletion available in app and on request.
 - Test accounts for reviewers: a staging-free production restaurant "Quán Demo" and a guest number, written in the review notes.
+
+## 8. Admin website
+
+- Build: `cd admin_app && flutter build web --dart-define=API_URL=https://api.comi.vn`, copy `build/web/*`
+  to `deploy/admin-web/` on the server; Caddy serves it at `admin.comi.vn` (see `deploy/Caddyfile`).
+- **First admin**: register a normal staff account (restaurant app or `POST /api/v1/auth/staff/register`), then
+  ```sh
+  docker compose -f docker-compose.prod.yml exec postgres psql -U comi -c "UPDATE \"StaffUser\" SET \"isAdmin\" = true WHERE email = 'you@comi.vn';"
+  ```
+  Sign in at admin.comi.vn without a code → set up the authenticator → sign in again with the code.
+- Admin routes **only** accept sessions opened with a TOTP code (`POST /auth/admin/login`); a code works once.
+- **Lost phone**: another admin (or psql) clears 2FA, then the admin sets it up again at next sign-in:
+  ```sql
+  UPDATE "StaffUser" SET "totpSecretEnc" = NULL, "totpEnabledAt" = NULL, "totpLastStep" = NULL WHERE email = 'you@comi.vn';
+  ```
+  Every 2FA change and admin sign-in is in the audit log (Nhật ký).

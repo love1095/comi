@@ -55,7 +55,7 @@ export class AuthGuard implements CanActivate {
     req.principal =
       payload.typ === 'user'
         ? { kind: 'user', userId: payload.sub }
-        : { kind: 'staff', staffId: payload.sub, isAdmin: !!payload.adm };
+        : { kind: 'staff', staffId: payload.sub, isAdmin: !!payload.adm, mfa: !!payload.mfa };
 
     if (isPublic) return true;
 
@@ -65,6 +65,8 @@ export class AuthGuard implements CanActivate {
     if (actor === 'admin' && !(req.principal.kind === 'staff' && req.principal.isAdmin)) {
       throw new AppError('FORBIDDEN', 'Admin only');
     }
+    // Admin routes need a session opened with a TOTP code (POST /auth/admin/login).
+    if (actor === 'admin' && !(req.principal.kind === 'staff' && req.principal.mfa)) throw new AppError('MFA_REQUIRED');
 
     const roles = this.reflector.getAllAndOverride<StaffRole[]>(RESTAURANT_ROLES, targets);
     if (roles && req.principal.kind === 'staff') {

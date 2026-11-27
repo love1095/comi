@@ -70,6 +70,9 @@ model StaffUser {
   termsVersion    String?
   termsAcceptedAt DateTime?
   deletedAt       DateTime?
+  totpSecretEnc   String? // admin 2FA secret, AES-256-GCM
+  totpEnabledAt   DateTime?
+  totpLastStep    Int? // last accepted TOTP step (no replay)
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   memberships     RestaurantMember[]
@@ -107,6 +110,7 @@ model RefreshToken {
   expiresAt    DateTime
   revokedAt    DateTime?
   replacedById String?
+  mfa          Boolean    @default(false) // admin session opened with 2FA
   createdAt    DateTime   @default(now())
   user         User?      @relation(fields: [userId], references: [id])
   staff        StaffUser? @relation(fields: [staffId], references: [id])

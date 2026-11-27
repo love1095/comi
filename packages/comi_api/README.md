@@ -49,12 +49,16 @@ import 'package:comi_api/comi_api.dart';
 
 
 final api = ComiApi().getAdminApi();
-final String id = id_example; // String | 
+final String entity = entity_example; // String | 
+final String entityId = entityId_example; // String | 
+final String actorId = actorId_example; // String | 
+final String before = before_example; // String | ISO time: older entries (paging)
 
 try {
-    api.adminRestaurantsApprove(id);
+    final response = await api.adminAuditLog(entity, entityId, actorId, before);
+    print(response);
 } on DioException catch (e) {
-    print("Exception when calling AdminApi->adminRestaurantsApprove: $e\n");
+    print("Exception when calling AdminApi->adminAuditLog: $e\n");
 }
 
 ```
@@ -65,11 +69,17 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*AdminApi*](doc/AdminApi.md) | [**adminAuditLog**](doc/AdminApi.md#adminauditlog) | **GET** /api/v1/admin/audit | 
+[*AdminApi*](doc/AdminApi.md) | [**adminBlock**](doc/AdminApi.md#adminblock) | **POST** /api/v1/admin/users/{id}/block | 
+[*AdminApi*](doc/AdminApi.md) | [**adminBookings**](doc/AdminApi.md#adminbookings) | **GET** /api/v1/admin/bookings | 
+[*AdminApi*](doc/AdminApi.md) | [**adminDashboard**](doc/AdminApi.md#admindashboard) | **GET** /api/v1/admin/dashboard | 
+[*AdminApi*](doc/AdminApi.md) | [**adminResetNoShow**](doc/AdminApi.md#adminresetnoshow) | **POST** /api/v1/admin/users/{id}/reset-no-show | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsApprove**](doc/AdminApi.md#adminrestaurantsapprove) | **POST** /api/v1/admin/restaurants/{id}/approve | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsGet**](doc/AdminApi.md#adminrestaurantsget) | **GET** /api/v1/admin/restaurants/{id} | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsList**](doc/AdminApi.md#adminrestaurantslist) | **GET** /api/v1/admin/restaurants | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsPause**](doc/AdminApi.md#adminrestaurantspause) | **POST** /api/v1/admin/restaurants/{id}/pause | 
 [*AdminApi*](doc/AdminApi.md) | [**adminRestaurantsReject**](doc/AdminApi.md#adminrestaurantsreject) | **POST** /api/v1/admin/restaurants/{id}/reject | 
+[*AdminApi*](doc/AdminApi.md) | [**adminUsers**](doc/AdminApi.md#adminusers) | **GET** /api/v1/admin/users | 
 [*AdminReviewsApi*](doc/AdminReviewsApi.md) | [**adminReviewsDecide**](doc/AdminReviewsApi.md#adminreviewsdecide) | **POST** /api/v1/admin/reviews/{id}/decision | 
 [*AdminReviewsApi*](doc/AdminReviewsApi.md) | [**adminReviewsReported**](doc/AdminReviewsApi.md#adminreviewsreported) | **GET** /api/v1/admin/reviews/reported | 
 [*AdminStatementsApi*](doc/AdminStatementsApi.md) | [**adminStatementsGenerate**](doc/AdminStatementsApi.md#adminstatementsgenerate) | **POST** /api/v1/admin/statements/generate | 
@@ -78,6 +88,9 @@ Class | Method | HTTP request | Description
 [*AdminVouchersApi*](doc/AdminVouchersApi.md) | [**adminVouchersActive**](doc/AdminVouchersApi.md#adminvouchersactive) | **PATCH** /api/v1/admin/vouchers/{id} | 
 [*AdminVouchersApi*](doc/AdminVouchersApi.md) | [**adminVouchersCreate**](doc/AdminVouchersApi.md#adminvoucherscreate) | **POST** /api/v1/admin/vouchers | 
 [*AdminVouchersApi*](doc/AdminVouchersApi.md) | [**adminVouchersList**](doc/AdminVouchersApi.md#adminvoucherslist) | **GET** /api/v1/admin/vouchers | 
+[*AuthApi*](doc/AuthApi.md) | [**adminAuthEnable**](doc/AuthApi.md#adminauthenable) | **POST** /api/v1/auth/admin/mfa/enable | 
+[*AuthApi*](doc/AuthApi.md) | [**adminAuthLogin**](doc/AuthApi.md#adminauthlogin) | **POST** /api/v1/auth/admin/login | 
+[*AuthApi*](doc/AuthApi.md) | [**adminAuthSetup**](doc/AuthApi.md#adminauthsetup) | **POST** /api/v1/auth/admin/mfa/setup | 
 [*AuthApi*](doc/AuthApi.md) | [**authExchange**](doc/AuthApi.md#authexchange) | **POST** /api/v1/auth/customer/exchange | 
 [*AuthApi*](doc/AuthApi.md) | [**authLogin**](doc/AuthApi.md#authlogin) | **POST** /api/v1/auth/staff/login | 
 [*AuthApi*](doc/AuthApi.md) | [**authLogout**](doc/AuthApi.md#authlogout) | **POST** /api/v1/auth/logout | 
@@ -237,15 +250,23 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AddPhotoDto](doc/AddPhotoDto.md)
+ - [AdminBookingDto](doc/AdminBookingDto.md)
+ - [AdminDashboardDto](doc/AdminDashboardDto.md)
+ - [AdminLoginDto](doc/AdminLoginDto.md)
+ - [AdminLoginResultDto](doc/AdminLoginResultDto.md)
+ - [AdminRestaurantRowDto](doc/AdminRestaurantRowDto.md)
+ - [AdminUserDto](doc/AdminUserDto.md)
  - [AdminVoucherInputDto](doc/AdminVoucherInputDto.md)
  - [AreaBriefDto](doc/AreaBriefDto.md)
  - [AreaDto](doc/AreaDto.md)
  - [AreaLayoutDto](doc/AreaLayoutDto.md)
  - [AreaSummaryDto](doc/AreaSummaryDto.md)
+ - [AuditEntryDto](doc/AuditEntryDto.md)
  - [AvailabilityDto](doc/AvailabilityDto.md)
  - [AvailabilityResultDto](doc/AvailabilityResultDto.md)
  - [BillDto](doc/BillDto.md)
  - [BillRoundDto](doc/BillRoundDto.md)
+ - [BlockDto](doc/BlockDto.md)
  - [BoardBookingDto](doc/BoardBookingDto.md)
  - [BoardOrderDto](doc/BoardOrderDto.md)
  - [BoardOrderItemDto](doc/BoardOrderItemDto.md)
@@ -331,6 +352,8 @@ Class | Method | HTTP request | Description
  - [MenuOptionResponseDto](doc/MenuOptionResponseDto.md)
  - [MenuPhotoDto](doc/MenuPhotoDto.md)
  - [MenuTranslationDto](doc/MenuTranslationDto.md)
+ - [MfaCodeDto](doc/MfaCodeDto.md)
+ - [MfaSetupDto](doc/MfaSetupDto.md)
  - [MoveTableDto](doc/MoveTableDto.md)
  - [MyBookingsPageDto](doc/MyBookingsPageDto.md)
  - [MyHoldDto](doc/MyHoldDto.md)

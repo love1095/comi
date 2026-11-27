@@ -2,10 +2,10 @@ name: flutter
 
 on:
   pull_request:
-    paths: ['customer_app/**', 'restaurant_app/**', 'packages/**', 'pubspec.yaml', 'pubspec.lock', '.github/workflows/flutter.yml']
+    paths: ['customer_app/**', 'restaurant_app/**', 'admin_app/**', 'packages/**', 'pubspec.yaml', 'pubspec.lock', '.github/workflows/flutter.yml']
   push:
     branches: [main]
-    paths: ['customer_app/**', 'restaurant_app/**', 'packages/**', 'pubspec.yaml', 'pubspec.lock', '.github/workflows/flutter.yml']
+    paths: ['customer_app/**', 'restaurant_app/**', 'admin_app/**', 'packages/**', 'pubspec.yaml', 'pubspec.lock', '.github/workflows/flutter.yml']
 
 jobs:
   test:
@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [packages/shared_ui, restaurant_app, customer_app]
+        package: [packages/shared_ui, restaurant_app, customer_app, admin_app]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2

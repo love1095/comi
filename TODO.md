@@ -27,7 +27,7 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 - [x] Table map data + shared `TableMap` Flutter widget + map editor §8.6 — backend `PUT /restaurant/areas/:id/layout`, `shared_ui` TableMap, restaurant app editor (palette, inspector, undo, template, preview as customer, list view) — ⬜ room-photo background
 - [x] Menu: categories, items, options, sold-out switch, Excel import (xlsx/csv template → preview → confirm)
 - [x] Photos: Cloudinary signed upload, 4:3 crop, blurhash §16 — signature + verify + rules + BullMQ worker + blurhash job; restaurant app: pick → 4:3 crop (crop_your_image) → direct Cloudinary upload → verify; apps build URLs from `CLOUDINARY_CLOUD_NAME` dart-define — ⬜ real Cloudinary account
-- [ ] AdminJS: approve restaurants — ✅ admin REST endpoints `/admin/restaurants`, ⬜ AdminJS UI + 2FA
+- [x] Admin website — Flutter web `admin_app` instead of AdminJS (same API client + tests): dashboard, restaurant approval (approve / reject with reason / pause), reported reviews, guests (search, block → sessions end, clear no-shows, their bookings), booking lookup by code, fee statements (mark paid, run month), platform vouchers, exchange rates, audit log; admin routes require TOTP 2FA (RFC 6238, encrypted secret, no replay)
 - [x] Generate Dart API client from Swagger; shared_models + shared_ui packages — `packages/comi_api` (dart-dio, json_serializable; every endpoint the apps use now has a typed response), `packages/shared_ui` (theme, VND/time format, photo URLs, TableMap); shared_models dropped: apps use comi_api models directly
 - [x] Restaurant app: login, onboarding wizard, menu editor, photo upload, table map editor — staff sign-up, register restaurant, setup checklist (location by Goong search or pasted coordinates, opening hours with presets, tables, menu, submit for review), menu editor (categories, dishes, options, sold-out switch, drag to reorder), Excel import with preview, dish photos; menu/media/geocode endpoints now typed in Swagger
 - [ ] CI + staging server + first deploy — ✅ backend CI (lint, unit, e2e, build, OpenAPI), ✅ Flutter CI (format, analyze, test for shared_ui, restaurant_app, customer_app), ⬜ staging, deploy
@@ -135,7 +135,7 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 
 ### Other
 
-- [ ] Full admin website (Next.js)
+- [~] Full admin website — ✅ core pages in `admin_app` (Flutter web); ⬜ refunds/disputes page (with the full refund system), fee plans per restaurant, staff management, charts
 - [ ] Automatic e-invoices (MISA, Viettel, VNPT)
 - [ ] POS integrations (iPOS, KiotViet, Sapo)
 - [ ] Split payments / marketplace payments

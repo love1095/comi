@@ -1,13 +1,21 @@
 import 'package:comi_api/src/model/add_photo_dto.dart';
+import 'package:comi_api/src/model/admin_booking_dto.dart';
+import 'package:comi_api/src/model/admin_dashboard_dto.dart';
+import 'package:comi_api/src/model/admin_login_dto.dart';
+import 'package:comi_api/src/model/admin_login_result_dto.dart';
+import 'package:comi_api/src/model/admin_restaurant_row_dto.dart';
+import 'package:comi_api/src/model/admin_user_dto.dart';
 import 'package:comi_api/src/model/admin_voucher_input_dto.dart';
 import 'package:comi_api/src/model/area_brief_dto.dart';
 import 'package:comi_api/src/model/area_dto.dart';
 import 'package:comi_api/src/model/area_layout_dto.dart';
 import 'package:comi_api/src/model/area_summary_dto.dart';
+import 'package:comi_api/src/model/audit_entry_dto.dart';
 import 'package:comi_api/src/model/availability_dto.dart';
 import 'package:comi_api/src/model/availability_result_dto.dart';
 import 'package:comi_api/src/model/bill_dto.dart';
 import 'package:comi_api/src/model/bill_round_dto.dart';
+import 'package:comi_api/src/model/block_dto.dart';
 import 'package:comi_api/src/model/board_booking_dto.dart';
 import 'package:comi_api/src/model/board_order_dto.dart';
 import 'package:comi_api/src/model/board_order_item_dto.dart';
@@ -88,6 +96,8 @@ import 'package:comi_api/src/model/menu_item_dto.dart';
 import 'package:comi_api/src/model/menu_option_response_dto.dart';
 import 'package:comi_api/src/model/menu_photo_dto.dart';
 import 'package:comi_api/src/model/menu_translation_dto.dart';
+import 'package:comi_api/src/model/mfa_code_dto.dart';
+import 'package:comi_api/src/model/mfa_setup_dto.dart';
 import 'package:comi_api/src/model/move_table_dto.dart';
 import 'package:comi_api/src/model/my_bookings_page_dto.dart';
 import 'package:comi_api/src/model/my_hold_dto.dart';
@@ -194,6 +204,18 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return (value is double ? value : double.parse('$value')) as ReturnType;
         case 'AddPhotoDto':
           return AddPhotoDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminBookingDto':
+          return AdminBookingDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminDashboardDto':
+          return AdminDashboardDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminLoginDto':
+          return AdminLoginDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminLoginResultDto':
+          return AdminLoginResultDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminRestaurantRowDto':
+          return AdminRestaurantRowDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AdminUserDto':
+          return AdminUserDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AdminVoucherInputDto':
           return AdminVoucherInputDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AreaBriefDto':
@@ -204,6 +226,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return AreaLayoutDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AreaSummaryDto':
           return AreaSummaryDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'AuditEntryDto':
+          return AuditEntryDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AvailabilityDto':
           return AvailabilityDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'AvailabilityResultDto':
@@ -212,6 +236,8 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return BillDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BillRoundDto':
           return BillRoundDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'BlockDto':
+          return BlockDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BoardBookingDto':
           return BoardBookingDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'BoardOrderDto':
@@ -387,6 +413,10 @@ final _regMap = RegExp(r'^Map<String,(.*)>$');
           return MenuPhotoDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MenuTranslationDto':
           return MenuTranslationDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MfaCodeDto':
+          return MfaCodeDto.fromJson(value as Map<String, dynamic>) as ReturnType;
+        case 'MfaSetupDto':
+          return MfaSetupDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MoveTableDto':
           return MoveTableDto.fromJson(value as Map<String, dynamic>) as ReturnType;
         case 'MyBookingsPageDto':

@@ -3,13 +3,15 @@ import { Request } from 'express';
 
 export type Principal =
   | { kind: 'user'; userId: string }
-  | { kind: 'staff'; staffId: string; isAdmin: boolean };
+  | { kind: 'staff'; staffId: string; isAdmin: boolean; /** admin session opened with 2FA */ mfa?: boolean };
 
 /** JWT access-token payload. `typ` separates customers from restaurant staff. */
 export interface AccessTokenPayload {
   sub: string;
   typ: 'user' | 'staff';
   adm?: boolean;
+  /** Admin signed in with a TOTP code (required for admin routes). */
+  mfa?: boolean;
   /** Issued at (seconds), set by jsonwebtoken. */
   iat?: number;
 }

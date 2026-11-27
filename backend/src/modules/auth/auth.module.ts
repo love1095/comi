@@ -1,3 +1,4 @@
+import { AdminAuthController } from './admin-auth.controller';
 import { StaffAccountController } from './staff-account.controller';
 import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -17,7 +18,7 @@ import { TokenService } from './token.service';
       useFactory: (env: Env) => ({ secret: env.JWT_SECRET, signOptions: { issuer: 'comi' }, verifyOptions: { issuer: 'comi' } }),
     }),
   ],
-  controllers: [AuthController, StaffAccountController],
+  controllers: [AuthController, StaffAccountController, AdminAuthController],
   providers: [AuthService, TokenService, FirebaseVerifier],
   exports: [TokenService],
 })

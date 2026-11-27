@@ -5,7 +5,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import request from 'supertest';
-import { startServer, vnDate } from './helpers';
+import { adminSession, startServer, vnDate } from './helpers';
 
 jest.setTimeout(60_000);
 
@@ -101,9 +101,8 @@ describe('Phase 2 booking flow (e2e)', () => {
     await api().post('/api/v1/restaurant/submit').set(owner).expect(200);
 
     await api().post('/api/v1/auth/staff/register').send({ email: `p2admin-${run}@test.comi.vn`, password: 'password123', name: 'Admin' }).expect(201);
-    await prisma.staffUser.update({ where: { email: `p2admin-${run}@test.comi.vn` }, data: { isAdmin: true } });
-    const admin = await api().post('/api/v1/auth/staff/login').send({ email: `p2admin-${run}@test.comi.vn`, password: 'password123' }).expect(200);
-    await api().post(`/api/v1/admin/restaurants/${rid}/approve`).set('Authorization', `Bearer ${admin.body.accessToken}`).expect(200);
+    const admin = await adminSession(base, prisma, `p2admin-${run}@test.comi.vn`);
+    await api().post(`/api/v1/admin/restaurants/${rid}/approve`).set(admin).expect(200);
   });
 
   afterAll(async () => {

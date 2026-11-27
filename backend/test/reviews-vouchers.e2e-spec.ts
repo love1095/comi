@@ -5,7 +5,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import request from 'supertest';
-import { startServer, vnDate } from './helpers';
+import { adminSession, startServer, vnDate } from './helpers';
 
 jest.setTimeout(60_000);
 
@@ -58,9 +58,7 @@ describe('Phase 5 reviews + vouchers (e2e)', () => {
     await prisma.restaurant.update({ where: { id: rid }, data: { status: 'ACTIVE' } });
 
     await api().post('/api/v1/auth/staff/register').send({ email: `p5admin-${run}@test.comi.vn`, password: 'password123', name: 'Admin' }).expect(201);
-    await prisma.staffUser.update({ where: { email: `p5admin-${run}@test.comi.vn` }, data: { isAdmin: true } });
-    const a = await api().post('/api/v1/auth/staff/login').send({ email: `p5admin-${run}@test.comi.vn`, password: 'password123' }).expect(200);
-    admin = { Authorization: `Bearer ${a.body.accessToken}` };
+    admin = await adminSession(base, prisma, `p5admin-${run}@test.comi.vn`);
     const g = await api().post('/api/v1/auth/customer/exchange').send({ idToken: `dev:p5-${run}:+84908889900` }).expect(200);
     guest = { Authorization: `Bearer ${g.body.accessToken}` };
   });
