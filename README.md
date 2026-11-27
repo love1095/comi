@@ -7,9 +7,24 @@ Design: [docs/TECHNICAL_SPEC.md](docs/TECHNICAL_SPEC.md) · Progress: [TODO.md](
 backend/          NestJS 11 + Prisma 6 + PostGIS (modular monolith, API + worker)
 customer_app/     Flutter (phone)              — browse, menu + cart, book (COD), table picker, my bookings
 restaurant_app/   Flutter (tablet)             — sign-up + setup, bookings board, menu editor, table map editor
+admin_app/        Flutter web                  — admin website (2FA): approvals, reviews, guests, fees, vouchers
 packages/         comi_api (generated client), shared_ui
 docker-compose.yml  postgis :5433, redis :6379, mailpit :8025
 ```
+
+## Quick start (Windows)
+
+Start Docker Desktop, then double-click `dev.cmd` (or run `.\dev.ps1`). It starts Postgres/Redis/Mailpit,
+migrates + seeds the database, opens the API, the worker and the three apps in Chrome:
+
+| | URL | Sign in |
+|---|---|---|
+| Restaurant app | http://localhost:5001 | owner@comi.vn / comi12345 |
+| Customer app | http://localhost:5002 | any VN mobile, e.g. 0901234567 |
+| Admin website | http://localhost:5003 | admin@comi.vn / comi12345 (sets up 2FA the first time) |
+| Mailbox | http://localhost:8025 | |
+
+Options: `-Apps restaurant` (or `customer`, `admin`, `none`), `-Reset` (fresh demo data), `-Stop`.
 
 ## Run the backend locally
 
