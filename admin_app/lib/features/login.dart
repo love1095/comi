@@ -20,6 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _password = TextEditingController();
   final _code = TextEditingController();
   var _busy = false;
+  var _showPassword = false;
   String? _error;
 
   @override
@@ -71,9 +72,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _password,
-                  obscureText: true,
+                  obscureText: !_showPassword,
                   autofillHints: const [AutofillHints.password],
-                  decoration: const InputDecoration(labelText: 'Mật khẩu', border: OutlineInputBorder()),
+                  decoration: InputDecoration(
+                    labelText: 'Mật khẩu',
+                    border: const OutlineInputBorder(),
+                    // Lets admins see what Unikey/EVKey (VNI mode turns digits into tone marks) actually typed.
+                    suffixIcon: IconButton(
+                      tooltip: _showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu',
+                      icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(

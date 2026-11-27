@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Start comi locally in one go: Docker (Postgres, Redis, Mailpit) → backend API + worker → Flutter apps in Chrome.
 
@@ -49,7 +49,22 @@ foreach ($tool in 'docker', 'node', 'npm', 'flutter') {
   if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { Fail "$tool is not installed or not on PATH." }
 }
 docker info *> $null
-if ($LASTEXITCODE -ne 0) { Fail 'Docker is not running. Start Docker Desktop, wait until it says "running", then run this again.' }
+if ($LASTEXITCODE -ne 0) {
+  # Docker Desktop installed but not running: start it and wait (first start can take 1–2 minutes).
+  $desktop = @("$env:ProgramFiles\Docker\Docker\Docker Desktop.exe", "$env:LOCALAPPDATA\Docker\Docker Desktop.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+  if (-not $desktop) { Fail 'Docker is not running and Docker Desktop was not found. Install it from https://www.docker.com/products/docker-desktop/' }
+  Write-Host '    Docker is not running - starting Docker Desktop' -NoNewline
+  Start-Process $desktop | Out-Null
+  for ($i = 0; $i -lt 180; $i++) {
+    Start-Sleep -Seconds 2
+    docker info *> $null
+    if ($LASTEXITCODE -eq 0) { break }
+    Write-Host '.' -NoNewline
+  }
+  Write-Host ''
+  docker info *> $null
+  if ($LASTEXITCODE -ne 0) { Fail 'Docker Desktop did not start within 6 minutes. Open it yourself, wait until it says "running", then run this again.' }
+}
 
 # ── 2. Database, Redis, Mailpit ─────────────────────────────────────────────
 Step 'Starting Postgres, Redis and Mailpit (docker compose)'
@@ -90,14 +105,22 @@ if ($LASTEXITCODE -ne 0) { Fail 'Database migration failed.' }
 npm run db:seed   # safe to repeat: existing demo data is skipped
 if ($LASTEXITCODE -ne 0) { Fail 'Seeding demo data failed.' }
 
-Step 'Building the backend (the worker runs the build)'
-npm run build
-if ($LASTEXITCODE -ne 0) { Fail 'Backend build failed.' }
+# Already running from an earlier start? Then only start the apps (avoids a second API on port 3100).
+$apiRunning = $false
+try { $apiRunning = (Invoke-WebRequest -Uri 'http://localhost:3100/api/v1/health' -UseBasicParsing -TimeoutSec 2).StatusCode -eq 200 } catch { }
 
-# ── 4. API + worker in their own windows ───────────────────────────────────
-Step 'Starting API and worker'
-Start-Window 'comi API :3100' $backend 'npm run start:dev'
-Start-Window 'comi worker' $backend 'npm run start:worker'
+if ($apiRunning) {
+  Step 'API is already running on :3100 - keeping it (close its window and re-run to restart)'
+} else {
+  Step 'Building the backend (the worker runs the build)'
+  npm run build
+  if ($LASTEXITCODE -ne 0) { Fail 'Backend build failed.' }
+
+  # ── 4. API + worker in their own windows ─────────────────────────────────
+  Step 'Starting API and worker'
+  Start-Window 'comi API :3100' $backend 'npm run start:dev'
+  Start-Window 'comi worker' $backend 'npm run start:worker'
+}
 
 Write-Host '    waiting for the API' -NoNewline
 $up = $false
@@ -118,15 +141,16 @@ if ($want.Count -gt 0) {
   Step 'Getting Flutter packages'
   Set-Location $root
   flutter pub get *> $null
-  $apps = @{
+  $appDefs = @{
     restaurant = @{ dir = 'restaurant_app'; port = 5001 }
     customer   = @{ dir = 'customer_app'; port = 5002 }
     admin      = @{ dir = 'admin_app'; port = 5003 }
   }
   Step 'Starting apps in Chrome'
   foreach ($name in $want) {
-    $a = $apps[$name]
-    Start-Window "comi $name app :$($a.port)" (Join-Path $root $a.dir) "flutter run -d chrome --web-port $($a.port) --dart-define=API_URL=http://localhost:3100"
+    $a = $appDefs[$name]
+    Start-Window "comi $name app :$($a.port)" (Join-Path $root $a.dir) "flutter run -d chrome --no-pub --web-port $($a.port) --dart-define=API_URL=http://localhost:3100"
+    Start-Sleep -Seconds 8   # let each app pass Flutter's startup lock before the next one
   }
 }
 
