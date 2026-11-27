@@ -39,6 +39,11 @@ export const ErrorCode = {
   CANCEL_TOO_LATE: HttpStatus.UNPROCESSABLE_ENTITY,
   // kitchen + at the table (§7, §8.5, §9)
   KITCHEN_FULL: HttpStatus.CONFLICT,
+  // group orders + split bill (§8.4, §8.5)
+  SPLIT_MISMATCH: HttpStatus.UNPROCESSABLE_ENTITY,
+  GROUP_LOCKED: HttpStatus.CONFLICT,
+  GROUP_FULL: HttpStatus.CONFLICT,
+  GUEST_KEY_INVALID: HttpStatus.FORBIDDEN,
   QR_INVALID: HttpStatus.UNPROCESSABLE_ENTITY,
   CHECK_IN_TOO_EARLY: HttpStatus.UNPROCESSABLE_ENTITY,
   CHECK_IN_TOO_LATE: HttpStatus.UNPROCESSABLE_ENTITY,

@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter';
@@ -7,7 +7,8 @@ export const API_PREFIX = 'api/v1';
 
 /** Shared by main.ts, e2e tests and the OpenAPI export script. */
 export function configureApp(app: INestApplication) {
-  app.setGlobalPrefix(API_PREFIX);
+  // Web pages for share links live at the root: /g/{token} (group order, §8.4).
+  app.setGlobalPrefix(API_PREFIX, { exclude: [{ path: 'g/:token', method: RequestMethod.GET }] });
   app.use(helmet());
   app.enableCors();
   app.useGlobalPipes(

@@ -4,7 +4,7 @@
  */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BookingStatus, Course, ItemKind, OrderStatus, PaymentMode, ServeStyle, ServiceType, TableShape } from '@prisma/client';
-import { BoardOrderItemDto, MapElementResponseDto, OpeningHoursDto } from './responses';
+import { BoardOrderItemDto, MapElementResponseDto, OpeningHoursDto, OptionSnapshotDto } from './responses';
 
 // ───── discovery ─────
 
@@ -357,4 +357,69 @@ export class ServiceRequestDto {
   @ApiProperty({ enum: ['OPEN', 'DONE'] }) status: string;
   @ApiProperty() createdAt: string;
   @ApiPropertyOptional({ nullable: true, type: String }) doneAt: string | null;
+}
+
+// ───── group orders + split bill (§8.4, §8.5) ─────
+
+export class GroupRestaurantDto {
+  @ApiProperty() id: string;
+  @ApiProperty() slug: string;
+  @ApiProperty() name: string;
+  @ApiProperty() address: string;
+}
+
+export class GroupGuestDto {
+  @ApiProperty() id: string;
+  @ApiProperty() displayName: string;
+  @ApiProperty() isHost: boolean;
+  @ApiProperty({ description: 'Their dishes so far (VND)' }) subtotal: number;
+}
+
+export class GroupItemDto {
+  @ApiProperty() id: string;
+  @ApiPropertyOptional({ nullable: true, type: String }) guestId: string | null;
+  @ApiProperty() menuItemId: string;
+  @ApiProperty() nameSnapshot: string;
+  @ApiProperty() unitPrice: number;
+  @ApiProperty() quantity: number;
+  @ApiProperty({ type: [OptionSnapshotDto] }) optionsSnapshot: OptionSnapshotDto[];
+  @ApiPropertyOptional({ nullable: true, type: String }) note: string | null;
+  @ApiProperty({ enum: Course, enumName: 'Course' }) course: Course;
+}
+
+export class GroupViewDto {
+  @ApiProperty() token: string;
+  @ApiProperty({ description: 'Share this link (Zalo, Messenger)' }) link: string;
+  @ApiProperty() bookingId: string;
+  @ApiProperty({ enum: BookingStatus, enumName: 'BookingStatus' }) status: BookingStatus;
+  @ApiProperty({ type: GroupRestaurantDto }) restaurant: GroupRestaurantDto;
+  @ApiProperty() arrivalAt: string;
+  @ApiProperty() partySize: number;
+  @ApiProperty() cutoffAt: string;
+  @ApiProperty() locked: boolean;
+  @ApiProperty() maxGuests: number;
+  @ApiProperty({ type: [GroupGuestDto] }) guests: GroupGuestDto[];
+  @ApiProperty({ type: [GroupItemDto] }) items: GroupItemDto[];
+  @ApiProperty() total: number;
+}
+
+export class GroupMemberDto extends GroupViewDto {
+  @ApiPropertyOptional({ nullable: true, type: String }) guestId: string | null;
+  @ApiProperty({ description: 'Secret for adding/removing your own dishes — keep it on the device' }) guestKey: string;
+}
+
+export class SplitGuestDto {
+  @ApiProperty() id: string;
+  @ApiProperty() displayName: string;
+  @ApiProperty() isHost: boolean;
+  @ApiProperty() amountDue: number;
+  @ApiProperty() amountPaid: number;
+  @ApiPropertyOptional({ nullable: true, type: String }) paidAt: string | null;
+}
+
+export class SplitDto {
+  @ApiPropertyOptional({ nullable: true, enum: ['EQUAL', 'BY_ITEMS', 'CUSTOM'] }) mode: string | null;
+  @ApiProperty() total: number;
+  @ApiProperty() paid: number;
+  @ApiProperty({ type: [SplitGuestDto] }) guests: SplitGuestDto[];
 }

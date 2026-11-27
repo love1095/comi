@@ -17,6 +17,7 @@ export interface JobPayloads {
   'no-show-check': { bookingId: string };
   'kitchen-release': { bookingId: string };
   'kitchen-sweep': Record<string, never>;
+  'group-cutoff': { bookingId: string };
 }
 
 export function redisConnection(url: string) {

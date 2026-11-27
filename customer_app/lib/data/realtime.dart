@@ -19,6 +19,9 @@ class RealtimeEvent {
 
 abstract class RealtimeClient {
   Stream<RealtimeEvent> get events;
+
+  /// Watch a group order's shared cart (§8.4).
+  void joinGroup(String token);
   void dispose();
 }
 
@@ -28,14 +31,24 @@ class SocketRealtimeClient implements RealtimeClient {
       '$baseUrl/customer',
       io.OptionBuilder().setTransports(['websocket']).setAuth({'token': token}).enableReconnection().enableForceNew().build(),
     );
-    for (final e in const ['booking.status', 'order.item_status', 'service.updated']) {
+    for (final e in const ['booking.status', 'order.item_status', 'service.updated', 'group.updated']) {
       _socket.on(e, (data) => _controller.add(RealtimeEvent(e, data is Map ? data.cast<String, dynamic>() : const {})));
     }
     var once = false;
     _socket.onConnect((_) {
+      for (final t in _groups) {
+        _socket.emit('group.join', {'token': t});
+      }
       if (once) _controller.add(const RealtimeEvent(RealtimeEvent.reconnected));
       once = true;
     });
+  }
+
+  final _groups = <String>{};
+
+  @override
+  void joinGroup(String token) {
+    if (_groups.add(token)) _socket.emit('group.join', {'token': token});
   }
 
   late final io.Socket _socket;
@@ -52,6 +65,9 @@ class SocketRealtimeClient implements RealtimeClient {
 }
 
 class NoRealtimeClient implements RealtimeClient {
+  @override
+  void joinGroup(String token) {}
+
   @override
   Stream<RealtimeEvent> get events => const Stream.empty();
 

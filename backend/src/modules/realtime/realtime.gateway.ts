@@ -53,7 +53,20 @@ export class RestaurantGateway implements OnGatewayConnection {
  */
 @WebSocketGateway({ namespace: NS.CUSTOMER, cors: { origin: true } })
 export class CustomerGateway implements OnGatewayConnection {
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  /** Watch a group order's shared cart (§8.4). The share token is the permission. */
+  @SubscribeMessage('group.join')
+  async joinGroup(@ConnectedSocket() socket: Socket, @MessageBody() body: { token?: string }) {
+    if (!body?.token || body.token.length > 64) return { ok: false };
+    const inv = await this.prisma.groupInvite.findUnique({ where: { token: body.token }, select: { bookingId: true } });
+    if (!inv) return { ok: false };
+    await socket.join(rooms.group(inv.bookingId));
+    return { ok: true };
+  }
 
   async handleConnection(socket: Socket) {
     const p = await principalOf(this.jwt, socket);

@@ -453,4 +453,55 @@ class FakeKitchenRepository implements KitchenRepository {
     savedRules = rules;
     return const [];
   }
+
+  SplitDto splitValue = SplitDto(total: 100000, paid: 0, guests: const []);
+
+  @override
+  Future<SplitDto> split(String bookingId) async => splitValue;
+
+  @override
+  Future<SplitDto> saveSplit(String bookingId, SplitMode mode, {int? people}) async {
+    calls.add('split ${mode.value} $people');
+    final n = people ?? 2;
+    splitValue = SplitDto(
+      mode: SplitDtoModeEnum.values.byName(mode.value),
+      total: 100000,
+      paid: 0,
+      guests: [
+        for (var i = 0; i < n; i++)
+          SplitGuestDto(
+            id: 'g$i',
+            displayName: 'Khách ${i + 1}',
+            isHost: i == 0,
+            amountDue: 100000 ~/ n + (i == 0 ? 100000 % n : 0),
+            amountPaid: 0,
+          ),
+      ],
+    );
+    return splitValue;
+  }
+
+  @override
+  Future<SplitDto> markPaid(String bookingId, String guestId, bool paid) async {
+    calls.add('paid $guestId $paid');
+    splitValue = SplitDto(
+      mode: splitValue.mode,
+      total: splitValue.total,
+      paid: splitValue.guests.where((g) => g.id == guestId).fold<num>(0, (s, g) => s + g.amountDue),
+      guests: [
+        for (final g in splitValue.guests)
+          g.id == guestId
+              ? SplitGuestDto(
+                  id: g.id,
+                  displayName: g.displayName,
+                  isHost: g.isHost,
+                  amountDue: g.amountDue,
+                  amountPaid: g.amountDue,
+                  paidAt: paid ? '2026-12-02T06:00:00Z' : null,
+                )
+              : g,
+      ],
+    );
+    return splitValue;
+  }
 }

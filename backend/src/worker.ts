@@ -12,11 +12,12 @@ import { JobsModule, JobsService, QUEUES, redisConnection } from './jobs/queues'
 import { PhotoProcessor } from './jobs/photo.processor';
 import { PrismaModule } from './prisma/prisma.service';
 import { KitchenService } from './modules/kitchen/kitchen.service';
+import { GroupService } from './modules/group/group.service';
 import { RealtimeModule } from './modules/realtime/realtime.service';
 
 @Module({
   imports: [ConfigModule, PrismaModule, ClockModule, AuditModule, RedisModule, JobsModule, RealtimeModule],
-  providers: [PhotoProcessor, BookingTimeouts, KitchenService],
+  providers: [PhotoProcessor, BookingTimeouts, KitchenService, GroupService],
 })
 class WorkerModule {}
 
@@ -31,6 +32,7 @@ async function bootstrap() {
   const photos = app.get(PhotoProcessor);
   const bookings = app.get(BookingTimeouts);
   const kitchen = app.get(KitchenService);
+  const groups = app.get(GroupService);
 
   const workers = [
     new Worker(QUEUES.PHOTO, (job: Job<{ photoId: string }>) => photos.process(job.data.photoId), { connection, concurrency: 4 }),
@@ -39,6 +41,7 @@ async function bootstrap() {
       async (job: Job) => {
         if (job.name === 'group-approval-timeout') return bookings.approvalTimeout(job.data.bookingId as string);
         if (job.name === 'no-show-check') return bookings.noShow(job.data.bookingId as string);
+        if (job.name === 'group-cutoff') return groups.lock(job.data.bookingId as string, 'system').catch(() => undefined);
         logger.warn(`Unknown job ${job.name}`);
       },
       { connection, concurrency: 8 },

@@ -64,11 +64,11 @@ First version (MVP) = **office lunch + nhậu groups** in one office district. T
 
 ## Phase 3b — Group orders and split bill (2–3 weeks)
 
-- [ ] Group invite link + shared cart §8.4
-- [ ] Join-group web page (no app needed)
-- [ ] Group cutoff job
-- [ ] Live bill + split (equal / by items / custom) + staff "mark paid (cash)"
-- [ ] "Get home safe" ride buttons (Grab / Be / Xanh SM)
+- [x] Group invite link + shared cart §8.4 — host starts from a booking (pre-order becomes the host's), friends join by name without an account (secret guest key), add/remove own dishes, capacity checked, live over socket room `g:{bookingId}`; customer app group screen
+- [x] Join-group web page (no app needed) — `/g/{token}` served by the API, strict CSP with nonce, no HTML injection
+- [x] Group cutoff job — `group-cutoff` at arrival − 20 min (or host taps "Chốt đơn")
+- [x] Live bill + split (equal / by items / custom) + staff "mark paid (cash)" — `splitBill` (tests first, exact to the đồng); tables without the group link split by head count; split in both apps
+- [x] "Get home safe" ride buttons (Grab / Be / Xanh SM) — opens their websites (⬜ partner deep links with destination)
 
 ## Phase 4 — Payment and fees (3–4 weeks)
 

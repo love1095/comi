@@ -13,15 +13,18 @@ import 'package:comi_api/src/api/customer_at_the_table_api.dart';
 import 'package:comi_api/src/api/customer_availability_api.dart';
 import 'package:comi_api/src/api/customer_bookings_api.dart';
 import 'package:comi_api/src/api/customer_discovery_api.dart';
+import 'package:comi_api/src/api/customer_group_order_api.dart';
 import 'package:comi_api/src/api/health_api.dart';
 import 'package:comi_api/src/api/me_api.dart';
 import 'package:comi_api/src/api/media_api.dart';
+import 'package:comi_api/src/api/public_group_order_api.dart';
 import 'package:comi_api/src/api/restaurant_api.dart';
 import 'package:comi_api/src/api/restaurant_at_the_table_api.dart';
 import 'package:comi_api/src/api/restaurant_bookings_api.dart';
 import 'package:comi_api/src/api/restaurant_kitchen_api.dart';
 import 'package:comi_api/src/api/restaurant_menu_api.dart';
 import 'package:comi_api/src/api/restaurant_settings_api.dart';
+import 'package:comi_api/src/api/restaurant_split_bill_api.dart';
 import 'package:comi_api/src/api/restaurant_tables_api.dart';
 
 class ComiApi {
@@ -151,6 +154,12 @@ class ComiApi {
     return CustomerDiscoveryApi(dio);
   }
 
+  /// Get CustomerGroupOrderApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  CustomerGroupOrderApi getCustomerGroupOrderApi() {
+    return CustomerGroupOrderApi(dio);
+  }
+
   /// Get HealthApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   HealthApi getHealthApi() {
@@ -167,6 +176,12 @@ class ComiApi {
   /// by doing that all interceptors will not be executed
   MediaApi getMediaApi() {
     return MediaApi(dio);
+  }
+
+  /// Get PublicGroupOrderApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  PublicGroupOrderApi getPublicGroupOrderApi() {
+    return PublicGroupOrderApi(dio);
   }
 
   /// Get RestaurantApi instance, base route and serializer can be overridden by a given but be careful,
@@ -203,6 +218,12 @@ class ComiApi {
   /// by doing that all interceptors will not be executed
   RestaurantSettingsApi getRestaurantSettingsApi() {
     return RestaurantSettingsApi(dio);
+  }
+
+  /// Get RestaurantSplitBillApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  RestaurantSplitBillApi getRestaurantSplitBillApi() {
+    return RestaurantSplitBillApi(dio);
   }
 
   /// Get RestaurantTablesApi instance, base route and serializer can be overridden by a given but be careful,

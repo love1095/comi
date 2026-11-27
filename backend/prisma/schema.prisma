@@ -482,7 +482,7 @@ model Booking {
   invoiceRequest     InvoiceRequest?
   voucherRedemptions VoucherRedemption[]
   guests             BookingGuest[]
-  groupInvites       GroupInvite[]
+  groupInvite        GroupInvite?
   billSplit          BillSplit?
   serviceRequests    ServiceRequest[]
 
@@ -600,25 +600,28 @@ model TableHold {
 }
 
 model BookingGuest {
-  id          String   @id @default(uuid())
-  bookingId   String
-  userId      String? // null = guest without account (web link)
-  displayName String
-  isHost      Boolean  @default(false)
-  joinedAt    DateTime @default(now())
-  amountDue   Int      @default(0)
-  amountPaid  Int      @default(0)
-  booking     Booking  @relation(fields: [bookingId], references: [id])
+  id            String    @id @default(uuid())
+  bookingId     String
+  userId        String? // null = guest without account (web link)
+  displayName   String
+  isHost        Boolean   @default(false)
+  joinedAt      DateTime  @default(now())
+  amountDue     Int       @default(0)
+  amountPaid    Int       @default(0)
+  paidAt        DateTime? // staff "mark paid (cash)" (§8.5); online payments come in Phase 4
+  accessKeyHash String? // guests without an account act with a secret key from the join response
+  booking       Booking   @relation(fields: [bookingId], references: [id])
 
   @@unique([bookingId, userId])
 }
 
 model GroupInvite {
-  token     String   @id // random, in share link
-  bookingId String
+  token     String    @id // random, in share link
+  bookingId String    @unique
   expiresAt DateTime // order cutoff
   maxGuests Int
-  booking   Booking  @relation(fields: [bookingId], references: [id])
+  lockedAt  DateTime? // cutoff reached or host tapped "Lock order"
+  booking   Booking   @relation(fields: [bookingId], references: [id])
 }
 
 model BillSplit {

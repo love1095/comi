@@ -9,6 +9,8 @@ import '../features/booking/booking_screen.dart';
 import '../features/booking/my_bookings_screen.dart';
 import '../features/discovery/list_screen.dart';
 import '../features/discovery/search_screen.dart';
+import '../features/group/group_screen.dart';
+import '../features/group/split_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/restaurant/restaurant_screen.dart';
 
@@ -59,6 +61,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+      GoRoute(
+        path: '/g/:token',
+        builder: (_, s) => GroupScreen(token: s.pathParameters['token']!),
+      ),
+      GoRoute(
+        path: '/split/:id',
+        builder: (_, s) => SplitScreen(bookingId: s.pathParameters['id']!),
+      ),
     ],
   );
 });

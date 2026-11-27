@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:restaurant_app/data/realtime.dart';
 import 'package:restaurant_app/data/session.dart';
 import 'package:restaurant_app/data/token_store.dart';
+import 'package:restaurant_app/features/bookings/split_section.dart';
 import 'package:restaurant_app/features/bookings/table_actions.dart';
 import 'package:restaurant_app/features/kitchen/kitchen_repository.dart';
 import 'package:restaurant_app/features/kitchen/kitchen_screen.dart';
@@ -261,5 +262,27 @@ void main() {
     expect(onboarding.settings!.tableOrderingNeedsApproval, isTrue);
     expect(kitchen.savedRules!.single.maxItems, 20);
     expect(find.text('Đã lưu cài đặt'), findsOneWidget);
+  });
+
+  testWidgets('split: equal between the table, tick off cash payments', (tester) async {
+    final kitchen = FakeKitchenRepository();
+    await pump(
+      tester,
+      const SingleChildScrollView(child: SplitSection(bookingId: 'b1', partySize: 4)),
+      kitchen: kitchen,
+    );
+
+    await tester.tap(find.byTooltip('Bớt người'));
+    await tester.pump();
+    await tester.tap(find.text('Chia đều'));
+    await tester.pumpAndSettle();
+    expect(kitchen.calls, ['split EQUAL 3']);
+    expect(find.text('Khách 3'), findsOneWidget);
+    expect(find.text(formatVnd(33334)), findsOneWidget);
+
+    await tester.tap(find.text('Khách 2'));
+    await tester.pumpAndSettle();
+    expect(kitchen.calls.last, 'paid g1 true');
+    expect(find.textContaining('Đã thu ${formatVnd(33333)}'), findsOneWidget);
   });
 }

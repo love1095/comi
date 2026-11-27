@@ -21,10 +21,14 @@ abstract class KitchenRepository {
   Future<int> approveRound(String bookingId, int round);
   Future<List<CapacityRuleDto>> capacityRules();
   Future<List<CapacityRuleDto>> saveCapacityRules(List<CapacityRuleInput> rules);
+  Future<SplitDto> split(String bookingId);
+  Future<SplitDto> saveSplit(String bookingId, SplitMode mode, {int? people});
+  Future<SplitDto> markPaid(String bookingId, String guestId, bool paid);
 }
 
 class ApiKitchenRepository implements KitchenRepository {
-  ApiKitchenRepository(this._kitchen, this._table, this._rid);
+  ApiKitchenRepository(this._kitchen, this._table, this._rid, this._split);
+  final RestaurantSplitBillApi _split;
   final RestaurantKitchenApi _kitchen;
   final RestaurantAtTheTableApi _table;
   final String _rid;
@@ -91,11 +95,34 @@ class ApiKitchenRepository implements KitchenRepository {
         capacityRulesDto: CapacityRulesDto(rules: rules),
       )).data ??
       const [];
+
+  @override
+  Future<SplitDto> split(String bookingId) async => (await _split.restaurantSplitSplit(id: bookingId, xRestaurantId: _rid)).data!;
+
+  @override
+  Future<SplitDto> saveSplit(String bookingId, SplitMode mode, {int? people}) async => (await _split.restaurantSplitSaveSplit(
+    id: bookingId,
+    xRestaurantId: _rid,
+    saveSplitDto: SaveSplitDto(mode: mode, people: people),
+  )).data!;
+
+  @override
+  Future<SplitDto> markPaid(String bookingId, String guestId, bool paid) async => (await _split.restaurantSplitPaid(
+    id: bookingId,
+    guestId: guestId,
+    xRestaurantId: _rid,
+    markPaidDto: MarkPaidDto(paid: paid),
+  )).data!;
 }
 
 final kitchenRepositoryProvider = Provider<KitchenRepository>((ref) {
   final api = ref.watch(apiProvider);
-  return ApiKitchenRepository(api.getRestaurantKitchenApi(), api.getRestaurantAtTheTableApi(), ref.watch(restaurantIdProvider));
+  return ApiKitchenRepository(
+    api.getRestaurantKitchenApi(),
+    api.getRestaurantAtTheTableApi(),
+    ref.watch(restaurantIdProvider),
+    api.getRestaurantSplitBillApi(),
+  );
 });
 
 /// Reloads every 20 s and on any kitchen hint from the socket.
@@ -144,3 +171,7 @@ String kitchenStatusLabel(KitchenStatus s) => switch (s) {
   KitchenStatus.SERVED => 'Đã bưng',
   KitchenStatus.CANCELLED => 'Huỷ',
 };
+
+final splitProvider = FutureProvider.autoDispose.family<SplitDto, String>(
+  (ref, bookingId) => ref.watch(kitchenRepositoryProvider).split(bookingId),
+);

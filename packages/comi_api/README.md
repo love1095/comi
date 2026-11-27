@@ -95,6 +95,10 @@ Class | Method | HTTP request | Description
 [*CustomerDiscoveryApi*](doc/CustomerDiscoveryApi.md) | [**discoveryMenu**](doc/CustomerDiscoveryApi.md#discoverymenu) | **GET** /api/v1/restaurants/{id}/menu | 
 [*CustomerDiscoveryApi*](doc/CustomerDiscoveryApi.md) | [**discoveryNearby**](doc/CustomerDiscoveryApi.md#discoverynearby) | **GET** /api/v1/restaurants | 
 [*CustomerDiscoveryApi*](doc/CustomerDiscoveryApi.md) | [**discoverySuggest**](doc/CustomerDiscoveryApi.md#discoverysuggest) | **GET** /api/v1/search/suggest | 
+[*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupLock**](doc/CustomerGroupOrderApi.md#customergrouplock) | **POST** /api/v1/bookings/{id}/group/lock | 
+[*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupSaveSplit**](doc/CustomerGroupOrderApi.md#customergroupsavesplit) | **POST** /api/v1/bookings/{id}/split | 
+[*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupSplit**](doc/CustomerGroupOrderApi.md#customergroupsplit) | **GET** /api/v1/bookings/{id}/split | 
+[*CustomerGroupOrderApi*](doc/CustomerGroupOrderApi.md) | [**customerGroupStart**](doc/CustomerGroupOrderApi.md#customergroupstart) | **POST** /api/v1/bookings/{id}/group | 
 [*HealthApi*](doc/HealthApi.md) | [**healthCheck**](doc/HealthApi.md#healthcheck) | **GET** /api/v1/health | 
 [*MeApi*](doc/MeApi.md) | [**meExtrasAddFavorite**](doc/MeApi.md#meextrasaddfavorite) | **POST** /api/v1/me/favorites | 
 [*MeApi*](doc/MeApi.md) | [**meExtrasDeleteSavedOrder**](doc/MeApi.md#meextrasdeletesavedorder) | **DELETE** /api/v1/me/saved-orders/{id} | 
@@ -109,6 +113,10 @@ Class | Method | HTTP request | Description
 [*MeApi*](doc/MeApi.md) | [**usersRemove**](doc/MeApi.md#usersremove) | **DELETE** /api/v1/me | 
 [*MeApi*](doc/MeApi.md) | [**usersUpdate**](doc/MeApi.md#usersupdate) | **PATCH** /api/v1/me | 
 [*MediaApi*](doc/MediaApi.md) | [**mediaSignature**](doc/MediaApi.md#mediasignature) | **GET** /api/v1/media/upload-signature | 
+[*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupAdd**](doc/PublicGroupOrderApi.md#publicgroupadd) | **POST** /api/v1/groups/{token}/items | 
+[*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupGet**](doc/PublicGroupOrderApi.md#publicgroupget) | **GET** /api/v1/groups/{token} | 
+[*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupJoin**](doc/PublicGroupOrderApi.md#publicgroupjoin) | **POST** /api/v1/groups/{token}/join | 
+[*PublicGroupOrderApi*](doc/PublicGroupOrderApi.md) | [**publicGroupRemove**](doc/PublicGroupOrderApi.md#publicgroupremove) | **POST** /api/v1/groups/{token}/items/{itemId}/remove | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantChecklist**](doc/RestaurantApi.md#restaurantchecklist) | **GET** /api/v1/restaurant/checklist | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantClosures**](doc/RestaurantApi.md#restaurantclosures) | **GET** /api/v1/restaurant/closures | 
 [*RestaurantApi*](doc/RestaurantApi.md) | [**restaurantCreateClosure**](doc/RestaurantApi.md#restaurantcreateclosure) | **POST** /api/v1/restaurant/closures | 
@@ -159,6 +167,9 @@ Class | Method | HTTP request | Description
 [*RestaurantSettingsApi*](doc/RestaurantSettingsApi.md) | [**diningRulesCreate**](doc/RestaurantSettingsApi.md#diningrulescreate) | **POST** /api/v1/restaurant/dining-rules | 
 [*RestaurantSettingsApi*](doc/RestaurantSettingsApi.md) | [**diningRulesList**](doc/RestaurantSettingsApi.md#diningruleslist) | **GET** /api/v1/restaurant/dining-rules | 
 [*RestaurantSettingsApi*](doc/RestaurantSettingsApi.md) | [**diningRulesRemove**](doc/RestaurantSettingsApi.md#diningrulesremove) | **DELETE** /api/v1/restaurant/dining-rules/{id} | 
+[*RestaurantSplitBillApi*](doc/RestaurantSplitBillApi.md) | [**restaurantSplitPaid**](doc/RestaurantSplitBillApi.md#restaurantsplitpaid) | **POST** /api/v1/restaurant/bookings/{id}/guests/{guestId}/paid | 
+[*RestaurantSplitBillApi*](doc/RestaurantSplitBillApi.md) | [**restaurantSplitSaveSplit**](doc/RestaurantSplitBillApi.md#restaurantsplitsavesplit) | **POST** /api/v1/restaurant/bookings/{id}/split | 
+[*RestaurantSplitBillApi*](doc/RestaurantSplitBillApi.md) | [**restaurantSplitSplit**](doc/RestaurantSplitBillApi.md#restaurantsplitsplit) | **GET** /api/v1/restaurant/bookings/{id}/split | 
 [*RestaurantTablesApi*](doc/RestaurantTablesApi.md) | [**tablesCreateArea**](doc/RestaurantTablesApi.md#tablescreatearea) | **POST** /api/v1/restaurant/areas | 
 [*RestaurantTablesApi*](doc/RestaurantTablesApi.md) | [**tablesCreateTable**](doc/RestaurantTablesApi.md#tablescreatetable) | **POST** /api/v1/restaurant/tables | 
 [*RestaurantTablesApi*](doc/RestaurantTablesApi.md) | [**tablesDeleteArea**](doc/RestaurantTablesApi.md#tablesdeletearea) | **DELETE** /api/v1/restaurant/areas/{id} | 
@@ -222,6 +233,13 @@ Class | Method | HTTP request | Description
  - [FireDto](doc/FireDto.md)
  - [FireResultDto](doc/FireResultDto.md)
  - [GeocodeResultDto](doc/GeocodeResultDto.md)
+ - [GroupGuestDto](doc/GroupGuestDto.md)
+ - [GroupItemDto](doc/GroupItemDto.md)
+ - [GroupItemsDto](doc/GroupItemsDto.md)
+ - [GroupMemberDto](doc/GroupMemberDto.md)
+ - [GroupRestaurantDto](doc/GroupRestaurantDto.md)
+ - [GroupViewDto](doc/GroupViewDto.md)
+ - [GuestKeyDto](doc/GuestKeyDto.md)
  - [HoldDto](doc/HoldDto.md)
  - [HomeDto](doc/HomeDto.md)
  - [HomeSectionDto](doc/HomeSectionDto.md)
@@ -230,6 +248,7 @@ Class | Method | HTTP request | Description
  - [ImportResultDto](doc/ImportResultDto.md)
  - [ImportedItemDto](doc/ImportedItemDto.md)
  - [ItemKind](doc/ItemKind.md)
+ - [JoinGroupDto](doc/JoinGroupDto.md)
  - [KitchenItemDto](doc/KitchenItemDto.md)
  - [KitchenQueueDto](doc/KitchenQueueDto.md)
  - [KitchenStatus](doc/KitchenStatus.md)
@@ -242,6 +261,7 @@ Class | Method | HTTP request | Description
  - [MapElementType](doc/MapElementType.md)
  - [MapPinDto](doc/MapPinDto.md)
  - [MapTableStateDto](doc/MapTableStateDto.md)
+ - [MarkPaidDto](doc/MarkPaidDto.md)
  - [MeDto](doc/MeDto.md)
  - [MembershipDto](doc/MembershipDto.md)
  - [MenuCategoryResponseDto](doc/MenuCategoryResponseDto.md)
@@ -282,17 +302,22 @@ Class | Method | HTTP request | Description
  - [RestaurantSummaryDto](doc/RestaurantSummaryDto.md)
  - [RoundResultDto](doc/RoundResultDto.md)
  - [SaveLayoutDto](doc/SaveLayoutDto.md)
+ - [SaveSplitDto](doc/SaveSplitDto.md)
  - [SavedOrderDto](doc/SavedOrderDto.md)
  - [ServeStyle](doc/ServeStyle.md)
  - [ServiceRequestCreateDto](doc/ServiceRequestCreateDto.md)
  - [ServiceRequestDto](doc/ServiceRequestDto.md)
  - [ServiceType](doc/ServiceType.md)
  - [SlotDto](doc/SlotDto.md)
+ - [SplitDto](doc/SplitDto.md)
+ - [SplitGuestDto](doc/SplitGuestDto.md)
+ - [SplitMode](doc/SplitMode.md)
  - [StaffLoginDto](doc/StaffLoginDto.md)
  - [StaffMenuCategoryDto](doc/StaffMenuCategoryDto.md)
  - [StaffMenuItemDto](doc/StaffMenuItemDto.md)
  - [StaffRegisterDto](doc/StaffRegisterDto.md)
  - [StaffRole](doc/StaffRole.md)
+ - [StartGroupDto](doc/StartGroupDto.md)
  - [SuggestDishDto](doc/SuggestDishDto.md)
  - [SuggestDto](doc/SuggestDto.md)
  - [SuggestRestaurantDto](doc/SuggestRestaurantDto.md)

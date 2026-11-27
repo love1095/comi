@@ -11,6 +11,7 @@ export const rooms = {
   kitchen: (restaurantId: string) => `r:${restaurantId}:kitchen`,
   user: (userId: string) => `u:${userId}`,
   map: (restaurantId: string, date: string) => `map:${restaurantId}:${date}`,
+  group: (bookingId: string) => `g:${bookingId}`,
 };
 
 /** Event names. Payloads are small "something changed" hints — apps reload over REST (§19.1 reconnect rule). */
@@ -26,7 +27,8 @@ export type RealtimeEvent =
   | 'order.round_added'
   | 'service.requested'
   | 'service.updated'
-  | 'table.state';
+  | 'table.state'
+  | 'group.updated';
 
 /**
  * Publishes through Redis so both the API and the worker can emit; the API's socket
@@ -71,6 +73,11 @@ export class RealtimeService implements OnModuleDestroy {
 
   toUser(userId: string, event: RealtimeEvent, payload: Record<string, unknown>) {
     this.emit(NS.CUSTOMER, rooms.user(userId), event, payload);
+  }
+
+  /** Shared cart of a group order changed (§8.4). */
+  toGroup(bookingId: string, payload: Record<string, unknown>) {
+    this.emit(NS.CUSTOMER, rooms.group(bookingId), 'group.updated', payload);
   }
 
   toMap(restaurantId: string, date: string, payload: Record<string, unknown>) {

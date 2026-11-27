@@ -8,6 +8,7 @@ import 'package:shared_ui/shared_ui.dart';
 import '../../data/api_error.dart';
 import '../cart/cart.dart';
 import '../discovery/discovery_repository.dart';
+import '../group/group_actions.dart';
 import 'at_table.dart';
 import 'bookings_repository.dart';
 import 'my_bookings_screen.dart' show statusColor;
@@ -150,6 +151,8 @@ class BookingDetailScreen extends ConsumerWidget {
           ),
         const SizedBox(height: 12),
         AtTablePanel(booking: b),
+        const SizedBox(height: 8),
+        GroupActions(booking: b),
         const Divider(height: 32),
         if (b.status == BookingStatus.CHECKED_IN) LiveBillView(bookingId: b.id),
         if (!hasItems && b.status != BookingStatus.CHECKED_IN)
